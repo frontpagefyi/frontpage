@@ -6,7 +6,7 @@ export const metadata: Metadata = {
   robots: "noindex, nofollow",
 };
 
-export default async function NewPost(props: PageProps<"/post/new">) {
+export default async function NewPostPage(props: PageProps<"/post/new">) {
   const searchParams = await props.searchParams;
   const defaultTitle =
     typeof searchParams.title === "string"
