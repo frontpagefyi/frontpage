@@ -96,7 +96,7 @@ function Fallback({ handle, did }: { handle: string | null; did: DID }) {
         href={`/profile/${handle ?? did}`}
         className="text-sm font-semibold"
       >
-        @{handle}
+        @{handle ?? "handle.invalid"}
       </Link>
       <Skeleton className="h-5 w-12" />
       <Skeleton className="h-5 w-12" />
