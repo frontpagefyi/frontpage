@@ -31,10 +31,7 @@ import { redirect, RedirectType } from "next/navigation";
 import { db } from "./db";
 import * as schema from "./schema";
 import { eq } from "drizzle-orm";
-import {
-  getDidFromHandleOrDid,
-  getVerifiedHandle,
-} from "./data/atproto/identity";
+import { getDidFromHandleOrDid } from "./data/atproto/identity";
 import {
   AUTH_SCOPES,
   getClientMetadata as createClientMetadata,

@@ -37,7 +37,7 @@ async function performModerationAction(
   const newModEvent: ModerationEventDTO = {
     subjectUri: report.subjectUri,
     subjectDid: report.subjectDid as DID,
-    createdBy: user.did as DID,
+    createdBy: user.did,
     createdAt: new Date(),
     labelsAdded: report.reportReason,
     creatorReportReason: report.creatorComment,
