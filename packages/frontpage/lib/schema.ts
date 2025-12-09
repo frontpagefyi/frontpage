@@ -257,9 +257,7 @@ export const OauthSession = sqliteTable("oauth_sessions", {
   sessionId: integer("id").primaryKey(),
   did: did("did").notNull(),
   /**
-   * Username may be an empty string if the user logs in using a did or PDS URL.
-   * Ideally we should make this nullable, but for now we keep it as not null to avoid
-   * migration issues.
+   * @deprecated Don't use this, it's just set to "" for all new rows
    */
   username: text("username").notNull(),
   iss: text("iss").notNull(),
