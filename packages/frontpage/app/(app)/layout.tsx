@@ -112,11 +112,7 @@ async function LoginOrLogout() {
       </NotificationIndicator>
       <DropdownMenu>
         <DropdownMenuTrigger aria-label="User menu">
-          {session.did ? (
-            <UserAvatar did={session.did} size="smedium" />
-          ) : (
-            <span>{handle ?? "handle.invalid"}</span>
-          )}
+          <UserAvatar did={session.did} size="smedium" />
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" side="bottom" align="end">
           <DropdownMenuLabel className="truncate">
