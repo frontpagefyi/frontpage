@@ -20,6 +20,7 @@ export const GET = createApiRoute(async (request) => {
 
   return {
     ...submissions,
+    did,
     handle,
   };
 });

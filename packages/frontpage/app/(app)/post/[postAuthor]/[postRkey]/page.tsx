@@ -28,10 +28,10 @@ export async function generateMetadata(props: {
     },
     openGraph: {
       title: post.title,
-      description: `Discuss @${handle}'s post on Frontpage.`,
+      description: `Discuss @${handle ?? "handle.invalid"}'s post on Frontpage.`,
       type: "article",
       publishedTime: post.createdAt.toISOString(),
-      authors: [`@${handle}`],
+      authors: handle ? [`@${handle}`] : undefined,
       url: `https://frontpage.fyi${path}`,
       images: [
         {

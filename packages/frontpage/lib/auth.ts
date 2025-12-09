@@ -324,6 +324,7 @@ export const handlers = {
 
       const { lastInsertRowid } = await db.insert(schema.OauthSession).values({
         did: subjectDid,
+        // Ideally username should be nullable, at some point we should change it
         username: row.username || ((await getVerifiedHandle(subjectDid)) ?? ""),
         iss: row.iss,
         accessToken: tokensResult.data.access_token,

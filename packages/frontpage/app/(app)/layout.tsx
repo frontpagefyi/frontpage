@@ -115,14 +115,19 @@ async function LoginOrLogout() {
           {session.did ? (
             <UserAvatar did={session.did} size="smedium" />
           ) : (
-            <span>{handle}</span>
+            <span>{handle ?? "handle.invalid"}</span>
           )}
         </DropdownMenuTrigger>
         <DropdownMenuContent className="w-56" side="bottom" align="end">
-          <DropdownMenuLabel className="truncate">{handle}</DropdownMenuLabel>
+          <DropdownMenuLabel className="truncate">
+            {handle ?? "handle.invalid"}
+          </DropdownMenuLabel>
           <DropdownMenuSeparator />
           <DropdownMenuItem asChild>
-            <Link href={`/profile/${handle}`} className="cursor-pointer">
+            <Link
+              href={`/profile/${handle ?? session.did}`}
+              className="cursor-pointer"
+            >
               Profile
             </Link>
           </DropdownMenuItem>

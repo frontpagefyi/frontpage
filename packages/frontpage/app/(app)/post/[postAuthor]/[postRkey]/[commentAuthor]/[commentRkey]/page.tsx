@@ -25,12 +25,13 @@ export async function generateMetadata(props: {
   const { comment, post } = await getCommentPageData(params);
 
   const handle = await getVerifiedHandle(comment.authorDid);
+  const handleDisplay = handle ?? "handle.invalid";
   const path = getPagePath(params);
 
   return {
     title:
       comment.status === "live"
-        ? `@${handle}'s comment on "${truncateText(post.title, 15)}"`
+        ? `@${handleDisplay}'s comment on "${truncateText(post.title, 15)}"`
         : "Deleted comment",
     description:
       comment.status === "live" ? truncateText(comment.body, 47) : null,
@@ -40,11 +41,11 @@ export async function generateMetadata(props: {
     openGraph:
       comment.status === "live"
         ? {
-            title: `@${handle}'s comment on Frontpage`,
+            title: `@${handleDisplay}'s comment on Frontpage`,
             description: truncateText(comment.body, 47),
             type: "article",
             publishedTime: comment.createdAt.toISOString(),
-            authors: [`@${handle}`],
+            authors: handle ? [`@${handle}`] : undefined,
             url: `https://frontpage.fyi${path}`,
             images: [
               {

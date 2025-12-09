@@ -46,7 +46,7 @@ export async function GET(
             fontFamily: "Source Sans 3",
           }}
         >
-          @{handle}&apos;s comment:
+          @{handle ?? "handle.invalid"}&apos;s comment:
         </OgBox>
         <OgBox
           style={{

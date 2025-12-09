@@ -256,6 +256,11 @@ export const OauthAuthRequest = sqliteTable("oauth_auth_requests", {
 export const OauthSession = sqliteTable("oauth_sessions", {
   sessionId: integer("id").primaryKey(),
   did: did("did").notNull(),
+  /**
+   * Username may be an empty string if the user logs in using a did or PDS URL.
+   * Ideally we should make this nullable, but for now we keep it as not null to avoid
+   * migration issues.
+   */
   username: text("username").notNull(),
   iss: text("iss").notNull(),
   accessToken: text("access_token").notNull(),

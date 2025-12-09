@@ -22,7 +22,7 @@ export async function UserHoverCard({ did, children, asChild }: Props) {
         avatar={<UserAvatar did={did} size="medium" />}
         did={did}
         asChild={asChild}
-        initialHandle={handle ?? ""}
+        handle={handle}
         reportAction={reportUserAction.bind(null, { did })}
       >
         {children}

@@ -103,8 +103,11 @@ export async function PostCard({
         <div className="flex flex-nowrap text-gray-500 dark:text-gray-400 sm:gap-4 justify-between">
           <div className="flex flex-wrap items-center gap-x-4">
             <UserHoverCard did={author} asChild>
-              <Link href={`/profile/${handle}`} className="hover:underline">
-                @{handle}
+              <Link
+                href={`/profile/${handle ?? author}`}
+                className="hover:underline"
+              >
+                @{handle ?? "handle.invalid"}
               </Link>
             </UserHoverCard>
             {/* <span aria-hidden>•</span> */}

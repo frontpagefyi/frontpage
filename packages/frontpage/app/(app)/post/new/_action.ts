@@ -30,7 +30,7 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
       getVerifiedHandle(user.did),
     ]);
 
-    redirect(`/post/${handle}/${rkey}`);
+    redirect(`/post/${handle ?? user.did}/${rkey}`);
   } catch (error) {
     if (!(error instanceof DataLayerError)) throw error;
     return { error: "Failed to create post" };

@@ -77,7 +77,7 @@ async function getNotificationViewModel(notification: NotificationType) {
     return {
       type: "commentReply",
       Icon: ChatBubbleIcon,
-      title: `@${replierHandle ?? "<invalid handle>"} replied to your comment on "${notification.post.title}"`,
+      title: `@${replierHandle ?? "handle.invalid"} replied to your comment on "${notification.post.title}"`,
       body: notification.comment.body,
       time: notification.createdAt,
       read: notification.read,
@@ -90,7 +90,7 @@ async function getNotificationViewModel(notification: NotificationType) {
     return {
       type: "postComment",
       Icon: Link1Icon,
-      title: `@${replierHandle ?? "<invalid handle>"} commented on your post: "${notification.post.title}"`,
+      title: `@${replierHandle ?? "handle.invalid"} commented on your post: "${notification.post.title}"`,
       body: notification.comment.body,
       time: notification.createdAt,
       read: notification.read,

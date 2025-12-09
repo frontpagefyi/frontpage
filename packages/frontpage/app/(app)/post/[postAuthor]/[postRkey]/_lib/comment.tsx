@@ -68,7 +68,7 @@ async function LiveComment({
   const hasAuthored = user?.did === comment.authorDid;
 
   const childCommentLevel = getChildCommentLevel(level);
-  const commentHref = `/post/${postAuthorParam}/${postRkey}/${handle}/${comment.rkey}`;
+  const commentHref = `/post/${postAuthorParam}/${postRkey}/${handle ?? comment.authorDid}/${comment.rkey}`;
 
   return (
     <>
@@ -90,11 +90,11 @@ async function LiveComment({
         <div className="flex items-center gap-2">
           <UserHoverCard asChild did={comment.authorDid}>
             <Link
-              href={`/profile/${handle}`}
+              href={`/profile/${handle ?? comment.authorDid}`}
               className="flex items-center gap-2"
             >
               <UserAvatar did={comment.authorDid} />
-              <div className="font-medium">@{handle}</div>
+              <div className="font-medium">@{handle ?? "handle.invalid"}</div>
             </Link>
           </UserHoverCard>
           {comment.status === "pending" ? (

@@ -40,12 +40,13 @@ export async function generateMetadata(props: {
     getVerifiedHandle(did),
     getBlueskyProfile(did),
   ]);
-  const description = `@${handle}'s profile on Frontpage`;
+  const handleDisplay = handle ?? "handle.invalid";
+  const description = `@${handleDisplay}'s profile on Frontpage`;
   return {
-    title: `@${handle} on Frontpage`,
+    title: `@${handleDisplay} on Frontpage`,
     description: description,
     openGraph: {
-      title: `@${handle}`,
+      title: `@${handleDisplay}`,
       description: description,
       type: "profile",
       images: profile?.avatar,
@@ -84,7 +85,7 @@ export default async function Profile(props: { params: Promise<Params> }) {
         <UserAvatar did={did} size="medium" />
         <div className="flex flex-wrap items-center gap-2">
           <h1 className="md:text-2xl font-bold">
-            {userHandle ?? "Invalid handle"}
+            {userHandle ?? "handle.invalid"}
           </h1>
           <EllipsisDropdown aria-label="User actions">
             <ReportDialogDropdownButton

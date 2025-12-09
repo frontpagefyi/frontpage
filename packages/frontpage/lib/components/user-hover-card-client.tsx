@@ -17,7 +17,7 @@ type Props = {
   children: ReactNode;
   asChild?: boolean;
   avatar: ReactNode;
-  initialHandle: string;
+  handle: string | null;
   reportAction: (formData: FormData) => Promise<void>;
 };
 
@@ -26,7 +26,7 @@ export function UserHoverCardClient({
   children,
   asChild,
   avatar,
-  initialHandle,
+  handle,
   reportAction,
 }: Props) {
   return (
@@ -41,11 +41,11 @@ export function UserHoverCardClient({
       </HoverCardTrigger>
       <HoverCardContent className="w-80">
         <div className="flex gap-4">
-          <Link href={`/profile/${initialHandle}`} className="shrink-0">
+          <Link href={`/profile/${handle ?? did}`} className="shrink-0">
             {avatar}
           </Link>
           <div className="flex flex-col gap-1 basis-full">
-            <Suspense fallback={<Fallback handle={initialHandle} />}>
+            <Suspense fallback={<Fallback handle={handle} did={did} />}>
               <Content did={did} />
             </Suspense>
           </div>
@@ -67,8 +67,11 @@ function Content({ did }: { did: DID }) {
 
   return (
     <>
-      <Link href={`/profile/${data.handle}`} className="text-sm font-semibold">
-        @{data.handle}
+      <Link
+        href={`/profile/${data.handle ?? data.did}`}
+        className="text-sm font-semibold"
+      >
+        @{data.handle ?? "handle.invalid"}
       </Link>
       <p
         className="text-sm flex gap-2 items-center"
@@ -86,10 +89,13 @@ function Content({ did }: { did: DID }) {
   );
 }
 
-function Fallback({ handle }: { handle: string }) {
+function Fallback({ handle, did }: { handle: string | null; did: DID }) {
   return (
     <>
-      <Link href={`/profile/${handle}`} className="text-sm font-semibold">
+      <Link
+        href={`/profile/${handle ?? did}`}
+        className="text-sm font-semibold"
+      >
         @{handle}
       </Link>
       <Skeleton className="h-5 w-12" />
