@@ -19,6 +19,8 @@ import {
   type Client as OauthClient,
   isOAuth2Error,
   customFetch as oauth4webapiCustomFetchSymbol,
+  refreshTokenGrantRequest,
+  processRefreshTokenResponse,
 } from "oauth4webapi";
 import { cookies } from "next/headers";
 import {
@@ -316,17 +318,13 @@ export const handlers = {
       invariant(tokensResult.data.refresh_token, "Missing refresh token");
       invariant(tokensResult.data.expires_in, "Missing expires_in");
 
-      const handle = row.username || (await getVerifiedHandle(subjectDid));
-
-      invariant(handle, "Failed to get handle");
-
       const expiresAt = new Date(
         Date.now() + tokensResult.data.expires_in * 1000,
       );
 
       const { lastInsertRowid } = await db.insert(schema.OauthSession).values({
         did: subjectDid,
-        username: handle,
+        username: row.username || ((await getVerifiedHandle(subjectDid)) ?? ""),
         iss: row.iss,
         accessToken: tokensResult.data.access_token,
         refreshToken: tokensResult.data.refresh_token,
@@ -366,7 +364,7 @@ type AuthCookiePayload = {
   token_exp: number;
 };
 
-export async function setAuthCookie(payload: AuthCookiePayload) {
+async function setAuthCookie(payload: AuthCookiePayload) {
   const userToken = await new SignJWT(payload)
     .setProtectedHeader({ alg: USER_SESSION_JWT_ALG })
     .setIssuedAt()
@@ -404,20 +402,20 @@ export const getAuthCookie = cache(async () => {
 });
 
 export async function signOut() {
-  const session = await getSession();
+  const session = await getFullSession();
   if (!session) {
     console.warn("No session to sign out of");
     return;
   }
   const authServer = await processDiscoveryResponse(
-    new URL(session.user.iss),
-    await oauthDiscoveryRequest(new URL(session.user.iss)),
+    new URL(session.iss),
+    await oauthDiscoveryRequest(new URL(session.iss)),
   );
 
   await revocationRequest(
     authServer,
     await getOauthClientOptions(),
-    session.user.accessToken,
+    session.accessToken,
     {
       clientPrivateKey: await getClientPrivateKey(),
     },
@@ -425,12 +423,15 @@ export async function signOut() {
 
   await db
     .delete(schema.OauthSession)
-    .where(eq(schema.OauthSession.sessionId, session.user.sessionId));
+    .where(eq(schema.OauthSession.sessionId, session.sessionId));
 
   (await cookies()).delete(AUTH_COOKIE_NAME);
 }
 
-export const getSession = cache(async () => {
+/**
+ * @private This returns the full session row from the database and should not be used outside of this module. This is done to protect sensitive fields like access tokens that should only be handled within this module.
+ */
+const getFullSession = cache(async () => {
   const token = await getAuthCookie();
   if (!token) {
     return null;
@@ -449,10 +450,28 @@ export const getSession = cache(async () => {
     return null;
   }
 
-  return {
-    user: session,
-  };
+  return session;
 });
+
+/**
+ * Session DTO contains only non-sensitive session fields, this is safe to pass to other modules and the client.
+ */
+type SessionDTO = {
+  did: DID;
+  scope: string;
+};
+
+export async function getSession(): Promise<SessionDTO | null> {
+  const session = await getFullSession();
+  if (!session) {
+    return null;
+  }
+
+  return {
+    did: session.did,
+    scope: session.scope,
+  };
+}
 
 export async function importDpopJwks({
   privateJwk,
@@ -490,22 +509,22 @@ export async function fetchAuthenticatedAtproto(
   input: RequestInfo | URL,
   init?: RequestInit,
 ) {
-  const session = await getSession();
+  const session = await getFullSession();
 
   if (!session) {
     throw new Error("Not authenticated");
   }
 
   const { privateDpopKey, publicDpopKey } = await importDpopJwks({
-    privateJwk: session.user.dpopPrivateJwk,
-    publicJwk: session.user.dpopPublicJwk,
+    privateJwk: session.dpopPrivateJwk,
+    publicJwk: session.dpopPublicJwk,
   });
 
   const makeRequest = (dpopNonce: string) => {
     // It's important to reconstruct the request because we can't send the same body readable stream twice
     const request = new Request(input, init);
     return protectedResourceRequest(
-      session.user.accessToken,
+      session.accessToken,
       request.method,
       new URL(request.url),
       request.headers,
@@ -532,7 +551,7 @@ export async function fetchAuthenticatedAtproto(
     );
   };
 
-  let response = await makeRequest(session.user.dpopNonce);
+  let response = await makeRequest(session.dpopNonce);
 
   if (response.status === 401) {
     if (
@@ -562,7 +581,115 @@ export async function fetchAuthenticatedAtproto(
     .set({
       dpopNonce,
     })
-    .where(eq(schema.OauthSession.sessionId, session.user.sessionId));
+    .where(eq(schema.OauthSession.sessionId, session.sessionId));
 
   return response;
+}
+
+type RefreshSessionResult =
+  | { success: true }
+  | {
+      success: false;
+      error:
+        | "NOT_AUTHENTICATED"
+        | "REFRESH_FAILED"
+        | "CONCURRENT_REFRESH_REPLAYED";
+    };
+
+export async function refreshSession(): Promise<RefreshSessionResult> {
+  const session = await getFullSession();
+  if (!session) {
+    return { error: "NOT_AUTHENTICATED", success: false };
+  }
+  const authServer = await processDiscoveryResponse(
+    new URL(session.iss),
+    await oauthDiscoveryRequest(new URL(session.iss)),
+  );
+
+  const client = await getOauthClientOptions();
+
+  const { privateDpopKey, publicDpopKey } = await importDpopJwks({
+    privateJwk: session.dpopPrivateJwk,
+    publicJwk: session.dpopPublicJwk,
+  });
+
+  let response = await refreshTokenGrantRequest(
+    authServer,
+    client,
+    session.refreshToken,
+    {
+      clientPrivateKey: await getClientPrivateKey(),
+      DPoP: {
+        privateKey: privateDpopKey,
+        publicKey: publicDpopKey,
+        nonce: session.dpopNonce,
+      },
+    },
+  );
+
+  let result = await processRefreshTokenResponse(authServer, client, response);
+
+  if ("error" in result && result.error == "use_dpop_nonce") {
+    const nonce = response.headers.get("DPoP-Nonce");
+    if (!nonce) {
+      throw new Error("Missing DPoP nonce");
+    }
+    response = await refreshTokenGrantRequest(
+      authServer,
+      client,
+      session.refreshToken,
+      {
+        clientPrivateKey: await getClientPrivateKey(),
+        DPoP: {
+          privateKey: privateDpopKey,
+          publicKey: publicDpopKey,
+          nonce: nonce,
+        },
+      },
+    );
+
+    result = await processRefreshTokenResponse(authServer, client, response);
+  }
+
+  if (
+    "error" in result &&
+    result.error === "invalid_grant" &&
+    result.error_description === "refresh token replayed"
+  ) {
+    console.warn("Concurrent refresh token replayed");
+    return { error: "CONCURRENT_REFRESH_REPLAYED", success: false };
+  }
+
+  if ("error" in result) {
+    return { error: "REFRESH_FAILED", success: false };
+  }
+
+  const dpopNonce = response.headers.get("DPoP-Nonce");
+  if (!dpopNonce) {
+    throw new Error("Missing DPoP nonce");
+  }
+
+  if (result.expires_in == null) {
+    throw new Error("Missing expires_in");
+  }
+
+  const expiresAt = new Date(Date.now() + result.expires_in * 1000);
+
+  await db
+    .update(schema.OauthSession)
+    .set({
+      accessToken: result.access_token,
+      refreshToken: result.refresh_token,
+      expiresAt,
+      dpopNonce,
+    })
+    .where(eq(schema.OauthSession.sessionId, session.sessionId));
+
+  await setAuthCookie({
+    jti: String(session.sessionId),
+    sub: session.did,
+    token_exp: expiresAt.getTime(),
+  });
+
+  return { success: true };
 }

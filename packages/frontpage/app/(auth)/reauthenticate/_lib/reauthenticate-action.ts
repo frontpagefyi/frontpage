@@ -10,7 +10,7 @@ export async function reauthenticateAction() {
     redirect("/login?error=You've been logged out. Please log in again.");
   }
   const result = await signIn({
-    identifier: session.user.did,
+    identifier: session.did,
   });
 
   if (result && "error" in result) {

@@ -18,7 +18,7 @@ export default async function LoginPage({
 
   const redirectParam = (await searchParams).redirect;
 
-  if (session.user.scope === AUTH_SCOPES) {
+  if (session.scope === AUTH_SCOPES) {
     // Checking for // and forcing to / to avoid open redirect vulnerabilities
     // This should ensure we only redirect to internal paths and not external sites
     const redirectPath =
@@ -44,7 +44,7 @@ export default async function LoginPage({
       </div>
       <div>
         <ReauthenticateForm
-          avatar={<UserAvatar did={session.user.did} size="smedium" />}
+          avatar={<UserAvatar did={session.did} size="smedium" />}
         />
         <form
           action={async () => {

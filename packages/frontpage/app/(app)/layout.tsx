@@ -5,10 +5,7 @@ import { Button } from "@/lib/components/ui/button";
 import { isAdmin } from "@/lib/data/user";
 import { BellIcon, OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { ThemeToggleMenuGroup } from "./_components/theme-toggle";
-import {
-  getDidFromHandleOrDid,
-  getVerifiedHandle,
-} from "@/lib/data/atproto/identity";
+import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 
 import {
   DropdownMenu,
@@ -42,7 +39,7 @@ export default async function Layout({
 
   // If the current session has different scopes than the AUTH_SCOPES, redirect to reauthenticate
   // Don't redirect if the request is for the reauthenticate page or oauth callback
-  if (session && session.user.scope !== AUTH_SCOPES) {
+  if (session && session.scope !== AUTH_SCOPES) {
     redirect("/reauthenticate");
   }
 
@@ -93,79 +90,78 @@ export default async function Layout({
 
 async function LoginOrLogout() {
   const session = await getSession();
-  if (session) {
-    const [did, handle] = await Promise.all([
-      getDidFromHandleOrDid(session.user.username),
-      getVerifiedHandle(session.user.did),
-    ]);
+
+  if (!session) {
     return (
-      <>
-        <NotificationIndicator>
-          <Button asChild variant="outline" size="icon">
-            <Link href="/notifications" aria-label="Notifications">
-              <BellIcon />
-            </Link>
-          </Button>
-        </NotificationIndicator>
-        <DropdownMenu>
-          <DropdownMenuTrigger aria-label="User menu">
-            {did ? (
-              <UserAvatar did={did} size="smedium" />
-            ) : (
-              <span>{handle}</span>
-            )}
-          </DropdownMenuTrigger>
-          <DropdownMenuContent className="w-56" side="bottom" align="end">
-            <DropdownMenuLabel className="truncate">{handle}</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            <DropdownMenuItem asChild>
-              <Link href={`/profile/${handle}`} className="cursor-pointer">
-                Profile
-              </Link>
-            </DropdownMenuItem>
-            <DropdownMenuItem asChild>
-              <Link href="/about" className="cursor-pointer">
-                About
-              </Link>
-            </DropdownMenuItem>
-            <Suspense fallback={null}>
-              {isAdmin().then((isAdmin) =>
-                isAdmin ? (
-                  <DropdownMenuItem asChild>
-                    <Link href="/moderation" className="cursor-pointer">
-                      Moderation
-                    </Link>
-                  </DropdownMenuItem>
-                ) : null,
-              )}
-            </Suspense>
-            <ThemeToggleMenuGroup />
-            <DropdownMenuSeparator />
-            <form
-              action={async () => {
-                "use server";
-                await signOut();
-                revalidatePath("/", "layout");
-              }}
-            >
-              <DropdownMenuItem asChild>
-                <button
-                  type="submit"
-                  className="w-full text-start cursor-pointer"
-                >
-                  Logout
-                </button>
-              </DropdownMenuItem>
-            </form>
-          </DropdownMenuContent>
-        </DropdownMenu>
-      </>
+      <Button variant="outline" asChild>
+        <Link href="/login">Login</Link>
+      </Button>
     );
   }
 
+  const handle = await getVerifiedHandle(session.did);
+
   return (
-    <Button variant="outline" asChild>
-      <Link href="/login">Login</Link>
-    </Button>
+    <>
+      <NotificationIndicator>
+        <Button asChild variant="outline" size="icon">
+          <Link href="/notifications" aria-label="Notifications">
+            <BellIcon />
+          </Link>
+        </Button>
+      </NotificationIndicator>
+      <DropdownMenu>
+        <DropdownMenuTrigger aria-label="User menu">
+          {session.did ? (
+            <UserAvatar did={session.did} size="smedium" />
+          ) : (
+            <span>{handle}</span>
+          )}
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56" side="bottom" align="end">
+          <DropdownMenuLabel className="truncate">{handle}</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem asChild>
+            <Link href={`/profile/${handle}`} className="cursor-pointer">
+              Profile
+            </Link>
+          </DropdownMenuItem>
+          <DropdownMenuItem asChild>
+            <Link href="/about" className="cursor-pointer">
+              About
+            </Link>
+          </DropdownMenuItem>
+          <Suspense fallback={null}>
+            {isAdmin().then((isAdmin) =>
+              isAdmin ? (
+                <DropdownMenuItem asChild>
+                  <Link href="/moderation" className="cursor-pointer">
+                    Moderation
+                  </Link>
+                </DropdownMenuItem>
+              ) : null,
+            )}
+          </Suspense>
+          <ThemeToggleMenuGroup />
+          <DropdownMenuSeparator />
+          <form
+            action={async () => {
+              "use server";
+              await signOut();
+              revalidatePath("/", "layout");
+            }}
+          >
+            <DropdownMenuItem asChild>
+              <button
+                type="submit"
+                className="w-full text-start cursor-pointer"
+              >
+                Logout
+              </button>
+            </DropdownMenuItem>
+          </form>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </>
   );
 }

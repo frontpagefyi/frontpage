@@ -17,14 +17,14 @@ export const getUser = cache(async () => {
     return null;
   }
 
-  const pdsUrl = await getPdsUrl(session.user.did);
+  const pdsUrl = await getPdsUrl(session.did);
   if (!pdsUrl) {
     throw new Error("No AtprotoPersonalDataServer service found");
   }
 
   return {
     pdsUrl,
-    did: session.user.did,
+    did: session.did,
   };
 });
 
