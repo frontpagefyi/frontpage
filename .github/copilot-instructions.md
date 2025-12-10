@@ -35,7 +35,7 @@ Trust these notes before searching; only explore if something here is missing or
 1. Ensure Node 22.18 available (`nvm use`).
 2. Enable Corepack so pnpm 10.12.0 is provisioned: `corepack enable`.
 3. Install JS deps from repo root: `pnpm install`.
-   - **Observed issue (sandbox)**: install failed here with `ENOTFOUND npm.jsr.io` while fetching `@jsr/lpm__core@0.2.9` (dependency of `packages/atproto-browser`). In CI/public networks this should resolve; if it appears locally, verify DNS/egress to `npm.jsr.io` or set a proxy/mirror that can reach it. No other steps were executed because install did not complete.
+   - If you see `ENOTFOUND npm.jsr.io` while fetching `@jsr/lpm__core@0.2.9` (pulled by `packages/atproto-browser`), it is a network/DNS issue: confirm egress/DNS can reach `npm.jsr.io` or route through a proxy. CI typically resolves this normally.
 
 ## Common commands (run from repo root unless noted)
 - **Format check**: `pnpm exec prettier --check .`
@@ -65,7 +65,7 @@ Trust these notes before searching; only explore if something here is missing or
 - Config locations: lint configs per package (`eslint.config.mjs`), TS configs per package, Tailwind/PostCSS in frontend apps, Drizzle config in `packages/frontpage/drizzle.config.ts`, Vercel config `packages/frontpage/vercel.json`.
 - If you run Node commands manually (not through package scripts) while using the local CA, export `NODE_OPTIONS=--use-openssl-ca`.
 - Lexicon-related changes require Go toolchain; other changes do not.
-- Because `pnpm install` hit `npm.jsr.io` DNS errors in this sandbox, re-run after ensuring network access; downstream lint/test/build commands depend on install completing.
+- If package installs fail with `npm.jsr.io` DNS errors, fix network access first; lint/test/build commands depend on a complete install.
 
 ## File listing (root, high level)
 `CODE_OF_CONDUCT.md`, `CONTRIBUTING.md`, `README.md`, `SECURITY.md`, `LICENSE`, `.nvmrc`, `package.json`, `pnpm-lock.yaml`, `pnpm-workspace.yaml`, `turbo.json`, `Cargo.toml`, `lexicons/`, `packages/`, `packages-rs/`, `.github/workflows/`.
