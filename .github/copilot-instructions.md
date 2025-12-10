@@ -10,7 +10,7 @@ Trust these notes before searching; only explore if something here is missing or
 
 ## Tooling & runtimes
 - Node **v22.18.0** (`.nvmrc`); pnpm **10.12.0** (declared in root `package.json`); turbo **2.5.0**.
-- TypeScript 5.9, Next 16 beta (Turbopack), React 19, Vitest, ESLint 9, Prettier 3.
+- TypeScript 5.9, Next 16 (Turbopack), React 19, Vitest, ESLint 9, Prettier 3.
 - Drizzle ORM migrations in `packages/frontpage/drizzle` with `drizzle.config.ts`.
 - Go tool `glot` is used only in lexicon CI; not needed for most tasks unless touching `lexicons/`.
 - Rust stable via Cargo for `packages-rs/*`.
