@@ -14,70 +14,35 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
+import { Label } from "@/lib/components/ui/label";
 
 const DEFAULT_PDS_URL =
   process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST || "bsky.social";
 
 export function LoginForm() {
   const [pdsDialogOpen, setPdsDialogOpen] = useState(false);
-  const [pdsState, pdsAction, isPdsPending] = useActionState(
-    loginWithPdsAction,
-    null,
-  );
 
   return (
-    <div className="space-y-3">
-      <form className="contents" action={pdsAction}>
-        <Button
-          className="w-full"
-          type="submit"
-          name="pdsUrl"
-          value={DEFAULT_PDS_URL}
-          disabled={isPdsPending}
-          size="lg"
-        >
-          Login or signup with {DEFAULT_PDS_URL}
-        </Button>
-      </form>
+    <div className="flex flex-col gap-4">
+      <IdentifierForm />
 
       <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
         <DialogTrigger asChild>
           <Button className="w-full" variant="outline">
-            Continue with another PDS
+            Continue with your PDS
           </Button>
         </DialogTrigger>
         <DialogContent className="top-1/3">
           <DialogHeader>
-            <DialogTitle>Login with another PDS</DialogTitle>
+            <DialogTitle>Login with PDS</DialogTitle>
             <DialogDescription>
-              Enter the URL of your PDS to login.
+              Enter the URL of your Personal Data Server to login or signup.
             </DialogDescription>
           </DialogHeader>
 
           <PdsForm />
         </DialogContent>
       </Dialog>
-
-      <Dialog>
-        <DialogTrigger asChild>
-          <Button className="w-full" variant="outline">
-            Continue with @handle
-          </Button>
-        </DialogTrigger>
-
-        <DialogContent className="top-1/3">
-          <DialogHeader>
-            <DialogTitle>Login with handle</DialogTitle>
-            <DialogDescription>
-              Enter your Bluesky/AT Protocol handle to login.
-            </DialogDescription>
-          </DialogHeader>
-
-          <IdentifierForm />
-        </DialogContent>
-      </Dialog>
-
-      <LoginError errorState={pdsState?.error} />
     </div>
   );
 }
@@ -108,16 +73,35 @@ function IdentifierForm() {
         });
       }}
     >
-      <Input
-        id="identifier"
-        name="identifier"
-        required
-        placeholder="eg. dril.bsky.social"
-      />
+      <div>
+        <Label htmlFor="identifier">
+          Internet Handle
+          <sup>
+            {" "}
+            <a
+              href="https://internethandle.org/#start"
+              target="_blank"
+              rel="noreferrer"
+              className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
+            >
+              ?
+            </a>
+          </sup>{" "}
+          or DID
+        </Label>
 
-      <Button type="submit" className="w-full" disabled={isIdentifierPending}>
-        Login
-      </Button>
+        <div className="flex gap-2">
+          <Input
+            id="identifier"
+            name="identifier"
+            required
+            placeholder="eg. dril.bsky.social"
+          />
+          <Button type="submit" disabled={isIdentifierPending}>
+            Login
+          </Button>
+        </div>
+      </div>
 
       <LoginError errorState={identifierState?.error} />
     </form>
@@ -140,7 +124,11 @@ function PdsForm() {
         });
       }}
     >
-      <Input name="pdsUrl" placeholder="eg. bsky.social" />
+      <Input
+        name="pdsUrl"
+        placeholder="eg. bsky.social"
+        defaultValue={DEFAULT_PDS_URL}
+      />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
         Login
       </Button>
