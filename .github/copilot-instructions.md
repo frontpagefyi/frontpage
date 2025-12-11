@@ -57,7 +57,7 @@ Trust these notes before searching; only explore if something here is missing or
 - Follow `packages/frontpage/local-infra/README.md`:
   - `docker-compose up` to run PLC, PDS, Jetstream, Drainpipe, Turso, Caddy, cloudflared tunnel.
   - Install Unravel CA (`frontpage-local-infra_caddy_data/pki/authorities/unravel/root.crt`) and set `NODE_OPTIONS=--use-openssl-ca` for Node apps (frontpage scripts already set this).
-  - Generate `.env.local` via `pnpm --filter=frontpage run generate-local-env`, run `pnpm db:migrate`, start app with `pnpm turbo dev` (or `pnpm --filter frontpage run dev`), grab cloudflared tunnel URL for access.
+  - Generate `.env.local` via `pnpm --filter=frontpage run generate-local-env`, run `pnpm db:migrate`, start app with `pnpm --filter frontpage exec turbo dev` (or `pnpm --filter frontpage run dev`) from the repo root, grab cloudflared tunnel URL for access.
   - Troubleshooting steps for docker platforms, SSL renewal, Cloudflare 502, Windows WSL reset are in the README.
 
 ## Notes / tips
