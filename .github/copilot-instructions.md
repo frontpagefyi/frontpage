@@ -28,7 +28,7 @@ Trust these notes before searching; only explore if something here is missing or
   - `pnpm exec turbo run --affected lint`
   - `pnpm exec turbo run --affected test`
   - `pnpm exec turbo run --affected type-check`
-- Lexicon changes (`lexicons/fyi/frontpage/**`) trigger Go-based `glot lint` and `glot compat`.
+- Lexicon changes (`lexicons/**`) trigger Go-based `glot lint` and `glot compat`.
 - Label sync on PRs; `sync-tangled` push job mirrors `main` to tangled.sh (uses secret).
 
 ## Setup / bootstrap
