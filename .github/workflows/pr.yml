@@ -86,26 +86,18 @@ jobs:
       
       - name: Run ESLint with JSON output
         run: |
-          # Run ESLint on packages and save output
+          # Run ESLint on each package and save output
           pnpm --filter frontpage exec eslint . --format json --output-file ../../eslint-frontpage.json || true
           pnpm --filter atproto-browser exec eslint . --format json --output-file ../../eslint-atproto-browser.json || true
           pnpm --filter unravel exec eslint . --format json --output-file ../../eslint-unravel.json || true
           pnpm --filter frontpage-oauth exec eslint . --format json --output-file ../../eslint-frontpage-oauth.json || true
           pnpm --filter frontpage-oauth-preview-client exec eslint . --format json --output-file ../../eslint-frontpage-oauth-preview-client.json || true
-          
-          # Combine all JSON results into a single file
-          echo "[]" > eslint_report.json
-          for file in eslint-*.json; do
-            if [ -f "$file" ] && [ -s "$file" ]; then
-              cat "$file"
-            fi
-          done | jq -s 'add' > eslint_report.json || echo "[]" > eslint_report.json
         continue-on-error: true
 
       - name: Annotate Code Linting Results
         uses: ataylorme/eslint-annotate-action@v3
         with:
-          report-json: "eslint_report.json"
+          report-json: "eslint-*.json"
           check-name: "ESLint Results"
         continue-on-error: true
 
