@@ -33,6 +33,9 @@ export const metadata: Metadata = {
 };
 
 export default function Layout({ children }: { children: React.ReactNode }) {
+  // Intentional ESLint error for testing annotations
+  const unusedVariable = "This is a test error";
+  
   return (
     <html lang="en" suppressHydrationWarning>
       <body
