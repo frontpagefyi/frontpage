@@ -524,6 +524,9 @@ packages:
   '@asamuzakjp/css-color@3.2.0':
     resolution: {integrity: sha512-K1A6z8tS3XsmCMM86xoWdn7Fkdn9m6RSVtocUrJYIwZnFVkng/PvkEoWtOWmP+Scc6saYWHWZYbndEEXxl24jw==}
 
+  '@atproto/api@0.14.22':
+    resolution: {integrity: sha512-ziXPau+sUdFovObSnsoN7JbOmUw1C5e5L28/yXf3P8vbEnSS3HVVGD1jYcscBYY34xQqi4bVDpwMYx/4yRsTuQ==}
+
   '@atproto/api@0.18.0':
     resolution: {integrity: sha512-2GxKPhhvMocDjRU7VpNj+cvCdmCHVAmRwyfNgRLMrJtPZvrosFoi9VATX+7eKN0FZvYvy8KdLSkCcpP2owH3IA==}
 
@@ -1316,6 +1319,9 @@ packages:
 
   '@napi-rs/wasm-runtime@0.2.12':
     resolution: {integrity: sha512-ZVWUcfwY4E/yPitQJl481FjFo3K22D6qF0DuFH6Y/nbnE11GY5uguDxZMGXPQ8WQ0128MXQD7TnfHyK4oWoIJQ==}
+
+  '@needle-di/core@0.11.2':
+    resolution: {integrity: sha512-QwvlSTfpobIGGEmO/iMjMcL9lPf53cSV8mQVTzMGO4IkcyOQEK3nn7d6fkUOaaefwyiO4HGLEMl5VDaslnUuUg==}
 
   '@neon-rs/load@0.0.4':
     resolution: {integrity: sha512-kTPhdZyTQxB+2wpiRcFWrDcejc4JI6tkPuS7UZCG4l6Zvc5kU/gGQ/ozvHTh1XR5tS+UlfAfGuPajjzQjCiHCw==}
@@ -5065,6 +5071,17 @@ snapshots:
       '@csstools/css-tokenizer': 3.0.4
       lru-cache: 10.4.3
 
+  '@atproto/api@0.14.22':
+    dependencies:
+      '@atproto/common-web': 0.4.6
+      '@atproto/lexicon': 0.4.12
+      '@atproto/syntax': 0.4.2
+      '@atproto/xrpc': 0.6.12
+      await-lock: 2.2.2
+      multiformats: 9.9.0
+      tlds: 1.259.0
+      zod: 3.25.76
+
   '@atproto/api@0.18.0':
     dependencies:
       '@atproto/common-web': 0.4.6
@@ -5707,6 +5724,9 @@ snapshots:
     dependencies:
       '@atproto/api': 0.14.22
       '@atproto/identity': 0.4.9
+      '@atproto/lexicon': 0.4.12
+      '@atproto/syntax': 0.3.4
+      '@needle-di/core': 0.11.2
 
   '@libsql/client@0.15.15(bufferutil@4.0.8)(utf-8-validate@6.0.3)':
     dependencies:
@@ -5782,6 +5802,8 @@ snapshots:
       '@emnapi/runtime': 1.5.0
       '@tybys/wasm-util': 0.10.0
     optional: true
+
+  '@needle-di/core@0.11.2': {}
 
   '@neon-rs/load@0.0.4': {}
 
