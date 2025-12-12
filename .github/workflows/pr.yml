@@ -93,8 +93,6 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "packages/**/eslint_report.json"
-          # Rely on the previous lint step to fail the job if there are errors
-          fail-on-error: false
 
   typecheck:
     runs-on: ubuntu-latest
