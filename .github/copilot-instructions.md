@@ -30,6 +30,7 @@ Trust these notes before searching; only explore if something here is missing or
   - `pnpm exec turbo run --affected type-check`
 - Lexicon changes (`lexicons/**`) trigger Go-based `glot lint` and `glot compat`.
 - Label sync on PRs; `sync-tangled` push job mirrors `main` to tangled.sh (uses secret).
+- When adding new actions, prefer fixed SHAs over floating tags for stability. Include the version in a comment.
 
 ## Setup / bootstrap
 1. Ensure Node 22.18 available (`nvm use`).
