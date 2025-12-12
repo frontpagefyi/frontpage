@@ -22,6 +22,6 @@ export function PrefetchOgImage({ path }: { path: string }) {
     return () => {
       controller.abort();
     };
-  }, [path]);
+  }, []);
   return null;
 }
