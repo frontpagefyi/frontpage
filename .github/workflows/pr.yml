@@ -57,6 +57,10 @@ jobs:
 
   lint:
     runs-on: ubuntu-latest
+    permissions:
+      # Need to add these 2 for eslint-annotate-action
+      pull-requests: read
+      checks: write
     steps:
       - uses: actions/checkout@8e8c483db84b4bee98b60c0593521ed34d9990e8 # v6.0.1
         with:
@@ -81,7 +85,13 @@ jobs:
           cache: "pnpm"
 
       - run: pnpm i
-      - run: pnpm exec turbo run --affected lint
+      - run: pnpm exec turbo run --affected lint -- --output-file eslint_report.json --format json
+
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@d57a1193d4c59cbfbf3f86c271f42612f9dbd9e9 # v3.0.0
+        with:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          report-json: "packages/**/eslint_report.json"
 
   typecheck:
     runs-on: ubuntu-latest
