@@ -65,6 +65,7 @@ export function LoginForm() {
               domain and open social hosting when you sign up. You might not
               have realized that, but if you sign up on one of those services,
               the username you get is a domain, such as you.bsky.social.
+              That&apos;s an internet handle.
             </p>
             <p>
               If you don&apos;t have one, choose &quot;Continue with your
