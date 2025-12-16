@@ -15,7 +15,7 @@ import {
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
 
-import { Field, FieldError, FieldLabel } from "@/lib/components/ui/field";
+import { Field } from "@/lib/components/ui/field";
 import { Separator } from "@/lib/components/ui/separator";
 import {
   Accordion,
@@ -23,7 +23,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "@/lib/components/ui/accordion";
-import { ErrorReason } from "@/lib/auth-sign-in";
+import { type ErrorReason } from "@/lib/auth-sign-in";
 
 const DEFAULT_PDS_URL =
   process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST || "bsky.social";
