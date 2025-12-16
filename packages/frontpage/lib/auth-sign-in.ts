@@ -27,6 +27,13 @@ type SignInInput =
       pdsUrl: URL;
     };
 
+export type ErrorReason = Extract<
+  Awaited<ReturnType<typeof signIn>>,
+  {
+    error: unknown;
+  }
+>["error"];
+
 export async function signIn(input: SignInInput) {
   let authServerUrl: URL;
   if ("identifier" in input) {

@@ -18,7 +18,7 @@ export async function loginWithIdentifierAction(
   const result = await signIn({ identifier: handleOrDid });
   if (result && "error" in result) {
     return {
-      error: `An error occured while signing in (${result.error})`,
+      error: result.error,
     };
   }
 }

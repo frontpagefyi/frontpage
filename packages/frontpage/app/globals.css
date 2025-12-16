@@ -94,3 +94,7 @@ html {
   --input: 217.2 32.6% 17.5%;
   --ring: 215.4 16.3% 46.9%;
 }
+
+.prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
+  @apply text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300;
+}
