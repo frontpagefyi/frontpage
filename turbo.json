@@ -13,7 +13,8 @@
       "dependsOn": ["^build"]
     },
     "lint": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": ["eslint_report.json"]
     },
     "test": {
       "dependsOn": ["^build"]
