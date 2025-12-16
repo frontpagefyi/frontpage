@@ -59,7 +59,7 @@ export function LoginForm() {
       <Accordion type="multiple">
         <AccordionItem value="internet-handle-help">
           <AccordionTrigger>What is an internet handle?</AccordionTrigger>
-          <AccordionContent className="text-pretty prose prose-sm">
+          <AccordionContent className="text-pretty prose dark:prose-invert prose-sm">
             <p>
               Some open social apps, such as Bluesky, set you up with a free
               domain and open social hosting when you sign up. You might not
@@ -87,7 +87,7 @@ export function LoginForm() {
 
         <AccordionItem value="pds-help">
           <AccordionTrigger>What is my PDS?</AccordionTrigger>
-          <AccordionContent className="text-pretty prose prose-sm">
+          <AccordionContent className="text-pretty prose dark:prose-invert prose-sm">
             <p>
               Your Personal Data Server (PDS) is a service that stores your
               social data and allows you to interact with open social apps on AT
@@ -159,12 +159,10 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
   if (reason === "DID_NOT_FOUND") {
     return (
       <LoginError error="Internet handle not found">
-        <div className="prose prose-sm text-destructive">
-          <p>
-            There was either a typo in your internet handle or a temporary issue
-            with the service.
-          </p>
-        </div>
+        <p>
+          There was either a typo in your internet handle or a temporary issue
+          with the service.
+        </p>
       </LoginError>
     );
   }
@@ -172,12 +170,10 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
   if (reason === "PDS_NOT_FOUND") {
     return (
       <LoginError error="PDS not found">
-        <div className="prose prose-sm text-destructive">
-          <p>
-            The Personal Data Server (PDS) hosting your internet handle is
-            either temporarily down or there is a network issue.
-          </p>
-        </div>
+        <p>
+          The Personal Data Server (PDS) hosting your internet handle is either
+          temporarily down or there is a network issue.
+        </p>
       </LoginError>
     );
   }
@@ -186,7 +182,7 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
 
   return (
     <LoginError error="Login error">
-      <div className="prose prose-sm">
+      <div className="prose dark:prose-invert prose-sm">
         <p>An unexpected error occurred. Please try again later.</p>
         <p>Error code: {reason}</p>
       </div>
