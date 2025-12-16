@@ -26,8 +26,6 @@
     "@markdoc/markdoc": "^0.4.0",
     "@next/env": "16.0.0-beta.0",
     "@radix-ui/react-icons": "^1.3.2",
-    "@radix-ui/react-label": "^2.1.8",
-    "@radix-ui/react-separator": "^1.1.8",
     "@repo/frontpage-atproto-client": "workspace:*",
     "@repo/frontpage-oauth": "workspace:*",
     "@vercel/analytics": "^1.5.0",
