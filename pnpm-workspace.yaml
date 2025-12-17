@@ -16,11 +16,16 @@ catalog:
   '@vitejs/plugin-react': ^5.1.0
   vite-tsconfig-paths: ^5.1.4
   vitest: ^4.0.8
-  '@atproto/repo': ^0.8.10
-  '@atproto/syntax': ^0.3.4
-  '@atproto/identity': ^0.4.9
-  '@atproto/did': ^0.2.1
-  '@atproto/api': ^0.18.0
+
+  # It's crucial that all atproto packages are major version bumped in unison
+  # to prevent compatibility issues between packages.
+  '@atproto/repo': ^0.8.12
+  '@atproto/syntax': ^0.4.2
+  '@atproto/identity': ^0.4.10
+  '@atproto/did': ^0.2.3
+  '@atproto/api': ^0.18.8
+  '@atproto/lexicon': ^0.6.0
+  '@atproto/xrpc': ^0.7.7
 
 onlyBuiltDependencies:
   - '@vercel/speed-insights'
