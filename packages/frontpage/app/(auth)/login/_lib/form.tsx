@@ -37,17 +37,18 @@ export function LoginForm() {
 
       <Separator />
 
+      <BlueskySignupButton />
       <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
         <DialogTrigger asChild>
-          <Button className="w-full" variant="outline">
-            Continue with PDS
+          <Button className="w-full" variant="ghost">
+            Sign up with a PDS
           </Button>
         </DialogTrigger>
         <DialogContent className="top-1/3">
           <DialogHeader>
             <DialogTitle>Login with PDS</DialogTitle>
             <DialogDescription>
-              Enter the URL of your PDS to login or signup. By continuing, you
+              Enter the URL of your PDS to login or sign up. By continuing, you
               accept the Terms of Service of your chosen PDS.
             </DialogDescription>
           </DialogHeader>
@@ -69,7 +70,7 @@ export function LoginForm() {
             </p>
             <p>
               If you don&apos;t have one, choose &quot;Continue with your
-              PDS&quot; and select a service to login or signup.
+              PDS&quot; and select a service to login or sign up.
             </p>
             <p>
               Read more at{" "}
@@ -92,6 +93,11 @@ export function LoginForm() {
               Your Personal Data Server (PDS) is a service that stores your
               social data and allows you to interact with open social apps on AT
               Protocol.
+            </p>
+            <p>
+              If you don&apos;t have a specific PDS, it&apos;s best to continue
+              with Bluesky using the button above. You can always move to a
+              different PDS later.
             </p>
           </AccordionContent>
         </AccordionItem>
@@ -145,7 +151,7 @@ function IdentifierForm() {
         />
       </Field>
       <Button type="submit" disabled={isIdentifierPending} className="w-full">
-        Continue with internet handle
+        Login with internet handle
       </Button>
 
       {identifierState?.error ? (
@@ -190,6 +196,30 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
   );
 }
 
+function BlueskySignupButton() {
+  const [pdsState, pdsAction, isPdsPending] = useActionState(
+    loginWithPdsAction,
+    null,
+  );
+
+  return (
+    <form className="contents" action={pdsAction}>
+      <Button
+        type="submit"
+        className="w-full"
+        variant="outline"
+        disabled={isPdsPending}
+        name="pdsUrl"
+        value="https://bsky.social"
+      >
+        Sign up with Bluesky
+      </Button>
+
+      {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
+    </form>
+  );
+}
+
 function PdsForm() {
   const [pdsState, pdsAction, isPdsPending] = useActionState(
     loginWithPdsAction,
@@ -212,7 +242,7 @@ function PdsForm() {
         defaultValue={DEFAULT_PDS_URL}
       />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
-        Login
+        Continue to PDS sign up
       </Button>
 
       {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
