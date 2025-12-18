@@ -24,15 +24,18 @@ const handleResolver = new CompositeHandleResolver({
         }),
     }),
     http: new WellKnownHandleResolver({
-      fetch: (request) =>
-        fetch(request, {
+      fetch: (request) => {
+        const signal = AbortSignal.timeout(1500);
+        return fetch(request, {
+          signal,
           headers: {
             "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT,
           },
           next: {
             revalidate: 60 * 60 * 24, // 24 hours
           },
-        }),
+        });
+      },
     }),
   },
 });
