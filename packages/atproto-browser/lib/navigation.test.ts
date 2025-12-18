@@ -126,7 +126,7 @@ test("valid http input without included at uri", async () => {
 test("lex input with invalid NSID", async () => {
   // Numbers in NSID are not allowed
   expect(await navigateAtUri("lex:com.example.invalid1")).toEqual({
-    error: "Invalid NSID: com.example.invalid1",
+    error: "Could not resolve NSID(com.example.invalid1): NO_AUTHORITY",
   });
 });
 
