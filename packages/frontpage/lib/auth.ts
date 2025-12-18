@@ -39,8 +39,7 @@ import {
 } from "@repo/frontpage-oauth";
 import { getRootHost } from "./navigation";
 import { invariant } from "./utils";
-
-const USER_AGENT = "appview/@frontpage.fyi (@tom-sherman.com)";
+import { FRONTPAGE_APPVIEW_USER_AGENT } from "./constants";
 
 export const getPrivateJwk = cache(() =>
   importJWK(
@@ -104,7 +103,7 @@ export function oauthDiscoveryRequest(url: URL) {
   return discoveryRequest(url, {
     algorithm: "oauth2",
     headers: new Headers({
-      "User-Agent": USER_AGENT,
+      "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT,
     }),
   });
 }
@@ -120,7 +119,7 @@ export async function oauthProtectedMetadataRequest(did: DID) {
 
   const response = await fetch(`${pds}/.well-known/oauth-protected-resource`, {
     headers: {
-      "User-Agent": USER_AGENT,
+      "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT,
     },
   });
   if (response.status !== 200) {

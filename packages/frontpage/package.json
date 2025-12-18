@@ -19,6 +19,8 @@
     "generate-local-env": "node scripts/generate-local-env.mts"
   },
   "dependencies": {
+    "@atcute/identity": "catalog:",
+    "@atcute/identity-resolver": "catalog:",
     "@atproto/common-web": "^0.3.2",
     "@atproto/oauth-types": "^0.1.5",
     "@atproto/syntax": "catalog:",
