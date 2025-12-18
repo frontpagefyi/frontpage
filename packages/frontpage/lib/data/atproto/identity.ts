@@ -53,7 +53,14 @@ const getVerifiedDidFromHandle = cache(async (handle: string) => {
     return null;
   }
 
-  return did;
+  const didDoc = await getDidDoc(did);
+  const didDocHandle = didDoc.alsoKnownAs
+    ?.find((handle) => handle.startsWith("at://"))
+    ?.replace("at://", "");
+
+  if (!didDocHandle) return null;
+
+  return didDocHandle.toLowerCase() === handle.toLowerCase() ? did : null;
 });
 
 /**
@@ -69,14 +76,14 @@ export const getDidFromHandleOrDid = cache(async (handleOrDid: string) => {
 });
 
 export const getVerifiedHandle = cache(async (did: DID) => {
-  const plcDoc = await getDidDoc(did);
-  const plcHandle = plcDoc.alsoKnownAs
+  const didDoc = await getDidDoc(did);
+  const didDocHandle = didDoc.alsoKnownAs
     ?.find((handle) => handle.startsWith("at://"))
     ?.replace("at://", "");
 
-  if (!plcHandle) return null;
+  if (!didDocHandle) return null;
 
-  const resolvedDid = await getVerifiedDidFromHandle(plcHandle);
+  const resolvedDid = await getVerifiedDidFromHandle(didDocHandle);
 
-  return resolvedDid ? plcHandle : null;
+  return resolvedDid ? didDocHandle : null;
 });
