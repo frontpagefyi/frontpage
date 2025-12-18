@@ -64,7 +64,7 @@ const getVerifiedDidFromHandle = cache(async (handle: string) => {
 });
 
 /**
- * Returns the DID of the the handle or the DID itself if it's a DID. Or null if the handle doesn't resolve to a DID.
+ * Returns the DID of the handle or the DID itself if it's a DID. Or null if the handle doesn't resolve to a DID.
  */
 export const getDidFromHandleOrDid = cache(async (handleOrDid: string) => {
   const decodedHandleOrDid = decodeURIComponent(handleOrDid);
