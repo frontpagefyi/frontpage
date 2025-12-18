@@ -17,6 +17,7 @@ const handleResolver = new CompositeHandleResolver({
         fetch(request, {
           headers: {
             "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT,
+            Accept: "application/dns-json",
           },
           next: {
             revalidate: 60 * 60 * 24, // 24 hours
