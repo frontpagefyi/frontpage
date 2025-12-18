@@ -25,8 +25,15 @@ import {
 } from "@/lib/components/ui/accordion";
 import { type ErrorReason } from "@/lib/auth-sign-in";
 
-const DEFAULT_PDS_URL =
-  process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST || "bsky.social";
+const DEFAULT_PDS = process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST
+  ? {
+      host: process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST,
+      label: process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST,
+    }
+  : {
+      host: "bsky.social",
+      label: "Bluesky",
+    };
 
 export function LoginForm() {
   const [pdsDialogOpen, setPdsDialogOpen] = useState(false);
@@ -37,7 +44,7 @@ export function LoginForm() {
 
       <Separator />
 
-      <BlueskySignupButton />
+      <DefaultPdsSignupButton />
       <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
         <DialogTrigger asChild>
           <Button className="w-full" variant="ghost">
@@ -196,7 +203,7 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
   );
 }
 
-function BlueskySignupButton() {
+function DefaultPdsSignupButton() {
   const [pdsState, pdsAction, isPdsPending] = useActionState(
     loginWithPdsAction,
     null,
@@ -210,9 +217,9 @@ function BlueskySignupButton() {
         variant="outline"
         disabled={isPdsPending}
         name="pdsUrl"
-        value="https://bsky.social"
+        value={`https://${DEFAULT_PDS.host}`}
       >
-        Sign up with Bluesky
+        Sign up with {DEFAULT_PDS.label}
       </Button>
 
       {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
@@ -239,7 +246,7 @@ function PdsForm() {
       <Input
         name="pdsUrl"
         placeholder="eg. bsky.social"
-        defaultValue={DEFAULT_PDS_URL}
+        defaultValue={DEFAULT_PDS.host}
       />
       <Button type="submit" className="w-full" disabled={isPdsPending}>
         Continue to PDS sign up
