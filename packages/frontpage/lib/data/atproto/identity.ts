@@ -41,7 +41,15 @@ const getVerifiedDidFromHandle = cache(async (handle: string) => {
   if (!isValidHandle(handle)) {
     return null;
   }
-  return handleResolver.resolve(handle).catch(() => null);
+  const did = await handleResolver.resolve(handle).catch(() => null);
+
+  if (!did) return null;
+
+  if (!isDid(did)) {
+    return null;
+  }
+
+  return did;
 });
 
 /**
