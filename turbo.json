@@ -10,7 +10,8 @@
       "dependsOn": ["^build"]
     },
     "type-check": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "outputs": [".next/types/**"]
     },
     "lint": {
       "dependsOn": ["^build"],
