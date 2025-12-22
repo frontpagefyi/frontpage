@@ -21,7 +21,7 @@ export async function GET(
   _req: Request,
   {
     params,
-  }: PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">,
+  }: RouteContext<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]/og-image">,
 ) {
   const { comment } = await getCommentPageData(await params);
   if ((await shouldHideComment(comment)) || comment.status !== "live") {

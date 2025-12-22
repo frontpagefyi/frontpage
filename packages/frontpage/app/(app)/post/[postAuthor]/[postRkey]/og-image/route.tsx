@@ -17,7 +17,7 @@ export const revalidate = 3600; // 1 hour
 
 export async function GET(
   _req: Request,
-  { params }: PageProps<"/post/[postAuthor]/[postRkey]">,
+  { params }: RouteContext<"/post/[postAuthor]/[postRkey]/og-image">,
 ) {
   const { post } = await getPostPageData(await params);
   const profile = await getBlueskyProfile(post.authorDid);
