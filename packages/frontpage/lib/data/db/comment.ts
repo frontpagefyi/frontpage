@@ -205,15 +205,59 @@ export const updateComment = async (
   rkey: string,
   input: UpdateCommentInput,
 ) => {
-  await db
-    .update(schema.Comment)
-    .set({
-      ...input,
-      cid: input.cid ?? undefined,
-    })
-    .where(
-      and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
-    );
+  // If we're updating status to "live", we need to check if it was "pending"
+  // and trigger aggregates
+  if (input.status === "live") {
+    await db.transaction(async (tx) => {
+      // Get the current comment to check its status
+      const [currentComment] = await tx
+        .select({
+          id: schema.Comment.id,
+          postId: schema.Comment.postId,
+          status: schema.Comment.status,
+        })
+        .from(schema.Comment)
+        .where(
+          and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+        )
+        .limit(1);
+
+      if (!currentComment) {
+        throw new Error("Comment not found");
+      }
+
+      // Update the comment
+      await tx
+        .update(schema.Comment)
+        .set({
+          ...input,
+          cid: input.cid ?? undefined,
+        })
+        .where(
+          and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+        );
+
+      // If status is changing from "pending" to "live", trigger aggregates
+      if (currentComment.status === "pending") {
+        await newCommentAggregateTrigger(
+          currentComment.postId,
+          currentComment.id,
+          tx,
+        );
+      }
+    });
+  } else {
+    // No status change to "live", just update normally
+    await db
+      .update(schema.Comment)
+      .set({
+        ...input,
+        cid: input.cid ?? undefined,
+      })
+      .where(
+        and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+      );
+  }
 };
 
 export async function uncached_doesCommentExist(repo: DID, rkey: string) {
@@ -391,11 +435,14 @@ export async function createComment({
 
     invariant(insertedComment, "Failed to insert comment");
 
-    await newCommentAggregateTrigger(
-      insertedComment.postId,
-      insertedComment.id,
-      tx,
-    );
+    // Only update aggregates for live comments, not pending ones
+    if (status === "live") {
+      await newCommentAggregateTrigger(
+        insertedComment.postId,
+        insertedComment.id,
+        tx,
+      );
+    }
 
     return insertedComment;
   });
