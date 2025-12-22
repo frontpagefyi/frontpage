@@ -8,6 +8,7 @@
     "build-1pw": "NODE_OPTIONS=--use-openssl-ca op run --env-file=\"./.env.1pw\" -- next build",
     "build": "NODE_OPTIONS=--use-openssl-ca next build --turbopack",
     "start": "NODE_OPTIONS=--use-openssl-ca next start",
+    "typegen": "next typegen",
     "lint": "eslint .",
     "db:generate": "NODE_OPTIONS=--use-openssl-ca drizzle-kit generate",
     "db:migrate": "NODE_OPTIONS=--use-openssl-ca drizzle-kit migrate",
@@ -15,7 +16,7 @@
     "db:push": "NODE_OPTIONS=--use-openssl-ca drizzle-kit push",
     "db:pull": "NODE_OPTIONS=--use-openssl-ca drizzle-kit pull",
     "test": "vitest",
-    "type-check": "next typegen && tsc --noEmit",
+    "type-check": "tsc --noEmit",
     "generate-local-env": "node scripts/generate-local-env.mts"
   },
   "dependencies": {
