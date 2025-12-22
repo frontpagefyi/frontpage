@@ -15,7 +15,7 @@
     "db:push": "NODE_OPTIONS=--use-openssl-ca drizzle-kit push",
     "db:pull": "NODE_OPTIONS=--use-openssl-ca drizzle-kit pull",
     "test": "vitest",
-    "type-check": "next typgen && tsc --noEmit",
+    "type-check": "next typegen && tsc --noEmit",
     "generate-local-env": "node scripts/generate-local-env.mts"
   },
   "dependencies": {
