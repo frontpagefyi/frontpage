@@ -138,7 +138,7 @@ export const createPostVote = async ({
         rkey,
         collection,
       })
-      .returning({ id: schema.PostVote.id, postId: schema.PostVote.postId });
+      .returning({ id: schema.PostVote.id });
 
     if (!insertedVote) {
       throw new Error("Failed to insert vote");
@@ -146,7 +146,7 @@ export const createPostVote = async ({
 
     // Only update aggregates for live votes, not pending ones
     if (status === "live") {
-      await newPostVoteAggregateTrigger(insertedVote.postId, tx);
+      await newPostVoteAggregateTrigger(post.id, tx);
     }
 
     return { id: insertedVote?.id };
@@ -190,7 +190,7 @@ export async function createCommentVote({
         rkey,
         collection,
       })
-      .returning({ id: schema.CommentVote.id, commentId: schema.CommentVote.commentId });
+      .returning({ id: schema.CommentVote.id });
 
     if (!insertedVote) {
       throw new Error("Failed to insert vote");
@@ -198,7 +198,7 @@ export async function createCommentVote({
 
     // Only update aggregates for live votes, not pending ones
     if (status === "live") {
-      await newCommentVoteAggregateTrigger(comment.postId, insertedVote.commentId, tx);
+      await newCommentVoteAggregateTrigger(comment.postId, comment.id, tx);
     }
 
     return { id: insertedVote?.id };
