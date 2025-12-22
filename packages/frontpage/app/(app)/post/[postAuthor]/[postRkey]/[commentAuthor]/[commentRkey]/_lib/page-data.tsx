@@ -7,12 +7,9 @@ import {
 import { getPost } from "@/lib/data/db/post";
 import { notFound } from "next/navigation";
 
-export type CommentPageParams = {
-  commentRkey: string;
-  postRkey: string;
-  postAuthor: string;
-  commentAuthor: string;
-};
+export type CommentPageParams = Awaited<
+  PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">["params"]
+>;
 
 export async function getCommentPageData(params: CommentPageParams) {
   const [postAuthorDid, commentAuthorDid] = await Promise.all([

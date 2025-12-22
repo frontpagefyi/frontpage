@@ -24,13 +24,9 @@ import { reportUserAction } from "@/lib/components/user-hover-card";
 import { type Metadata } from "next";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 
-type Params = {
-  user: string;
-};
-
-export async function generateMetadata(props: {
-  params: Promise<Params>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/profile/[user]">,
+): Promise<Metadata> {
   const params = await props.params;
   const did = await getDidFromHandleOrDid(params.user);
   if (!did) {
@@ -57,7 +53,7 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function Profile(props: { params: Promise<Params> }) {
+export default async function Profile(props: PageProps<"/profile/[user]">) {
   await connection();
   const params = await props.params;
   const did = await getDidFromHandleOrDid(params.user);

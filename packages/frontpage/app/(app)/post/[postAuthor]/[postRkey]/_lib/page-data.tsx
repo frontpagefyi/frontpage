@@ -3,10 +3,9 @@ import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { getPost } from "@/lib/data/db/post";
 import { notFound } from "next/navigation";
 
-export type PostPageParams = {
-  postAuthor: string;
-  postRkey: string;
-};
+export type PostPageParams = Awaited<
+  PageProps<"/post/[postAuthor]/[postRkey]">["params"]
+>;
 
 export async function getPostPageData(params: PostPageParams) {
   const authorDid = await getDidFromHandleOrDid(params.postAuthor);

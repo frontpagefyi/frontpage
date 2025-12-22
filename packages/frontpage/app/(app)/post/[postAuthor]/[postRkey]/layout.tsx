@@ -8,15 +8,9 @@ import { Spinner } from "@/lib/components/ui/spinner";
 import { NewComment } from "./_lib/comment-client";
 import { SuperHackyScrollToTop } from "./scroller";
 
-type Params = {
-  postRkey: string;
-  postAuthor: string;
-};
-
-export default async function PostLayout(props: {
-  children: React.ReactNode;
-  params: Promise<Params>;
-}) {
+export default async function PostLayout(
+  props: LayoutProps<"/post/[postAuthor]/[postRkey]">,
+) {
   const params = await props.params;
 
   const { children } = props;

@@ -4,11 +4,7 @@ import { getUser } from "@/lib/data/user";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 
-export default async function LoginPage({
-  searchParams,
-}: {
-  searchParams: Promise<{ error?: string }>;
-}) {
+export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const user = await getUser();
 
   if (user !== null) {

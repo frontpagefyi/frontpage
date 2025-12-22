@@ -8,7 +8,7 @@ import {
   OgWrapper,
   frontpageOgImageResponse,
 } from "@/lib/og";
-import { type CommentPageParams, getCommentPageData } from "../_lib/page-data";
+import { getCommentPageData } from "../_lib/page-data";
 import { getBlueskyProfile } from "@/lib/data/user";
 import { shouldHideComment } from "@/lib/data/db/comment";
 import { notFound } from "next/navigation";
@@ -19,7 +19,9 @@ export const revalidate = 3600; // 1 hour
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<CommentPageParams> },
+  {
+    params,
+  }: PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">,
 ) {
   const { comment } = await getCommentPageData(await params);
   if ((await shouldHideComment(comment)) || comment.status !== "live") {

@@ -12,17 +12,12 @@ import {
 } from "@/lib/og";
 import { getPostPageData } from "../_lib/page-data";
 
-type Params = {
-  postRkey: string;
-  postAuthor: string;
-};
-
 export const dynamic = "force-static";
 export const revalidate = 3600; // 1 hour
 
 export async function GET(
   _req: Request,
-  { params }: { params: Promise<Params> },
+  { params }: PageProps<"/post/[postAuthor]/[postRkey]">,
 ) {
   const { post } = await getPostPageData(await params);
   const profile = await getBlueskyProfile(post.authorDid);

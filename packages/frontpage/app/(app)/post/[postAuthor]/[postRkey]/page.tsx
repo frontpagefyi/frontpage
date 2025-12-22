@@ -10,9 +10,9 @@ function getPagePath(params: PostPageParams) {
   return `/post/${params.postAuthor}/${params.postRkey}`;
 }
 
-export async function generateMetadata(props: {
-  params: Promise<PostPageParams>;
-}): Promise<Metadata> {
+export async function generateMetadata(
+  props: PageProps<"/post/[postAuthor]/[postRkey]">,
+): Promise<Metadata> {
   const params = await props.params;
   const { post } = await getPostPageData(params);
 
@@ -41,9 +41,9 @@ export async function generateMetadata(props: {
   };
 }
 
-export default async function PostPage(props: {
-  params: Promise<PostPageParams>;
-}) {
+export default async function PostPage(
+  props: PageProps<"/post/[postAuthor]/[postRkey]">,
+) {
   const params = await props.params;
   const { post, authorDid } = await getPostPageData(params);
   const comments = await getCommentsForPost(post.id);
