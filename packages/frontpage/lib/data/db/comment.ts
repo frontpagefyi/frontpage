@@ -218,7 +218,10 @@ export const updateComment = async (
         })
         .from(schema.Comment)
         .where(
-          and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+          and(
+            eq(schema.Comment.authorDid, repo),
+            eq(schema.Comment.rkey, rkey),
+          ),
         )
         .limit(1);
 
@@ -234,7 +237,10 @@ export const updateComment = async (
           cid: input.cid ?? undefined,
         })
         .where(
-          and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+          and(
+            eq(schema.Comment.authorDid, repo),
+            eq(schema.Comment.rkey, rkey),
+          ),
         );
 
       // If status is changing from "pending" to "live", trigger aggregates
