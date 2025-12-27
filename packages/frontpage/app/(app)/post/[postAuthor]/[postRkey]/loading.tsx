@@ -15,15 +15,15 @@ function CommentSkeleton({ className }: { className?: string }) {
   return (
     <div className={clsx("flex flex-col gap-2", className)}>
       <div className="flex items-center gap-2">
-        <Skeleton className="h-6 w-6 rounded-full" />
+        <Skeleton className="size-6 rounded-full" />
         <Skeleton className="h-4 w-24" />
         <Skeleton className="h-3 w-16" />
       </div>
       <Skeleton className="h-16 w-full" />
       <div className="flex items-center gap-4 mt-1">
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-4" />
-        <Skeleton className="h-4 w-4" />
+        <Skeleton className="size-4" />
+        <Skeleton className="size-4" />
+        <Skeleton className="size-4" />
       </div>
     </div>
   );

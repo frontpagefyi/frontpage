@@ -25,7 +25,7 @@ export function NotificationIndicatorCount() {
 
   return (
     <div
-      className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"
+      className="absolute -top-1 -right-1 size-4 bg-red-500 text-white text-xs rounded-full flex items-center justify-center"
       aria-label={`${count} notifications.`}
     >
       {count > 9 ? "9+" : count}

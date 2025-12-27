@@ -115,7 +115,7 @@ export function CommentClientWrapperWithToolbar({
               onClick={() => setShowNewComment(true)}
               disabled={!allowReply || cid === null}
             >
-              <ChatBubbleIcon className="w-4 h-4" />
+              <ChatBubbleIcon className="size-4" />
               <span className="sr-only">Reply</span>
             </Button>
           </SimpleTooltip>
@@ -169,7 +169,7 @@ export function CommentClientWrapperWithToolbar({
                       }
                     }}
                   >
-                    <TrashIcon className="w-4 h-4" />
+                    <TrashIcon className="size-4" />
                   </Button>
                 </AlertDialogTrigger>
               </SimpleTooltip>

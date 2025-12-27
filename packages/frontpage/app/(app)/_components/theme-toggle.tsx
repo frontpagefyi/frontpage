@@ -22,11 +22,11 @@ export function ThemeToggleMenuGroup() {
           <span>Light</span>
         </DropdownMenuRadioItem>
         <DropdownMenuRadioItem value="dark" className="flex gap-1.5">
-          <MoonIcon className="h-[1.2rem] w-[1.2rem]" />
+          <MoonIcon className="size-[1.2rem]" />
           <span>Dark</span>
         </DropdownMenuRadioItem>
         <DropdownMenuRadioItem value="system" className="flex gap-1.5">
-          <Half2Icon className="h-[1.2rem] w-[1.2rem]" />
+          <Half2Icon className="size-[1.2rem]" />
           <span>System</span>
         </DropdownMenuRadioItem>
       </DropdownMenuRadioGroup>

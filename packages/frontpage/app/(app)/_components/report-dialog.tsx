@@ -123,7 +123,7 @@ export function ReportDialogDropdownButton({
           e.preventDefault();
         }}
       >
-        <ExclamationTriangleIcon className="mr-2 h-4 w-4" />
+        <ExclamationTriangleIcon className="mr-2 size-4" />
         Report
       </DropdownMenuItem>
     </ReportDialog>

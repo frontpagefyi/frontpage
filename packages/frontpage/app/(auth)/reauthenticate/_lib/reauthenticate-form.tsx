@@ -27,7 +27,7 @@ export function ReauthenticateForm({
       </form>
       {state?.error ? (
         <Alert variant="destructive">
-          <CrossCircledIcon className="h-4 w-4" />
+          <CrossCircledIcon className="size-4" />
           <AlertTitle>Error</AlertTitle>
           <AlertDescription>{state?.error}</AlertDescription>
         </Alert>

@@ -116,7 +116,7 @@ async function NotificationCard({
     >
       <div className="flex items-start justify-between">
         <div className="flex items-center gap-4">
-          <model.Icon className="text-gray-500 dark:text-gray-400 h-4 w-4 self-start mt-1 shrink-0" />
+          <model.Icon className="text-gray-500 dark:text-gray-400 size-4 self-start mt-1 shrink-0" />
           <div>
             <p className="font-medium">{model.title}</p>
             <p className="text-gray-500 dark:text-gray-400">

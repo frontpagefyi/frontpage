@@ -26,7 +26,7 @@ export default async function LoginPage({ searchParams }: PageProps<"/login">) {
       <LoginForm />
       {error ? (
         <Alert variant="destructive">
-          <CrossCircledIcon className="h-4 w-4" />
+          <CrossCircledIcon className="size-4" />
           <AlertTitle>Login error, please try again</AlertTitle>
           <AlertDescription>{error}</AlertDescription>
         </Alert>

@@ -24,7 +24,7 @@ export function MarkAsReadButton({
         disabled={isPending}
         onClick={(e) => e.stopPropagation()}
       >
-        <CheckCircledIcon className="h-4 w-4" />
+        <CheckCircledIcon className="size-4" />
         <span className="sr-only">Mark as read</span>
       </Button>
     </form>

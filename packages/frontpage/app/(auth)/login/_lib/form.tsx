@@ -123,7 +123,7 @@ function LoginError({
   return (
     <div>
       <Alert variant="destructive">
-        <CrossCircledIcon className="h-4 w-4" />
+        <CrossCircledIcon className="size-4" />
         <AlertTitle>{error ?? "Login error"}</AlertTitle>
 
         <AlertDescription>

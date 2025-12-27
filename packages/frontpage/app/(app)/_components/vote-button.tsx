@@ -78,7 +78,7 @@ export function VoteButton({
       >
         <ChevronUpIcon
           className={cn(
-            "w-5 h-5",
+            "size-5",
             hasVoted && "text-yellow-500 group-disabled:text-yellow-500",
           )}
         />
