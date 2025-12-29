@@ -1,7 +1,7 @@
 import { getSession, signOut } from "@/lib/auth";
 import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 import { redirect } from "next/navigation";
-import { ReauthenticateForm } from "./_lib/reauthenticate-form";
+import { ReauthenticateForm } from "./_lib/form";
 import { Button } from "@/lib/components/ui/button";
 import { revalidatePath } from "next/cache";
 import { UserAvatar } from "@/lib/components/user-avatar";

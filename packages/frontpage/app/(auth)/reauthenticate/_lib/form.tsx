@@ -1,7 +1,7 @@
 "use client";
 
 import { type ReactNode, useActionState } from "react";
-import { reauthenticateAction } from "./reauthenticate-action";
+import { reauthenticateAction } from "./action";
 import { Button } from "@/lib/components/ui/button";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
