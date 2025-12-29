@@ -86,7 +86,7 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
           <h1 className="md:text-2xl font-bold">
             {userHandle ?? "handle.invalid"}
           </h1>
-          {session !== null ? (
+          {session !== null && session.did !== did ? (
             <EllipsisDropdown aria-label="User actions">
               <ReportDialogDropdownButton
                 reportAction={reportUserAction.bind(null, { did })}
