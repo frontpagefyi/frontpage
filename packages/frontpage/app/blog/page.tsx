@@ -26,7 +26,7 @@ export default async function Blog() {
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-6">
         {blogList.map((post) => (
           <Link key={post.uri.rkey} href={`/blog/${post.slug}`}>
-            <Card className="h-full flex flex-col">
+            <Card className="h-full">
               <CardHeader className="grow">
                 <TimeAgo
                   createdAt={post.value.createdAt}

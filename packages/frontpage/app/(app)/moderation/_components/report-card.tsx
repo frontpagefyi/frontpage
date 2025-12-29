@@ -122,7 +122,7 @@ const createLink = async (
 
 export async function ReportCard({ report }: { report: Report }) {
   return (
-    <Card className="mb-2 flex flex-col">
+    <Card>
       <CardHeader>
         <CardTitle className="text-blue-400">
           {report.subjectCollection ?? "Reported User"}
