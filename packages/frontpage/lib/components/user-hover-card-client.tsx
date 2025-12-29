@@ -18,7 +18,7 @@ type Props = {
   asChild?: boolean;
   avatar: ReactNode;
   handle: string | null;
-  reportAction: (formData: FormData) => Promise<void>;
+  reportAction: ((formData: FormData) => Promise<void>) | null;
 };
 
 export function UserHoverCardClient({
@@ -50,10 +50,14 @@ export function UserHoverCardClient({
             </Suspense>
           </div>
         </div>
-        <Separator className="my-2" />
-        <div>
-          <ReportDialogIcon reportAction={reportAction} />
-        </div>
+        {reportAction !== null ? (
+          <>
+            <Separator className="my-2" />
+            <div>
+              <ReportDialogIcon reportAction={reportAction} />
+            </div>
+          </>
+        ) : null}
       </HoverCardContent>
     </>
   );

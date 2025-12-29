@@ -3,7 +3,7 @@ import { HoverCard } from "@/lib/components/ui/hover-card";
 import { type DID } from "../data/atproto/did";
 import { getVerifiedHandle } from "../data/atproto/identity";
 import { UserHoverCardClient } from "./user-hover-card-client";
-import { ensureUser } from "../data/user";
+import { ensureUser, getUser } from "../data/user";
 import { parseReportForm } from "../data/db/report-shared";
 import { createReport } from "../data/db/report";
 
@@ -16,6 +16,8 @@ type Props = {
 export async function UserHoverCard({ did, children, asChild }: Props) {
   // Fetch this early on the server because it's almost certainly already cached this request
   const handle = await getVerifiedHandle(did);
+  const user = await getUser();
+
   return (
     <HoverCard>
       <UserHoverCardClient
@@ -23,7 +25,9 @@ export async function UserHoverCard({ did, children, asChild }: Props) {
         did={did}
         asChild={asChild}
         handle={handle}
-        reportAction={reportUserAction.bind(null, { did })}
+        reportAction={
+          user !== null ? reportUserAction.bind(null, { did }) : null
+        }
       >
         {children}
       </UserHoverCardClient>

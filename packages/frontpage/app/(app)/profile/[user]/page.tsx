@@ -10,7 +10,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/lib/components/ui/tabs";
-import { getBlueskyProfile } from "@/lib/data/user";
+import { getBlueskyProfile, getUser } from "@/lib/data/user";
 import { getUserComments } from "@/lib/data/db/comment";
 import { Comment } from "../../post/[postAuthor]/[postRkey]/_lib/comment";
 import { Suspense } from "react";
@@ -74,6 +74,8 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
     return b.createdAt.getTime() - a.createdAt.getTime();
   });
 
+  const user = await getUser();
+
   return (
     <>
       <LinkAlternateAtUri authority={did} />
@@ -83,11 +85,13 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
           <h1 className="md:text-2xl font-bold">
             {userHandle ?? "handle.invalid"}
           </h1>
-          <EllipsisDropdown aria-label="User actions">
-            <ReportDialogDropdownButton
-              reportAction={reportUserAction.bind(null, { did })}
-            />
-          </EllipsisDropdown>
+          {user !== null ? (
+            <EllipsisDropdown aria-label="User actions">
+              <ReportDialogDropdownButton
+                reportAction={reportUserAction.bind(null, { did })}
+              />
+            </EllipsisDropdown>
+          ) : null}
         </div>
       </div>
       <Tabs defaultValue="overview">
