@@ -43,7 +43,7 @@ export async function UserHoverCard({ did, children, asChild }: Props) {
             </Suspense>
           </div>
         </div>
-        {session !== null ? (
+        {session !== null && session.did !== did ? (
           <>
             <Separator className="my-2" />
             <div>
