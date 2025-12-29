@@ -6,7 +6,7 @@ import {
   UserHoverCardContent,
   UserHoverCardTrigger,
 } from "./user-hover-card-client";
-import { ensureUser, getUser } from "../data/user";
+import { ensureUser } from "../data/user";
 import { parseReportForm } from "../data/db/report-shared";
 import { createReport } from "../data/db/report";
 import Link from "next/link";
@@ -14,6 +14,7 @@ import { Skeleton } from "./ui/skeleton";
 import { Suspense } from "react";
 import { Separator } from "./ui/separator";
 import { ReportDialogIcon } from "@/app/(app)/_components/report-dialog";
+import { getSession } from "../auth";
 
 type Props = {
   did: DID;
@@ -24,7 +25,7 @@ type Props = {
 export async function UserHoverCard({ did, children, asChild }: Props) {
   // Fetch this early on the server because it's almost certainly already cached this request
   const handle = await getVerifiedHandle(did);
-  const user = await getUser();
+  const session = await getSession();
 
   return (
     <HoverCard>
@@ -42,7 +43,7 @@ export async function UserHoverCard({ did, children, asChild }: Props) {
             </Suspense>
           </div>
         </div>
-        {user !== null ? (
+        {session !== null ? (
           <>
             <Separator className="my-2" />
             <div>

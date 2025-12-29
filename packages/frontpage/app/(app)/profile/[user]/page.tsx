@@ -10,7 +10,7 @@ import {
   TabsTrigger,
   TabsContent,
 } from "@/lib/components/ui/tabs";
-import { getBlueskyProfile, getUser } from "@/lib/data/user";
+import { getBlueskyProfile } from "@/lib/data/user";
 import { getUserComments } from "@/lib/data/db/comment";
 import { Comment } from "../../post/[postAuthor]/[postRkey]/_lib/comment";
 import { Suspense } from "react";
@@ -23,6 +23,7 @@ import { ReportDialogDropdownButton } from "../../_components/report-dialog";
 import { reportUserAction } from "@/lib/components/user-hover-card";
 import { type Metadata } from "next";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { getSession } from "@/lib/auth";
 
 export async function generateMetadata(
   props: PageProps<"/profile/[user]">,
@@ -74,7 +75,7 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
     return b.createdAt.getTime() - a.createdAt.getTime();
   });
 
-  const user = await getUser();
+  const session = await getSession();
 
   return (
     <>
@@ -85,7 +86,7 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
           <h1 className="md:text-2xl font-bold">
             {userHandle ?? "handle.invalid"}
           </h1>
-          {user !== null ? (
+          {session !== null ? (
             <EllipsisDropdown aria-label="User actions">
               <ReportDialogDropdownButton
                 reportAction={reportUserAction.bind(null, { did })}
