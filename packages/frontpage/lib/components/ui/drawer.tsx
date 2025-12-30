@@ -1,6 +1,6 @@
 "use client";
 
-import { Drawer as DrawerPrimitive } from "vaul";
+import { Drawer as DrawerPrimitive } from "weasel";
 
 import { cn } from "@/lib/utils";
 import { useContext } from "react";
