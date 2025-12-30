@@ -12,10 +12,28 @@ catalogs:
     '@atcute/identity-resolver':
       specifier: ^1.2.0
       version: 1.2.0
+    '@atproto/api':
+      specifier: ^0.18.8
+      version: 0.18.8
+    '@atproto/did':
+      specifier: ^0.2.3
+      version: 0.2.3
+    '@atproto/identity':
+      specifier: ^0.4.10
+      version: 0.4.10
+    '@atproto/lexicon':
+      specifier: ^0.6.0
+      version: 0.6.0
+    '@atproto/repo':
+      specifier: ^0.8.12
+      version: 0.8.12
     '@atproto/syntax':
       specifier: ^0.4.2
       version: 0.4.2
     '@next/env':
+      specifier: ^16.1.0
+      version: 16.1.0
+    '@next/eslint-plugin-next':
       specifier: ^16.1.0
       version: 16.1.0
     '@types/node':
@@ -36,6 +54,9 @@ catalogs:
     eslint:
       specifier: ^9.37.0
       version: 9.39.2
+    eslint-config-next:
+      specifier: ^16.1.0
+      version: 16.1.0
     next:
       specifier: ^16.1.0
       version: 16.1.0
@@ -303,6 +324,9 @@ importers:
       slugify:
         specifier: ^1.6.6
         version: 1.6.6
+      sonner:
+        specifier: ^2.0.7
+        version: 2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       swr:
         specifier: ^2.3.4
         version: 2.3.6(react@19.2.3)
@@ -4742,6 +4766,12 @@ packages:
 
   sonic-boom@3.8.1:
     resolution: {integrity: sha512-y4Z8LCDBuum+PBP3lSV7RHrXscqksve/bi0as7mhwVnBW+/wUqKT/2Kb7um8yqcFy0duYbbPxzt89Zy2nOCaxg==}
+
+  sonner@2.0.7:
+    resolution: {integrity: sha512-W6ZN4p58k8aDKA4XPcx2hpIQXBRAgyiWVkYhT7CvK6D3iAu7xjvVyhQHg2/iaKJZ1XVJ4r7XuwGL+WGEK37i9w==}
+    peerDependencies:
+      react: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
+      react-dom: ^18.0.0 || ^19.0.0 || ^19.0.0-rc
 
   source-map-js@1.2.1:
     resolution: {integrity: sha512-UXWMKhLOwVKb728IUtQPXxfYU+usdybtUrK/8uGE8CQMvrhOpwvzDBwj0QhSL7MQc7vIsISBG8VQ8+IDQxpfQA==}
@@ -9605,6 +9635,11 @@ snapshots:
   sonic-boom@3.8.1:
     dependencies:
       atomic-sleep: 1.0.0
+
+  sonner@2.0.7(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   source-map-js@1.2.1: {}
 

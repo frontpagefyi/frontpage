@@ -4,7 +4,7 @@ import {
   AlertDialogHeader,
   AlertDialogFooter,
 } from "@/lib/components/ui/alert-dialog";
-import { toast } from "@/lib/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   AlertDialog,
   AlertDialogTrigger,
@@ -48,10 +48,7 @@ export function DeleteButton({ deleteAction }: DeleteButtonProps) {
           <AlertDialogAction
             onClick={() => {
               void deleteAction();
-              toast({
-                title: "Your entry will be deleted shortly",
-                type: "foreground",
-              });
+              toast.info("Your entry will be deleted shortly");
               ellipsisDropdownContext.close();
             }}
           >

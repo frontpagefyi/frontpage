@@ -2,7 +2,7 @@ import "./globals.css";
 import { VercelToolbar } from "@vercel/toolbar/next";
 import { Source_Sans_3, Source_Serif_4 } from "next/font/google";
 import { cn } from "@/lib/utils";
-import { Toaster } from "@/lib/components/ui/toaster";
+import { Toaster } from "@/lib/components/ui/sonner";
 import { Analytics } from "@vercel/analytics/next";
 import { type Metadata } from "next";
 import { ThemeProvider } from "@/lib/components/theme-provider";

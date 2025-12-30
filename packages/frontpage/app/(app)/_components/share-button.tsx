@@ -1,7 +1,7 @@
 "use client";
 
 import { DropdownMenuItem } from "@/lib/components/ui/dropdown-menu";
-import { toast } from "@/lib/components/ui/use-toast";
+import { toast } from "sonner";
 import { Share1Icon, Link1Icon } from "@radix-ui/react-icons";
 import { useSyncExternalStore } from "react";
 
@@ -33,10 +33,7 @@ export function ShareDropdownButton({ path }: { path: string }) {
         void navigator.clipboard
           .writeText(new URL(path, location.href).toString())
           .then(() => {
-            toast({
-              title: "Link copied to clipboard",
-              type: "foreground",
-            });
+            toast("Link copied to clipboard");
           });
       }}
     >

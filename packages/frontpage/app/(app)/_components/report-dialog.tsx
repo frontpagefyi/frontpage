@@ -12,7 +12,7 @@ import {
 } from "@/lib/components/ui/alert-dialog";
 import { Button } from "@/lib/components/ui/button";
 import { Textarea } from "@/lib/components/ui/textarea";
-import { toast } from "@/lib/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -48,16 +48,10 @@ function ReportDialog({ reportAction, children }: ReportDialogProps) {
             try {
               await reportAction(formData);
             } catch (_) {
-              toast({
-                title: "Something went wrong",
-                type: "foreground",
-              });
+              toast.error("Something went wrong");
               return;
             }
-            toast({
-              title: "Report submitted",
-              type: "foreground",
-            });
+            toast.success("Report submitted");
             setOpen(false);
           }}
         >

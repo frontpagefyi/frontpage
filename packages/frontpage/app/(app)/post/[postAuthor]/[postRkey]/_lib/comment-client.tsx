@@ -13,7 +13,7 @@ import {
 import { Button } from "@/lib/components/ui/button";
 import { Textarea } from "@/lib/components/ui/textarea";
 import { SimpleTooltip } from "@/lib/components/ui/tooltip";
-import { useToast } from "@/lib/components/ui/use-toast";
+import { toast } from "sonner";
 import {
   commentUnvoteAction,
   commentVoteAction,
@@ -90,7 +90,6 @@ export function CommentClientWrapperWithToolbar({
   const [showNewComment, setShowNewComment] = useState(false);
   const commentRef = useRef<HTMLDivElement>(null);
   const newCommentTextAreaRef = useRef<HTMLTextAreaElement>(null);
-  const { toast } = useToast();
   return (
     <NestComment level={level}>
       {/* eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex */}
@@ -189,10 +188,7 @@ export function CommentClientWrapperWithToolbar({
                   <AlertDialogAction
                     onClick={() => {
                       setShowNewComment(false);
-                      toast({
-                        title: "Comment discarded",
-                        type: "foreground",
-                      });
+                      toast("Comment discarded");
                     }}
                   >
                     Discard
