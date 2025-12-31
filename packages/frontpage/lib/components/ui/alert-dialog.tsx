@@ -212,17 +212,17 @@ AlertDialogDescription.displayName =
   AlertDialogPrimitive.Description.displayName;
 
 function AlertDialogAction({
-  className: classNameProp,
+  className,
   ...props
 }: React.ComponentProps<typeof AlertDialogPrimitive.Action>) {
   const { shouldUseDrawer, setOpen } = useContext(ResponsiveDialogContext);
 
-  const className = cn(buttonVariants(), classNameProp);
+  const classNameWithButtonStyles = cn(buttonVariants(), className);
 
   if (shouldUseDrawer) {
     return (
       <Button
-        className={classNameProp}
+        className={className}
         {...props}
         onClick={(event) => {
           setOpen(false);
@@ -232,7 +232,12 @@ function AlertDialogAction({
     );
   }
 
-  return <AlertDialogPrimitive.Action className={className} {...props} />;
+  return (
+    <AlertDialogPrimitive.Action
+      className={classNameWithButtonStyles}
+      {...props}
+    />
+  );
 }
 
 AlertDialogAction.displayName = AlertDialogPrimitive.Action.displayName;
