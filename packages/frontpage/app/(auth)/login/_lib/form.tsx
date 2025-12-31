@@ -45,13 +45,19 @@ export function LoginForm() {
       <Separator />
 
       <DefaultPdsSignupButton />
-      <Dialog open={pdsDialogOpen} onOpenChange={setPdsDialogOpen}>
+      <Dialog
+        open={pdsDialogOpen}
+        onOpenChange={setPdsDialogOpen}
+        // This autoFocus prop is not the same at the autoFocus prop on HTML elements.
+        // eslint-disable-next-line jsx-a11y/no-autofocus
+        autoFocus={true}
+      >
         <DialogTrigger asChild>
           <Button className="w-full" variant="ghost">
             Sign up with a PDS
           </Button>
         </DialogTrigger>
-        <DialogContent className="top-1/3">
+        <DialogContent>
           <DialogHeader>
             <DialogTitle>Login with PDS</DialogTitle>
             <DialogDescription>

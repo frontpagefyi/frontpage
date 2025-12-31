@@ -18,7 +18,9 @@ import {
 } from "./drawer";
 import { ResponsiveDialogContext } from "./dialog-context";
 
-function Dialog(props: ComponentProps<typeof DialogPrimitive.Root>) {
+function Dialog(
+  props: ComponentProps<typeof DialogPrimitive.Root | typeof Drawer>,
+) {
   const [openState, setOpen] = useState(props.open ?? false);
   const shouldUseDrawer = !useMediaQuery("sm");
 
