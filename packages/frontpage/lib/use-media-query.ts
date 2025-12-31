@@ -59,7 +59,6 @@ export function useMediaQuery(
   };
 
   const getSnapshot = () => {
-    // console.log(breakpoint, matchMediaMap.get(breakpoint)?.matches);
     return matchMediaMap.get(breakpoint)?.matches ?? false;
   };
 
