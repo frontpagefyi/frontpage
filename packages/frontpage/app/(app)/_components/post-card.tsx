@@ -21,6 +21,7 @@ import { nsids } from "@/lib/data/atproto/repo";
 type PostProps = {
   id: number;
   title: string;
+  body: string;
   url: string;
   votes: number;
   author: DID;
@@ -35,6 +36,7 @@ export async function PostCard({
   id,
   title,
   url,
+  body,
   votes,
   author,
   createdAt,
@@ -100,6 +102,7 @@ export async function PostCard({
             </span>
           </a>
         </h2>
+                <div>{body}</div>
         <div className="flex flex-nowrap text-gray-500 dark:text-gray-400 sm:gap-4 justify-between">
           <div className="flex flex-wrap items-center gap-x-4">
             <UserHoverCard did={author} asChild>

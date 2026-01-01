@@ -32,6 +32,7 @@ export default async function PostLayout(
       <PostCard
         author={post.authorDid}
         createdAt={post.createdAt}
+        body={post.body}
         id={post.id}
         commentCount={post.commentCount}
         title={post.title}

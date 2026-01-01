@@ -33,6 +33,7 @@ async function getMorePostsAction(cursor: number | null) {
             createdAt={post.createdAt}
             id={post.id}
             title={post.title}
+            body={post.body}
             url={post.url}
             votes={post.voteCount}
             commentCount={post.commentCount}

@@ -11,9 +11,10 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
   const user = await ensureUser();
   const title = formData.get("title");
   const url = formData.get("url");
+  const body = formData.get("body");
 
-  if (typeof title !== "string" || typeof url !== "string" || !title || !url) {
-    return { error: "Provide a title and url." };
+  if (typeof title !== "string" || typeof url !== "string" || !title || !url || typeof body !== "string" || !body) {
+    return { error: "Provide a title, url, and body." };
   }
 
   if (title.length > 120) {
@@ -26,7 +27,7 @@ export async function newPostAction(_prevState: unknown, formData: FormData) {
 
   try {
     const [{ rkey }, handle] = await Promise.all([
-      createPost({ authorDid: user.did, title, url }),
+      createPost({ authorDid: user.did, title, url, body }),
       getVerifiedHandle(user.did),
     ]);
 

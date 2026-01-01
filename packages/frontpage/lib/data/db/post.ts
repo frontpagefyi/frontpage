@@ -49,6 +49,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       cid: schema.Post.cid,
       title: schema.Post.title,
       url: schema.Post.url,
+      body: schema.Post.body,
       createdAt: schema.Post.createdAt,
       authorDid: schema.Post.authorDid,
       voteCount: schema.PostAggregates.voteCount,
@@ -82,6 +83,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
     rkey: row.rkey,
     cid: row.cid || null,
     title: row.title,
+    body: row.body,
     url: row.url,
     createdAt: row.createdAt,
     authorDid: row.authorDid,
@@ -175,7 +177,7 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
 }
 
 export type CreatePostInput = {
-  post: { title: string; url: string; createdAt: Date };
+  post: { title: string; url: string; body: string; createdAt: Date };
   authorDid: DID;
   rkey: string;
   cid?: string;
@@ -200,6 +202,7 @@ export async function createPost({
         authorDid,
         title: post.title,
         url: post.url,
+        body: post.body,
         createdAt: post.createdAt,
         status,
         collection,

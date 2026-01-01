@@ -12,28 +12,30 @@ export type ApiCreatePostInput = {
   authorDid: DID;
   title: string;
   url: string;
+  body: string;
 };
 
 export async function createPost({
   authorDid,
   title,
   url,
+  body,
 }: ApiCreatePostInput) {
   const user = await ensureUser();
 
   if (user.did !== authorDid) {
     throw new DataLayerError("You can only create posts for yourself");
   }
-
   const rkey = TID.next().toString();
   try {
     const dbCreatedPost = await db.createPost({
-      post: { title, url, createdAt: new Date() },
+      post: { title, url, body, createdAt: new Date() },
       rkey,
       authorDid: user.did,
       status: "pending",
       collection: nsids.FyiUnravelFrontpagePost,
     });
+    
     invariant(dbCreatedPost, "Failed to insert post in database");
 
     const atproto = getAtprotoClient();

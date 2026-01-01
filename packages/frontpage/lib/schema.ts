@@ -73,6 +73,9 @@ export const Post = sqliteTable(
     url: text("url", {
       length: MAX_POST_URL_LENGTH,
     }).notNull(),
+    body: text("body", {
+      length: 300,
+    }).notNull(),
     createdAt: dateIsoText("created_at").notNull(),
     authorDid: did("author_did").notNull(),
     // TODO: add notNull once this is rolled out

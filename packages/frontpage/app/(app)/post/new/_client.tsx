@@ -12,6 +12,7 @@ import {
   MAX_POST_URL_LENGTH,
 } from "@/lib/data/db/constants";
 import { InputLengthIndicator } from "@/lib/components/input-length-indicator";
+import { Textarea } from "@/lib/components/ui/textarea";
 
 export function NewPostForm({
   defaultTitle,
@@ -24,6 +25,7 @@ export function NewPostForm({
   const id = useId();
   const [title, setTitle] = useState(defaultTitle ?? "");
   const [url, setUrl] = useState(defaultUrl ?? "");
+  const [body, setBody] = useState("");
   return (
     <form
       action={action}
@@ -64,6 +66,21 @@ export function NewPostForm({
         <InputLengthIndicator
           length={url.length}
           maxLength={MAX_POST_URL_LENGTH}
+        />
+      </div>
+      <div>
+        <Label htmlFor={`${id}-body`}>Body</Label>
+        <Textarea
+          name="body"
+          id={`${id}-body`}
+          value={body}
+          onChange={(e) => {
+            setBody(e.currentTarget.value);
+          }}
+        />
+        <InputLengthIndicator
+          length={body.length}
+          maxLength={300}
         />
       </div>
       <Button
