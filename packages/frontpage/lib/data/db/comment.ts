@@ -18,7 +18,34 @@ import {
   deleteCommentAggregateTrigger,
   newCommentAggregateTrigger,
 } from "./triggers";
-import type { CommentCollectionType } from "../atproto/repo";
+import { nsids, type CommentCollectionType } from "../atproto/repo";
+import { type AtUri } from "@atproto/syntax";
+import { getDidFromHandleOrDid } from "../atproto/identity";
+import { type PostUri } from "./post";
+
+export type CommentUri = {
+  actor: DID;
+  collection: CommentCollectionType;
+  rkey: string;
+};
+
+export async function resolveCommentUri(uri: AtUri): Promise<CommentUri> {
+  invariant(
+    uri.collection === nsids.FyiUnravelFrontpageComment ||
+      uri.collection === nsids.FyiFrontpageFeedComment,
+    "Invalid comment collection",
+  );
+
+  const actor = await getDidFromHandleOrDid(uri.host);
+
+  invariant(actor, "Failed to resolve actor from URI");
+
+  return {
+    actor,
+    collection: uri.collection,
+    rkey: uri.rkey,
+  };
+}
 
 type CommentRow = Omit<InferSelectModel<typeof schema.Comment>, "cid"> & {
   cid: string | null;
@@ -183,14 +210,15 @@ const findCommentSubtree = (
   return null;
 };
 
-export const getComment = cache(async (authorDid: DID, rkey: string) => {
+export const getComment = cache(async (uri: CommentUri) => {
   const rows = await db
     .select()
     .from(schema.Comment)
     .where(
       and(
-        eq(schema.Comment.authorDid, authorDid),
-        eq(schema.Comment.rkey, rkey),
+        eq(schema.Comment.authorDid, uri.actor),
+        eq(schema.Comment.collection, uri.collection),
+        eq(schema.Comment.rkey, uri.rkey),
       ),
     )
     .limit(1);
@@ -201,8 +229,7 @@ export const getComment = cache(async (authorDid: DID, rkey: string) => {
 type UpdateCommentInput = Partial<Omit<CommentRow, "id">>;
 
 export const updateComment = async (
-  repo: DID,
-  rkey: string,
+  uri: CommentUri,
   input: UpdateCommentInput,
 ) => {
   await db
@@ -212,16 +239,24 @@ export const updateComment = async (
       cid: input.cid ?? undefined,
     })
     .where(
-      and(eq(schema.Comment.authorDid, repo), eq(schema.Comment.rkey, rkey)),
+      and(
+        eq(schema.Comment.authorDid, uri.actor),
+        eq(schema.Comment.collection, uri.collection),
+        eq(schema.Comment.rkey, uri.rkey),
+      ),
     );
 };
 
-export async function uncached_doesCommentExist(repo: DID, rkey: string) {
+export async function uncached_doesCommentExist(uri: CommentUri) {
   const row = await db
     .select({ id: schema.Comment.id })
     .from(schema.Comment)
     .where(
-      and(eq(schema.Comment.rkey, rkey), eq(schema.Comment.authorDid, repo)),
+      and(
+        eq(schema.Comment.authorDid, uri.actor),
+        eq(schema.Comment.collection, uri.collection),
+        eq(schema.Comment.rkey, uri.rkey),
+      ),
     )
     .limit(1);
 
@@ -275,14 +310,12 @@ export async function shouldHideComment(comment: CommentModel) {
 }
 
 type ModerateCommentInput = {
-  rkey: string;
-  authorDid: DID;
+  uri: CommentUri;
   cid: string;
   hide: boolean;
 };
 export async function moderateComment({
-  rkey,
-  authorDid,
+  uri,
   cid,
   hide,
 }: ModerateCommentInput) {
@@ -298,8 +331,9 @@ export async function moderateComment({
     .set({ status: hide ? "moderator_hidden" : "live" })
     .where(
       and(
-        eq(schema.Comment.rkey, rkey),
-        eq(schema.Comment.authorDid, authorDid),
+        eq(schema.Comment.authorDid, uri.actor),
+        eq(schema.Comment.collection, uri.collection),
+        eq(schema.Comment.rkey, uri.rkey),
         eq(schema.Comment.cid, cid),
       ),
     );
@@ -307,32 +341,23 @@ export async function moderateComment({
 
 export type CreateCommentInput = {
   cid?: string;
-  authorDid: DID;
-  rkey: string;
+  uri: CommentUri;
   content: string;
   createdAt: Date;
-  parent?: {
-    authorDid: DID;
-    rkey: string;
-  };
-  post: {
-    authorDid: DID;
-    rkey: string;
-  };
+  // TODO: parent and post should include CIDs as they are strongRefs in atproto
+  parent?: CommentUri;
+  post: PostUri;
   status: "live" | "pending";
-  collection: CommentCollectionType;
 };
 
 export async function createComment({
   cid,
-  authorDid,
-  rkey,
+  uri,
   content,
   createdAt,
   parent,
   post,
   status,
-  collection,
 }: CreateCommentInput) {
   return await db.transaction(async (tx) => {
     const existingPost = (
@@ -341,8 +366,9 @@ export async function createComment({
         .from(schema.Post)
         .where(
           and(
+            eq(schema.Post.authorDid, post.actor),
+            eq(schema.Post.collection, post.collection),
             eq(schema.Post.rkey, post.rkey),
-            eq(schema.Post.authorDid, post.authorDid),
           ),
         )
         .limit(1)
@@ -356,8 +382,9 @@ export async function createComment({
           .from(schema.Comment)
           .where(
             and(
+              eq(schema.Comment.authorDid, parent.actor),
+              eq(schema.Comment.collection, parent.collection),
               eq(schema.Comment.rkey, parent.rkey),
-              eq(schema.Comment.authorDid, parent.authorDid),
             ),
           )
           .limit(1)
@@ -367,21 +394,21 @@ export async function createComment({
     invariant(existingPost, "Post not found");
 
     if (existingPost.status !== "live") {
-      throw new Error(`[naughty] Cannot comment on deleted post. ${authorDid}`);
+      throw new Error(`[naughty] Cannot comment on deleted post. ${uri.actor}`);
     }
 
     const [insertedComment] = await tx
       .insert(schema.Comment)
       .values({
         cid: cid ?? "",
-        rkey,
+        rkey: uri.rkey,
         body: content,
         postId: existingPost.id,
-        authorDid,
+        authorDid: uri.actor,
         createdAt: createdAt,
         parentCommentId: existingParent?.id ?? null,
         status,
-        collection,
+        collection: uri.collection,
       })
       .returning({
         id: schema.Comment.id,
@@ -406,15 +433,16 @@ export type DeleteCommentInput = {
   authorDid: DID;
 };
 
-export async function deleteComment({ rkey, authorDid }: DeleteCommentInput) {
+export async function deleteComment(uri: CommentUri) {
   await db.transaction(async (tx) => {
     const [updatedComment] = await tx
       .update(schema.Comment)
       .set({ status: "deleted" })
       .where(
         and(
-          eq(schema.Comment.rkey, rkey),
-          eq(schema.Comment.authorDid, authorDid),
+          eq(schema.Comment.authorDid, uri.actor),
+          eq(schema.Comment.collection, uri.collection),
+          eq(schema.Comment.rkey, uri.rkey),
           ne(schema.Comment.status, "deleted"),
         ),
       )

@@ -20,6 +20,12 @@ Generally, the Next.js app should only speak to this layer, and not directly to 
 
 As this layer is designed to speak XRPC, it uses AT protocol types and concepts where possible. It borrows many conventions from the Bsky API eg. Using AT URIs to identify resources. Unlike the Bsky API it also offers write operations, not just read operations. This is because Frontpage chooses option 2 in [Paul's Leaflet](https://pfrazee.leaflet.pub/3m5hwua4sh22v) while Bsky chooses option 1. The main reason for this is to allow Frontpage to read it's own writes, Bsky is able to do this via specific logic that it injects into the PDS itself - we don't have that option.
 
+#### A note on AT URI types
+
+In the API layer we generally use generic `AtUri` types from `@atproto/syntax` to represent resources. This matches the bsky API and also allows us to be generic about the specific collection being used (important in the case of posts/comments/votes that can exist in the old or current lexicons).
+
+As data flows deeper into the Frontpage app we're less concerned with following conventions in other atproto apps, and more concerned with type safety and clarity. Therefore in the DB layer we convert these generic `AtUri` types into more specific types that represent exactly which collection is being used. Another difference is that the `AtUri` type allows for the actor (or `host`, in AT terms) to be either a DID or a handle, while in the DB layer we require this to always be a DID. This is because the database only stores DIDs (handles are mutable), so we need to resolve handles to DIDs before we can interact with the database.
+
 ### DB Layer
 
 Code for this layer is in `packages/frontpage/lib/data/db`. This layer is responsible for interacting with the Frontpage database. It's structured like a traditional database access layer, with functions for creating, reading, updating, and deleting records in the database.
