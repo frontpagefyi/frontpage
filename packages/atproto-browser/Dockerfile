@@ -1,11 +1,12 @@
-FROM node:24-alpine AS base
-RUN apk update
-RUN apk add --no-cache libc6-compat
+FROM node:24-slim AS base
+ENV PNPM_HOME="/pnpm"
+ENV PATH="$PNPM_HOME:$PATH"
 # Set working directory
 WORKDIR /app
-# ---
-FROM base AS prepare
+RUN corepack enable
 RUN corepack prepare pnpm@10.12.0 --activate
+
+FROM base AS prepare
 # Replace <your-major-version> with the major version installed in your repository. For example:
 # RUN yarn global add turbo@^2
 RUN pnpm i turbo@2.7.2 -g
@@ -14,11 +15,10 @@ COPY . .
 # Generate a partial monorepo with a pruned lockfile for a target workspace.
 # Assuming "web" is the name entered in the project's package.json: { name: "web" }
 RUN turbo prune atproto-browser --docker
-# ---
+
 FROM base AS builder
 # First install the dependencies (as they change less often)
 COPY --from=prepare /app/out/json/ .
-RUN corepack prepare pnpm@10.12.0 --activate
 RUN pnpm install
 # Build the project
 COPY --from=prepare /app/out/full/ .
@@ -28,7 +28,7 @@ COPY --from=prepare /app/out/full/ .
 # ARG TURBO_TOKEN
 # ENV TURBO_TOKEN=$TURBO_TOKEN
 RUN pnpm turbo build
-# ---
+
 FROM base AS runner
 # Don't run production as root for security reasons
 RUN addgroup --system --gid 1001 nodejs
@@ -38,5 +38,4 @@ USER nextjs
 # https://nextjs.org/docs/advanced-features/output-file-tracing
 COPY --from=builder --chown=nextjs:nodejs /app/packages/atproto-browser/.next/standalone ./
 COPY --from=builder --chown=nextjs:nodejs /app/packages/atproto-browser/.next/static ./packages/atproto-browser/.next/static
-COPY --from=builder --chown=nextjs:nodejs /app/packages/atproto-browser/public ./packages/atproto-browser/public
 CMD node packages/atproto-browser/server.js
