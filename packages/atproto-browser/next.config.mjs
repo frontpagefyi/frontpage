@@ -12,6 +12,7 @@ const nextConfig = {
     // This is because of improvements made to this feature in https://github.com/vercel/next.js/pull/86375
     "thread-stream",
   ],
+  output: "standalone",
 };
 
 export default nextConfig;
