@@ -5,6 +5,7 @@ RUN apk add --no-cache libc6-compat
 WORKDIR /app
 # ---
 FROM base AS prepare
+RUN corepack prepare pnpm@10.12.0 --activate
 # Replace <your-major-version> with the major version installed in your repository. For example:
 # RUN yarn global add turbo@^2
 RUN pnpm i turbo@2.7.2 -g
@@ -17,6 +18,7 @@ RUN turbo prune atproto-browser --docker
 FROM base AS builder
 # First install the dependencies (as they change less often)
 COPY --from=prepare /app/out/json/ .
+RUN corepack prepare pnpm@10.12.0 --activate
 RUN pnpm install
 # Build the project
 COPY --from=prepare /app/out/full/ .
