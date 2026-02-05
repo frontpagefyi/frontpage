@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 export default function Home() {
   return (
     <main>
-      <h1>Enter an AT uri:</h1>
+      <h1>Enter an AT uri:::::</h1>
       <div style={{ maxWidth: "450px" }}>
         <AtUriForm />
       </div>
