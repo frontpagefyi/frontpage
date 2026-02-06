@@ -1,12 +1,12 @@
 import { getUser } from "@/lib/data/user";
 import { notFound } from "next/navigation";
 import { PostCard } from "../../../_components/post-card";
-import { getPost } from "@/lib/data/db/post";
 import { getDidFromHandleOrDid } from "@/lib/data/atproto/identity";
 import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
 import { Spinner } from "@/lib/components/ui/spinner";
 import { NewComment } from "./_lib/comment-client";
 import { SuperHackyScrollToTop } from "./scroller";
+import { getPostPageData } from "./_lib/page-data";
 
 export default async function PostLayout(
   props: LayoutProps<"/post/[postAuthor]/[postRkey]">,
@@ -20,7 +20,7 @@ export default async function PostLayout(
   if (!didParam) {
     notFound();
   }
-  const post = await getPost(didParam, params.postRkey);
+  const { post } = await getPostPageData(params);
   if (!post) {
     notFound();
   }
@@ -40,6 +40,7 @@ export default async function PostLayout(
         rkey={post.rkey}
         cid={post.cid}
         isUpvoted={post.userHasVoted}
+        collection={post.collection}
       />
       {post.status === "pending" ? (
         // TODO: This should have a spinner and refresh on an interval

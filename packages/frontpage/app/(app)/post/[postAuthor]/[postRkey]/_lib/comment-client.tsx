@@ -148,7 +148,7 @@ export function CommentClientWrapperWithToolbar({
           postAuthorDid={postAuthorDid}
           // eslint-disable-next-line jsx-a11y/no-autofocus
           autoFocus
-          onActionDone={() => {
+          onDoneAction={() => {
             startTransition(() => {
               setShowNewComment(false);
             });
@@ -226,13 +226,13 @@ export function NewComment({
   postAuthorDid,
   extraButton,
   textAreaRef,
-  onActionDone,
+  onDoneAction,
 }: {
   parent?: { did: DID; rkey: string };
   postRkey: string;
   postAuthorDid: DID;
   autoFocus?: boolean;
-  onActionDone?: () => void;
+  onDoneAction?: () => void;
   extraButton?: React.ReactNode;
   textAreaRef?: React.RefObject<HTMLTextAreaElement | null>;
 }) {
@@ -252,7 +252,7 @@ export function NewComment({
         event.preventDefault();
         startTransition(() => {
           action(new FormData(event.currentTarget));
-          onActionDone?.();
+          onDoneAction?.();
           setInput("");
         });
       }}

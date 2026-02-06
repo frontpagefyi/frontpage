@@ -10,6 +10,7 @@ import {
 import { getUser } from "../user";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { cache } from "react";
+import { type AtUri } from "@atproto/syntax";
 
 export { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
 
@@ -48,3 +49,8 @@ export type CommentCollectionType =
 export type VoteCollectionType =
   | FyiUnravelFrontpageVote.Record["$type"]
   | FyiFrontpageFeedVote.Record["$type"];
+
+export type StrongRef = {
+  uri: AtUri;
+  cid: string;
+};

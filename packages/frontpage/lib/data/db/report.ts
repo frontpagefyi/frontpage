@@ -96,6 +96,7 @@ type CreateReportOptions = {
   subjectCid?: string;
 };
 
+// TODO: We don't need to pass uri and its parts separately, just pass AtUri and use it's parts
 export const createReport = async ({
   subjectUri,
   subjectDid,

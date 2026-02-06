@@ -82,6 +82,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       rank: schema.PostAggregates.rank,
       userHasVoted: userHasVoted.postId,
       status: schema.Post.status,
+      collection: schema.Post.collection,
     })
     .from(schema.PostAggregates)
     .innerJoin(schema.Post, eq(schema.PostAggregates.postId, schema.Post.id))
@@ -114,6 +115,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
     voteCount: row.voteCount,
     commentCount: row.commentCount,
     userHasVoted: Boolean(row.userHasVoted),
+    collection: row.collection,
   }));
 
   return {

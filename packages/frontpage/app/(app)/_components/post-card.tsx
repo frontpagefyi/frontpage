@@ -16,7 +16,8 @@ import { ShareDropdownButton } from "./share-button";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { deletePost } from "@/lib/api/post";
 import { invariant } from "@/lib/utils";
-import { nsids } from "@/lib/data/atproto/repo";
+import { nsids, type PostCollectionType } from "@/lib/data/atproto/repo";
+import { AtUri } from "@atproto/syntax";
 
 type PostProps = {
   id: number;
@@ -27,6 +28,7 @@ type PostProps = {
   createdAt: Date;
   commentCount: number;
   rkey: string;
+  collection: PostCollectionType;
   cid: string | null;
   isUpvoted: boolean;
 };
@@ -40,6 +42,7 @@ export async function PostCard({
   createdAt,
   commentCount,
   rkey,
+  collection,
   cid,
   isUpvoted,
 }: PostProps) {
@@ -126,12 +129,13 @@ export async function PostCard({
                   rkey,
                   cid,
                   author,
+                  collection,
                 })}
               />
               {/* TODO: there's a bug here where delete shows on deleted posts */}
               {user?.did === author ? (
                 <DeleteButton
-                  deleteAction={deletePostAction.bind(null, rkey)}
+                  deleteAction={deletePostAction.bind(null, collection, rkey)}
                 />
               ) : null}
             </EllipsisDropdown>
@@ -142,10 +146,13 @@ export async function PostCard({
   );
 }
 
-export async function deletePostAction(rkey: string) {
+export async function deletePostAction(
+  collection: PostCollectionType,
+  rkey: string,
+) {
   "use server";
   const user = await ensureUser();
-  await deletePost({ authorDid: user.did, rkey });
+  await deletePost(new AtUri(`at://${user.did}/${collection}/${rkey}`));
 
   revalidatePath("/");
 }
@@ -155,6 +162,7 @@ export async function reportPostAction(
     rkey: string;
     cid: string | null;
     author: DID;
+    collection: PostCollectionType;
   },
   formData: FormData,
 ) {
@@ -168,9 +176,9 @@ export async function reportPostAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.author}/${nsids.FyiUnravelFrontpagePost}/${input.rkey}`,
+    subjectUri: `at://${input.author}/${input.collection}/${input.rkey}`,
     subjectDid: input.author,
-    subjectCollection: nsids.FyiUnravelFrontpagePost,
+    subjectCollection: input.collection,
     subjectRkey: input.rkey,
     subjectCid: input.cid ?? undefined,
   });

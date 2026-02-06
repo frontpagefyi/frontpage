@@ -39,6 +39,7 @@ async function getMorePostsAction(cursor: number | null) {
             cid={post.cid}
             rkey={post.rkey}
             isUpvoted={post.userHasVoted}
+            collection={post.collection}
           />
         ))}
       </>
