@@ -2,8 +2,8 @@ packages:
   - packages/*
 
 catalog:
-  next: ^16.1.6
-  eslint-config-next: ^16.1.6
+  next: ^16.1.7
+  eslint-config-next: ^16.1.7
   '@next/eslint-plugin-next': ^16.1.6
   '@next/env': ^16.1.6
   react: ^19.2.3
