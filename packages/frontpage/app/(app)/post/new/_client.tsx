@@ -111,7 +111,9 @@ export function NewPostForm({
                   !url || isUrlPending || isPending || !URL.canParse(url)
                 }
                 aria-busy={isUrlPending}
-                title="Fetch title from URL"
+                title={
+                  title.isAutomaticallyFetched ? "Undo" : "Fetch title from URL"
+                }
               >
                 {isUrlPending ? (
                   <Spinner />
