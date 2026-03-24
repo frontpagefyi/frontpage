@@ -113,9 +113,9 @@ export function NewPostForm({
                       updateTitleFromUrl(url);
                     }
                   }}
-                  disabled={
-                    !url || isUrlPending || isPending || !URL.canParse(url)
-                  }
+                  // We are not disabling the button when isUrlPending so that focus is preserved when the user clicks the button
+                  // It's ok to disable it in other cases because the user has almost certainly focused something other than this button at the time
+                  disabled={!url || isPending || !URL.canParse(url)}
                   aria-busy={isUrlPending}
                 >
                   {isUrlPending ? (
