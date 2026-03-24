@@ -1,6 +1,12 @@
 "use client";
 
-import { startTransition, useActionState, useId, useState } from "react";
+import {
+  startTransition,
+  useActionState,
+  useId,
+  useState,
+  useTransition,
+} from "react";
 import { newPostAction } from "./_action";
 import { Label } from "@/lib/components/ui/label";
 import { Input } from "@/lib/components/ui/input";
@@ -12,6 +18,20 @@ import {
   MAX_POST_URL_LENGTH,
 } from "@/lib/data/db/constants";
 import { InputLengthIndicator } from "@/lib/components/input-length-indicator";
+import type { ApiRouteResponse } from "@/lib/api-route";
+import type { GET as GetFetchLinkOgApiRoute } from "@/app/api/fetch-link-og/route";
+import { ReloadIcon, ResetIcon } from "@radix-ui/react-icons";
+
+type TitleState =
+  | {
+      value: string;
+      isAutomaticallyFetched: false;
+    }
+  | {
+      value: string;
+      isAutomaticallyFetched: true;
+      previousTitle: string;
+    };
 
 export function NewPostForm({
   defaultTitle,
@@ -21,9 +41,27 @@ export function NewPostForm({
   defaultUrl?: string;
 }) {
   const [state, action, isPending] = useActionState(newPostAction, null);
+  const [isUrlPending, startUrlTransition] = useTransition();
   const id = useId();
-  const [title, setTitle] = useState(defaultTitle ?? "");
+  const [title, setTitle] = useState<TitleState>({
+    value: defaultTitle ?? "",
+    isAutomaticallyFetched: false,
+  });
   const [url, setUrl] = useState(defaultUrl ?? "");
+
+  function updateTitleFromUrl(url: string) {
+    startUrlTransition(async () => {
+      const newTitle = await fetchTitleFromUrl(url);
+      if (newTitle) {
+        setTitle({
+          value: newTitle,
+          isAutomaticallyFetched: true,
+          previousTitle: title.value,
+        });
+      }
+    });
+  }
+
   return (
     <form
       action={action}
@@ -37,16 +75,59 @@ export function NewPostForm({
     >
       <div>
         <Label htmlFor={`${id}-title`}>Title</Label>
-        <Input
-          name="title"
-          id={`${id}-title`}
-          value={title}
-          onChange={(e) => {
-            setTitle(e.currentTarget.value);
-          }}
-        />
+        <div className="relative">
+          <Input
+            name="title"
+            className="pr-10"
+            id={`${id}-title`}
+            value={title.value}
+            onChange={(e) => {
+              setTitle({
+                value: e.currentTarget.value,
+                isAutomaticallyFetched: false,
+              });
+            }}
+            disabled={isUrlPending}
+          />
+          {!isUrlPending && !url ? null : (
+            <div className="absolute right-0 top-0">
+              <Button
+                type="button"
+                variant="outline"
+                size="icon"
+                onClick={() => {
+                  if (title.isAutomaticallyFetched) {
+                    // Undo automatic title fetching and revert to previous title
+                    setTitle({
+                      value: title.previousTitle,
+                      isAutomaticallyFetched: false,
+                    });
+                  } else {
+                    // Refetch title from URL
+                    updateTitleFromUrl(url);
+                  }
+                }}
+                disabled={
+                  !url || isUrlPending || isPending || !URL.canParse(url)
+                }
+                aria-busy={isUrlPending}
+                title="Fetch title from URL"
+              >
+                {isUrlPending ? (
+                  <Spinner />
+                ) : url ? (
+                  title.isAutomaticallyFetched ? (
+                    <ResetIcon />
+                  ) : (
+                    <ReloadIcon />
+                  )
+                ) : null}
+              </Button>
+            </div>
+          )}
+        </div>
         <InputLengthIndicator
-          length={title.length}
+          length={title.value.length}
           maxLength={MAX_POST_TITLE_LENGTH}
         />
       </div>
@@ -59,6 +140,9 @@ export function NewPostForm({
           value={url}
           onChange={(e) => {
             setUrl(e.currentTarget.value);
+            if (!title.value) {
+              updateTitleFromUrl(e.currentTarget.value);
+            }
           }}
         />
         <InputLengthIndicator
@@ -70,7 +154,7 @@ export function NewPostForm({
         type="submit"
         disabled={
           isPending ||
-          title.length > MAX_POST_TITLE_LENGTH ||
+          title.value.length > MAX_POST_TITLE_LENGTH ||
           url.length > MAX_POST_URL_LENGTH
         }
       >
@@ -84,4 +168,20 @@ export function NewPostForm({
       ) : null}
     </form>
   );
+}
+
+async function fetchTitleFromUrl(url: string) {
+  if (!url || !URL.canParse(url)) {
+    return null;
+  }
+  const response = await fetch(
+    "/api/fetch-link-og?url=" + encodeURIComponent(url),
+  );
+  if (!response.ok) {
+    throw new Error("Failed to fetch title");
+  }
+  const data = (await response.json()) as ApiRouteResponse<
+    typeof GetFetchLinkOgApiRoute
+  >;
+  return data.title;
 }
