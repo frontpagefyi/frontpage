@@ -21,6 +21,7 @@ import { InputLengthIndicator } from "@/lib/components/input-length-indicator";
 import type { ApiRouteResponse } from "@/lib/api-route";
 import type { GET as GetFetchLinkOgApiRoute } from "@/app/api/fetch-link-og/route";
 import { ReloadIcon, ResetIcon } from "@radix-ui/react-icons";
+import { SimpleTooltip } from "@/lib/components/ui/tooltip";
 
 type TitleState =
   | {
@@ -91,40 +92,43 @@ export function NewPostForm({
           />
           {!isUrlPending && !url ? null : (
             <div className="absolute right-0 top-0">
-              <Button
-                type="button"
-                variant="outline"
-                size="icon"
-                onClick={() => {
-                  if (title.isAutomaticallyFetched) {
-                    // Undo automatic title fetching and revert to previous title
-                    setTitle({
-                      value: title.previousTitle,
-                      isAutomaticallyFetched: false,
-                    });
-                  } else {
-                    // Refetch title from URL
-                    updateTitleFromUrl(url);
-                  }
-                }}
-                disabled={
-                  !url || isUrlPending || isPending || !URL.canParse(url)
-                }
-                aria-busy={isUrlPending}
-                title={
+              <SimpleTooltip
+                content={
                   title.isAutomaticallyFetched ? "Undo" : "Fetch title from URL"
                 }
               >
-                {isUrlPending ? (
-                  <Spinner />
-                ) : url ? (
-                  title.isAutomaticallyFetched ? (
-                    <ResetIcon />
-                  ) : (
-                    <ReloadIcon />
-                  )
-                ) : null}
-              </Button>
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="icon"
+                  onClick={() => {
+                    if (title.isAutomaticallyFetched) {
+                      // Undo automatic title fetching and revert to previous title
+                      setTitle({
+                        value: title.previousTitle,
+                        isAutomaticallyFetched: false,
+                      });
+                    } else {
+                      // Refetch title from URL
+                      updateTitleFromUrl(url);
+                    }
+                  }}
+                  disabled={
+                    !url || isUrlPending || isPending || !URL.canParse(url)
+                  }
+                  aria-busy={isUrlPending}
+                >
+                  {isUrlPending ? (
+                    <Spinner />
+                  ) : url ? (
+                    title.isAutomaticallyFetched ? (
+                      <ResetIcon />
+                    ) : (
+                      <ReloadIcon />
+                    )
+                  ) : null}
+                </Button>
+              </SimpleTooltip>
             </div>
           )}
         </div>
@@ -143,6 +147,7 @@ export function NewPostForm({
           onChange={(e) => {
             setUrl(e.currentTarget.value);
             if (!title.value) {
+              // If title is empty, automatically fetch title from URL as user types/pastes URL
               updateTitleFromUrl(e.currentTarget.value);
             }
           }}
