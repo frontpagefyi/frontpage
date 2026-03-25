@@ -1,5 +1,5 @@
+import { NewPostForm } from "@/lib/components/new-post-form/new-post-form";
 import { type Metadata } from "next";
-import { NewPostForm } from "./_client";
 
 export const metadata: Metadata = {
   title: "New post | Frontpage",
