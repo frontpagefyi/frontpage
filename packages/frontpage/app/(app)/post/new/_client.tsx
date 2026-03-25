@@ -185,7 +185,8 @@ async function fetchTitleFromUrl(url: string) {
     "/api/fetch-link-og?url=" + encodeURIComponent(url),
   );
   if (!response.ok) {
-    throw new Error("Failed to fetch title");
+    console.error(`Failed to fetch title from URL: ${url}`);
+    return null;
   }
   const data = (await response.json()) as ApiRouteResponse<
     typeof GetFetchLinkOgApiRoute
