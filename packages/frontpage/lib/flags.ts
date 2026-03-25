@@ -2,7 +2,7 @@ import { flag, dedupe } from "flags/next";
 import { vercelAdapter } from "@flags-sdk/vercel";
 import type { DID } from "./data/atproto/did";
 import { getSession } from "./auth";
-import { Adapter } from "flags";
+import type { Adapter } from "flags";
 
 // Defined here: https://vercel.com/frontpagefyi/frontpage/flags/entities
 type Entities = {
