@@ -22,6 +22,7 @@ import type { ApiRouteResponse } from "@/lib/api-route";
 import type { GET as GetFetchLinkOgApiRoute } from "@/app/api/fetch-link-og/route";
 import { ReloadIcon, ResetIcon } from "@radix-ui/react-icons";
 import { SimpleTooltip } from "@/lib/components/ui/tooltip";
+import { toast } from "sonner";
 
 type TitleState =
   | {
@@ -186,6 +187,9 @@ async function fetchTitleFromUrl(url: string) {
   );
   if (!response.ok) {
     console.error(`Failed to fetch title from URL: ${url}`);
+    toast.error(
+      "Failed to fetch URL metadata, please check the URL and try again or enter the title manually.",
+    );
     return null;
   }
   const data = (await response.json()) as ApiRouteResponse<
