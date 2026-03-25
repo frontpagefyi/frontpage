@@ -3,6 +3,7 @@ import {
   createApiRoute,
   internalServerError,
 } from "@/lib/api-route";
+import { MAX_POST_URL_LENGTH } from "@/lib/data/db/constants";
 import z from "zod";
 
 export const GET = createApiRoute(async (request) => {
@@ -13,7 +14,7 @@ export const GET = createApiRoute(async (request) => {
     badRequest("Missing url parameter");
   }
 
-  if (!URL.canParse(targetUrl)) {
+  if (targetUrl.length > MAX_POST_URL_LENGTH || !URL.canParse(targetUrl)) {
     badRequest("Invalid url parameter");
   }
 

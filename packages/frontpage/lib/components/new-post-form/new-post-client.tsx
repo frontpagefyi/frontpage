@@ -233,9 +233,17 @@ async function fetchTitleFromUrl(url: string) {
   if (!url || !URL.canParse(url)) {
     return null;
   }
-  const response = await fetch(
-    "/api/fetch-link-og?url=" + encodeURIComponent(url),
-  );
+  let response;
+  try {
+    response = await fetch("/api/fetch-link-og?url=" + encodeURIComponent(url));
+  } catch (error) {
+    console.error(`Failed to fetch title from URL: ${url}`, error);
+    toast.error(
+      "Failed to fetch URL metadata, please check the URL and try again or enter the title manually.",
+    );
+    return null;
+  }
+
   if (!response.ok) {
     console.error(`Failed to fetch title from URL: ${url}`);
     toast.error(
