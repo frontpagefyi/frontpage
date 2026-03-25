@@ -13,6 +13,10 @@ export const GET = createApiRoute(async (request) => {
     badRequest("Missing url parameter");
   }
 
+  if (!URL.canParse(targetUrl)) {
+    badRequest("Invalid url parameter");
+  }
+
   const cardyBURL = new URL("https://cardyb.bsky.app/v1/extract");
   cardyBURL.searchParams.set("url", targetUrl);
 
