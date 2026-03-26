@@ -29,7 +29,7 @@ const buildUserHasVotedQuery = cache(async () => {
     .as("hasVoted");
 });
 
-const bannedUserSubQuery = db
+export const bannedUserSubQuery = db
   .select({
     did: schema.LabelledProfile.did,
     isHidden: schema.LabelledProfile.isHidden,

@@ -29,6 +29,7 @@ import {
 import { NewPostForm } from "./post/new/_client";
 import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 import { redirect } from "next/navigation";
+import { GlobalSearch } from "@/lib/components/search/search";
 
 export default async function Layout({
   children,
@@ -65,6 +66,7 @@ export default async function Layout({
               </DialogContent>
             </Dialog>
           ) : null}
+          <GlobalSearch />
           <Suspense>
             <LoginOrLogout />
           </Suspense>
