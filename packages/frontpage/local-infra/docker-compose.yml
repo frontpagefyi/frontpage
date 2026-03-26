@@ -101,6 +101,15 @@ services:
       - JETSTREAM_LIVENESS_TTL=300s
       - JETSTREAM_WS_URL=ws://pds:3000/xrpc/com.atproto.sync.subscribeRepos
 
+  meilisearch:
+    container_name: meilisearch
+    image: getmeili/meilisearch:v1.4.0
+    restart: unless-stopped
+    ports:
+      - "7700:7700"
+    volumes:
+      - meilisearch:/meili_data
+
 volumes:
   caddy_data:
   caddy_config:
@@ -109,3 +118,4 @@ volumes:
   plc:
   drainpipe:
   jetstream:
+  meilisearch:
