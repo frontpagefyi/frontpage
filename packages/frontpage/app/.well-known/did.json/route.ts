@@ -1,8 +1,12 @@
 import { NextResponse } from "next/server";
+import {
+  FEED_SERVICE_DID,
+  STATIC_CACHE_MAX_AGE_SECONDS,
+} from "@/lib/data/feed-constants";
 
 const DID_DOCUMENT = {
   "@context": ["https://www.w3.org/ns/did/v1"],
-  id: "did:web:frontpage.fyi",
+  id: FEED_SERVICE_DID,
   service: [
     {
       id: "#frontpage_fg",
@@ -15,7 +19,7 @@ const DID_DOCUMENT = {
 export async function GET() {
   return NextResponse.json(DID_DOCUMENT, {
     headers: {
-      "Cache-Control": "public, max-age=86400",
+      "Cache-Control": `public, max-age=${STATIC_CACHE_MAX_AGE_SECONDS}`,
     },
   });
 }

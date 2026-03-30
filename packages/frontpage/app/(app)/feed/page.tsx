@@ -1,8 +1,7 @@
 import { Suspense } from "react";
 import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
-import { PostCard } from "../_components/post-card";
-import { resolveFeed } from "@/lib/data/feed-resolver";
+import { getMoreFeedPostsAction } from "@/lib/feed-action";
 import { FeedLoadingSkeleton } from "./_components/feed-skeleton";
 
 export default async function FeedPage({
@@ -36,39 +35,4 @@ async function FeedContent({ uri }: { uri: string }) {
       emptyMessage="No posts in this feed"
     />
   );
-}
-
-async function getMoreFeedPostsAction(
-  feedUri: string,
-  cursor: string | null,
-) {
-  "use server";
-  const { posts, cursor: nextCursor } = await resolveFeed(
-    feedUri,
-    cursor ?? undefined,
-  );
-
-  return {
-    content: (
-      <>
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            author={post.authorDid}
-            createdAt={post.createdAt}
-            id={post.id}
-            title={post.title}
-            url={post.url}
-            votes={post.voteCount}
-            commentCount={post.commentCount}
-            cid={post.cid}
-            rkey={post.rkey}
-            isUpvoted={post.userHasVoted}
-          />
-        ))}
-      </>
-    ),
-    pageSize: posts.length,
-    nextCursor: nextCursor ?? null,
-  };
 }

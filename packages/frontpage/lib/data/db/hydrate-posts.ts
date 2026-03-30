@@ -1,15 +1,14 @@
 import "server-only";
 
-import { cache } from "react";
 import { db } from "@/lib/db";
-import { eq, and, or, sql } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { AtUri } from "@atproto/syntax";
-import { getUser } from "../user";
 import { type DID, parseDid } from "../atproto/did";
 import {
   bannedUserSubQuery,
   postVisibilityFilters,
+  buildUserHasVotedQuery,
 } from "./visibility";
 
 export type HydratedPost = {
@@ -24,16 +23,6 @@ export type HydratedPost = {
   commentCount: number;
   userHasVoted: boolean;
 };
-
-const buildUserHasVotedQuery = cache(async () => {
-  const user = await getUser();
-
-  return db
-    .select({ postId: schema.PostVote.postId })
-    .from(schema.PostVote)
-    .where(user ? eq(schema.PostVote.authorDid, user.did) : sql`false`)
-    .as("hasVoted");
-});
 
 export async function hydratePosts(
   postUris: string[],

@@ -10,10 +10,12 @@ import {
 } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
 import { isPrivateHost } from "@/lib/data/ssrf";
-
-const SERVICE_DID = "did:web:frontpage.fyi";
-const GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
-const SKELETON_NSID = "fyi.frontpage.feed.getFeedSkeleton";
+import {
+  FEED_SERVICE_DID,
+  FEED_GENERATOR_COLLECTION,
+  GET_FEED_SKELETON_NSID,
+  EXTERNAL_REQUEST_TIMEOUT_MS,
+} from "@/lib/data/feed-constants";
 
 export async function resolveFeed(
   feedUri: string,
@@ -22,9 +24,9 @@ export async function resolveFeed(
 ): Promise<{ posts: HydratedPost[]; cursor?: string }> {
   // Validate feedUri before triggering any outbound requests
   const atUri = new AtUri(feedUri); // throws on malformed URIs
-  if (atUri.collection !== GENERATOR_COLLECTION) {
+  if (atUri.collection !== FEED_GENERATOR_COLLECTION) {
     throw new Error(
-      `Invalid feed URI: expected collection ${GENERATOR_COLLECTION}, got ${atUri.collection}`,
+      `Invalid feed URI: expected collection ${FEED_GENERATOR_COLLECTION}, got ${atUri.collection}`,
     );
   }
 
@@ -48,8 +50,8 @@ async function getSkeleton(
 
 function isLocalFeed(feedUri: AtUri): boolean {
   return (
-    feedUri.host === SERVICE_DID &&
-    feedUri.collection === GENERATOR_COLLECTION &&
+    feedUri.host === FEED_SERVICE_DID &&
+    feedUri.collection === FEED_GENERATOR_COLLECTION &&
     isKnownFeed(feedUri.rkey)
   );
 }
@@ -74,14 +76,14 @@ async function getExternalSkeleton(
 
   const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
 
-  const url = new URL(`/xrpc/${SKELETON_NSID}`, serviceEndpoint);
+  const url = new URL(`/xrpc/${GET_FEED_SKELETON_NSID}`, serviceEndpoint);
   url.searchParams.set("feed", feedUri.toString());
   url.searchParams.set("limit", String(limit));
   if (cursor) url.searchParams.set("cursor", cursor);
 
   const response = await fetch(url.toString(), {
     headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(5000),
+    signal: AbortSignal.timeout(EXTERNAL_REQUEST_TIMEOUT_MS),
     redirect: "error",
   });
 

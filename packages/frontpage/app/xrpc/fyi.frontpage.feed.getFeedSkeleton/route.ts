@@ -7,10 +7,16 @@ import {
   getSkeletonByAlgorithm,
 } from "@/lib/data/db/feed-skeleton";
 import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
-
-const SERVICE_DID = "did:web:frontpage.fyi";
-const GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
-const SKELETON_NSID = "fyi.frontpage.feed.getFeedSkeleton";
+import {
+  FEED_SERVICE_DID,
+  FEED_GENERATOR_COLLECTION,
+  GET_FEED_SKELETON_NSID,
+  DEFAULT_SKELETON_LIMIT,
+  MIN_SKELETON_LIMIT,
+  MAX_SKELETON_LIMIT,
+  SKELETON_CACHE_MAX_AGE_SECONDS,
+  SKELETON_SWR_SECONDS,
+} from "@/lib/data/feed-constants";
 
 function xrpcError(name: string, message: string, status: number) {
   return NextResponse.json({ error: name, message }, { status });
@@ -58,7 +64,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Validate collection
-  if (feedUri.collection !== GENERATOR_COLLECTION) {
+  if (feedUri.collection !== FEED_GENERATOR_COLLECTION) {
     return xrpcError(
       "UnknownFeed",
       `Unknown collection: ${feedUri.collection}`,
@@ -71,10 +77,10 @@ export async function GET(request: NextRequest) {
     return xrpcError("UnknownFeed", `Unknown feed: ${feedUri.rkey}`, 400);
   }
 
-  // Parse limit (default 50, clamp 1-100)
-  let limit = 50;
+  // Parse limit (default DEFAULT_SKELETON_LIMIT, clamp MIN..MAX)
+  let limit = DEFAULT_SKELETON_LIMIT;
   if (limitParam) {
-    limit = Math.max(1, Math.min(100, parseInt(limitParam, 10) || 50));
+    limit = Math.max(MIN_SKELETON_LIMIT, Math.min(MAX_SKELETON_LIMIT, parseInt(limitParam, 10) || DEFAULT_SKELETON_LIMIT));
   }
 
   // Optional JWT verification — auth not required for public feeds
@@ -85,8 +91,8 @@ export async function GET(request: NextRequest) {
       const jwt = authHeader.slice(7);
       const payload = await verifyJwt(
         jwt,
-        SERVICE_DID,
-        SKELETON_NSID,
+        FEED_SERVICE_DID,
+        GET_FEED_SKELETON_NSID,
         getSigningKey,
       );
       requesterDid = payload.iss;
@@ -119,7 +125,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(result, {
     headers: {
-      "Cache-Control": "public, max-age=30, stale-while-revalidate=60",
+      "Cache-Control": `public, max-age=${SKELETON_CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${SKELETON_SWR_SECONDS}`,
     },
   });
 }
