@@ -9,6 +9,7 @@ import {
 } from "@/lib/components/ui/dropdown-menu";
 import { ChevronDownIcon, OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import Link from "next/link";
+import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 
 const FEEDS = [
   { label: "Hot", slug: "hot" },
@@ -48,10 +49,10 @@ export function FeedSwitcher({
         </DropdownMenuContent>
       </DropdownMenu>
       <a
-        href="https://bsky.app/profile/frontpage.fyi"
+        href={`https://bsky.app/profile/${FRONTPAGE_ATPROTO_HANDLE}`}
         className="text-sm font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
       >
-        @frontpage.fyi <OpenInNewWindowIcon className="inline" />
+        @{FRONTPAGE_ATPROTO_HANDLE} <OpenInNewWindowIcon className="inline" />
       </a>
     </div>
   );

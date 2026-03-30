@@ -16,7 +16,6 @@ import {
   DropdownMenuTrigger,
 } from "@/lib/components/ui/dropdown-menu";
 import { UserAvatar } from "@/lib/components/user-avatar";
-import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import { revalidatePath } from "next/cache";
 import { NotificationIndicator } from "./_components/notification-indicator";
 import {
