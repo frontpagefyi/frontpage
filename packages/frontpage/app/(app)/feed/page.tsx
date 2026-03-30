@@ -25,6 +25,8 @@ export default async function FeedPage({
 async function FeedContent({ uri }: { uri: string }) {
   await connection();
 
+  // Server actions can't serialize undefined as params, so we use null
+  // at the boundary and convert to undefined for resolveFeed
   const initialData = await getMoreFeedPostsAction(uri, null);
 
   return (

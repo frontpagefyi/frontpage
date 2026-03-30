@@ -18,6 +18,8 @@ import {
   SKELETON_SWR_SECONDS,
 } from "@/lib/data/feed-constants";
 
+const BEARER_PREFIX = "Bearer ";
+
 function xrpcError(name: string, message: string, status: number) {
   return NextResponse.json({ error: name, message }, { status });
 }
@@ -26,22 +28,22 @@ async function getSigningKey(
   iss: string,
   forceRefresh: boolean,
 ): Promise<string> {
-  const issDid = parseDid(iss);
-  if (!issDid) {
+  const issuerDid = parseDid(iss);
+  if (!issuerDid) {
     throw new Error(`Invalid DID in JWT issuer: ${iss}`);
   }
   // verifyJwt calls with forceRefresh=true after initial key lookup fails,
   // to handle DID key rotation. Bypass the React.cache() wrapper in that case.
   const didDoc = forceRefresh
-    ? await getDidDocFresh(issDid)
-    : await getDidDoc(issDid);
-  const vm = didDoc.verificationMethod?.find(
-    (m) => m.id === `${iss}#atproto`,
+    ? await getDidDocFresh(issuerDid)
+    : await getDidDoc(issuerDid);
+  const verificationMethod = didDoc.verificationMethod?.find(
+    (method) => method.id === `${iss}#atproto`,
   );
-  if (!vm) {
+  if (!verificationMethod) {
     throw new Error(`No atproto verification method for ${iss}`);
   }
-  return (vm as unknown as { publicKeyMultibase: string }).publicKeyMultibase;
+  return (verificationMethod as unknown as { publicKeyMultibase: string }).publicKeyMultibase;
 }
 
 export async function GET(request: NextRequest) {
@@ -90,9 +92,9 @@ export async function GET(request: NextRequest) {
   // Optional JWT verification — auth not required for public feeds
   let requesterDid: string | undefined;
   const authHeader = request.headers.get("authorization");
-  if (authHeader?.startsWith("Bearer ")) {
+  if (authHeader?.startsWith(BEARER_PREFIX)) {
     try {
-      const jwt = authHeader.slice(7);
+      const jwt = authHeader.slice(BEARER_PREFIX.length);
       const payload = await verifyJwt(
         jwt,
         FEED_SERVICE_DID,

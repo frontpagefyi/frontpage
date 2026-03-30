@@ -133,9 +133,9 @@ async function fetchGeneratorRecord(
 async function resolveServiceEndpoint(did: DID): Promise<string> {
   const didDoc = await getDidDoc(did);
   const service = didDoc.service?.find(
-    (s) =>
-      s.type === "FrontpageFeedGenerator" ||
-      s.type === "BskyFeedGenerator",
+    (serviceEntry) =>
+      serviceEntry.type === "FrontpageFeedGenerator" ||
+      serviceEntry.type === "BskyFeedGenerator",
   );
 
   if (!service || typeof service.serviceEndpoint !== "string") {
