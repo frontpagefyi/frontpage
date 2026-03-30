@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { notFound, redirect } from "next/navigation";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
-import { FeedSwitcher } from "../../_components/feed-switcher";
+import { FeedSwitcherLayout } from "../../_components/feed-switcher";
 import { FEED_URIS } from "@/lib/constants";
 
 export default async function FeedSlugPage({
@@ -27,14 +27,13 @@ export default async function FeedSlugPage({
   const initialData = await getMoreFeedPostsAction(uri, null);
 
   return (
-    <>
-      <FeedSwitcher currentSlug={slug} />
+    <FeedSwitcherLayout currentSlug={slug}>
       <InfiniteList
         cacheKey={`feed:${uri}`}
         getMoreItemsAction={getMoreFeedPostsAction.bind(null, uri)}
         fallback={initialData}
         emptyMessage="No posts in this feed"
       />
-    </>
+    </FeedSwitcherLayout>
   );
 }

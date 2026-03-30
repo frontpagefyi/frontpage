@@ -2,7 +2,7 @@ import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
 import { HOT_FEED_URI } from "@/lib/constants";
-import { FeedSwitcher } from "./_components/feed-switcher";
+import { FeedSwitcherLayout } from "./_components/feed-switcher";
 
 export default async function Home() {
   await connection();
@@ -11,14 +11,13 @@ export default async function Home() {
   const initialData = await getMorePostsAction(null);
 
   return (
-    <>
-      <FeedSwitcher />
+    <FeedSwitcherLayout>
       <InfiniteList
         cacheKey="posts"
         getMoreItemsAction={getMorePostsAction}
         emptyMessage="No posts remaining"
         fallback={initialData}
       />
-    </>
+    </FeedSwitcherLayout>
   );
 }

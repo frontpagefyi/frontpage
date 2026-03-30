@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { type ReactNode, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/lib/components/ui/button";
 import {
@@ -11,6 +11,7 @@ import {
 } from "@/lib/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Spinner } from "@/lib/components/ui/spinner";
+import { FeedLoadingSkeleton } from "../feed/_components/feed-skeleton";
 
 const FEEDS = [
   { label: "Hot", slug: "hot" },
@@ -24,10 +25,12 @@ function feedHref(slug: string) {
   return slug === "hot" ? "/" : `/feed/${slug}`;
 }
 
-export function FeedSwitcher({
+export function FeedSwitcherLayout({
   currentSlug = "hot",
+  children,
 }: {
   currentSlug?: string;
+  children: ReactNode;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
@@ -35,31 +38,38 @@ export function FeedSwitcher({
   const current = FEEDS.find((f) => f.slug === optimisticSlug) ?? DEFAULT_FEED;
 
   return (
-    <div className="mb-4">
-      <DropdownMenu>
-        <DropdownMenuTrigger asChild>
-          <Button variant="ghost" size="sm" className="gap-1 text-base">
-            {current.label}
-            {isPending ? <Spinner className="h-3 w-3" /> : <ChevronDownIcon />}
-          </Button>
-        </DropdownMenuTrigger>
-        <DropdownMenuContent align="start">
-          {FEEDS.map((feed) => (
-            <DropdownMenuItem
-              key={feed.slug}
-              className={feed.slug === optimisticSlug ? "font-medium" : ""}
-              onSelect={() => {
-                setOptimisticSlug(feed.slug);
-                startTransition(() => {
-                  router.push(feedHref(feed.slug));
-                });
-              }}
-            >
-              {feed.label}
-            </DropdownMenuItem>
-          ))}
-        </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+    <>
+      <div className="mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1 text-base">
+              {current.label}
+              {isPending ? (
+                <Spinner className="h-3 w-3" />
+              ) : (
+                <ChevronDownIcon />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            {FEEDS.map((feed) => (
+              <DropdownMenuItem
+                key={feed.slug}
+                className={feed.slug === optimisticSlug ? "font-medium" : ""}
+                onSelect={() => {
+                  setOptimisticSlug(feed.slug);
+                  startTransition(() => {
+                    router.push(feedHref(feed.slug));
+                  });
+                }}
+              >
+                {feed.label}
+              </DropdownMenuItem>
+            ))}
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {isPending ? <FeedLoadingSkeleton /> : children}
+    </>
   );
 }
