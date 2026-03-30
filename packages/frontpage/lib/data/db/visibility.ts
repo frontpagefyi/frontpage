@@ -22,9 +22,7 @@ export const bannedUserSubQuery = db
  * WHERE conditions for post visibility: status is live AND author is not banned.
  * Use with posts/skeletons where banned content should be fully excluded.
  */
-export function postVisibilityFilters(
-  bannedUser: typeof bannedUserSubQuery,
-) {
+export function postVisibilityFilters(bannedUser: typeof bannedUserSubQuery) {
   return and(
     eq(schema.Post.status, "live"),
     or(isNull(bannedUser.isHidden), eq(bannedUser.isHidden, false)),

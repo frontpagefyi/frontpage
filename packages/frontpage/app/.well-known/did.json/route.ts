@@ -16,7 +16,7 @@ const DID_DOCUMENT = {
   ],
 };
 
-export async function GET() {
+export function GET() {
   return NextResponse.json(DID_DOCUMENT, {
     headers: {
       "Cache-Control": `public, max-age=${STATIC_CACHE_MAX_AGE_SECONDS}`,

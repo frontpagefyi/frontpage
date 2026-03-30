@@ -90,10 +90,7 @@ async function getExternalSkeleton(
   if (!response.ok) {
     const body = await response.text();
     const truncated = body.length > 200 ? body.slice(0, 200) + "..." : body;
-    console.error(
-      `External feed generator error (${response.status}):`,
-      body,
-    );
+    console.error(`External feed generator error (${response.status}):`, body);
     throw new Error(
       `External feed generator returned ${response.status}: ${truncated}`,
     );
@@ -110,11 +107,9 @@ async function getExternalSkeleton(
   return parsed.data;
 }
 
-async function fetchGeneratorRecord(
-  feedUri: AtUri,
-): Promise<{ did: string }> {
+async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
   const { getAtprotoClient } = await import("@/lib/data/atproto/repo");
-  const client = await getAtprotoClient();
+  const client = getAtprotoClient();
 
   const result = await client.com.atproto.repo.getRecord({
     repo: feedUri.host,

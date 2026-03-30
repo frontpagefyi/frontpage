@@ -6,7 +6,7 @@ import {
   isKnownFeed,
   getSkeletonByAlgorithm,
 } from "@/lib/data/db/feed-skeleton";
-import { getDidDoc, getDidDocFresh, parseDid, type DID } from "@/lib/data/atproto/did";
+import { getDidDoc, getDidDocFresh, parseDid } from "@/lib/data/atproto/did";
 import {
   FEED_SERVICE_DID,
   FEED_GENERATOR_COLLECTION,
@@ -43,7 +43,8 @@ async function getSigningKey(
   if (!verificationMethod) {
     throw new Error(`No atproto verification method for ${iss}`);
   }
-  return (verificationMethod as unknown as { publicKeyMultibase: string }).publicKeyMultibase;
+  return (verificationMethod as unknown as { publicKeyMultibase: string })
+    .publicKeyMultibase;
 }
 
 export async function GET(request: NextRequest) {
@@ -54,11 +55,7 @@ export async function GET(request: NextRequest) {
 
   // Validate feed param exists
   if (!feed) {
-    return xrpcError(
-      "InvalidRequest",
-      "Missing required parameter: feed",
-      400,
-    );
+    return xrpcError("InvalidRequest", "Missing required parameter: feed", 400);
   }
 
   // Parse and validate the feed URI
@@ -86,7 +83,13 @@ export async function GET(request: NextRequest) {
   // Parse limit (default DEFAULT_SKELETON_LIMIT, clamp MIN..MAX)
   let limit = DEFAULT_SKELETON_LIMIT;
   if (limitParam) {
-    limit = Math.max(MIN_SKELETON_LIMIT, Math.min(MAX_SKELETON_LIMIT, parseInt(limitParam, 10) || DEFAULT_SKELETON_LIMIT));
+    limit = Math.max(
+      MIN_SKELETON_LIMIT,
+      Math.min(
+        MAX_SKELETON_LIMIT,
+        parseInt(limitParam, 10) || DEFAULT_SKELETON_LIMIT,
+      ),
+    );
   }
 
   // Optional JWT verification — auth not required for public feeds

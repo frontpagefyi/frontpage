@@ -1,12 +1,9 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { eq, desc, and, or, lt, sql, type SQL } from "drizzle-orm";
+import { eq, desc, and, or, lt, type SQL } from "drizzle-orm";
 import * as schema from "@/lib/schema";
-import {
-  bannedUserSubQuery,
-  postVisibilityFilters,
-} from "./visibility";
+import { bannedUserSubQuery, postVisibilityFilters } from "./visibility";
 
 export type SkeletonPost = { post: string };
 export type SkeletonResult = {
@@ -41,7 +38,10 @@ function parseCompoundCursor(
   const separatorIndex = cursor.lastIndexOf(CURSOR_SEPARATOR);
   if (separatorIndex === -1) return null;
   const value = cursor.slice(0, separatorIndex);
-  const id = parseInt(cursor.slice(separatorIndex + CURSOR_SEPARATOR.length), 10);
+  const id = parseInt(
+    cursor.slice(separatorIndex + CURSOR_SEPARATOR.length),
+    10,
+  );
   if (!value || isNaN(id)) return null;
   return { value, id };
 }
@@ -112,7 +112,9 @@ async function queryAggregateSkeletonPosts<T>(
   const lastRow = rows[rows.length - 1];
   const nextCursor = lastRow
     ? buildCompoundCursor(
-        config.serializeCursorValue(lastRow as unknown as Record<string, unknown>),
+        config.serializeCursorValue(
+          lastRow as unknown as Record<string, unknown>,
+        ),
         lastRow.id,
       )
     : undefined;
@@ -174,7 +176,9 @@ async function queryPostOnlySkeletonPosts<T>(
   const lastRow = rows[rows.length - 1];
   const nextCursor = lastRow
     ? buildCompoundCursor(
-        config.serializeCursorValue(lastRow as unknown as Record<string, unknown>),
+        config.serializeCursorValue(
+          lastRow as unknown as Record<string, unknown>,
+        ),
         lastRow.id,
       )
     : undefined;

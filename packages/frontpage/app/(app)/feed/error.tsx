@@ -1,7 +1,7 @@
 "use client";
 
 export default function FeedError({
-  error,
+  error: _error,
   reset,
 }: {
   error: Error & { digest?: string };
@@ -10,10 +10,7 @@ export default function FeedError({
   return (
     <div className="flex flex-col items-center gap-4 py-12">
       <p className="text-gray-500">Failed to load feed.</p>
-      <button
-        onClick={reset}
-        className="text-sm text-blue-500 hover:underline"
-      >
+      <button onClick={reset} className="text-sm text-blue-500 hover:underline">
         Try again
       </button>
     </div>

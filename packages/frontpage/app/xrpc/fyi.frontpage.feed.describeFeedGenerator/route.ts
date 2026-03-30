@@ -15,7 +15,7 @@ const RESPONSE_BODY = {
   ],
 };
 
-export async function GET() {
+export function GET() {
   return NextResponse.json(RESPONSE_BODY, {
     headers: {
       "Cache-Control": `public, max-age=${STATIC_CACHE_MAX_AGE_SECONDS}`,

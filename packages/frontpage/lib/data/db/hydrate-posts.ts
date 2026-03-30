@@ -38,13 +38,12 @@ export async function hydratePosts(
     return { authorDid, collection: atUri.collection, rkey: atUri.rkey, uri };
   });
 
-  const uriConditions = parsedUris.map(
-    (parsedUri) =>
-      and(
-        eq(schema.Post.authorDid, parsedUri.authorDid),
-        eq(schema.Post.collection, parsedUri.collection),
-        eq(schema.Post.rkey, parsedUri.rkey),
-      ),
+  const uriConditions = parsedUris.map((parsedUri) =>
+    and(
+      eq(schema.Post.authorDid, parsedUri.authorDid),
+      eq(schema.Post.collection, parsedUri.collection),
+      eq(schema.Post.rkey, parsedUri.rkey),
+    ),
   );
 
   const userHasVoted = await buildUserHasVotedQuery();
@@ -74,10 +73,7 @@ export async function hydratePosts(
       eq(bannedUserSubQuery.did, schema.Post.authorDid),
     )
     .where(
-      and(
-        postVisibilityFilters(bannedUserSubQuery),
-        or(...uriConditions),
-      ),
+      and(postVisibilityFilters(bannedUserSubQuery), or(...uriConditions)),
     );
 
   const rowMap = new Map<string, (typeof rows)[number]>();
@@ -88,7 +84,9 @@ export async function hydratePosts(
 
   const hydrated: HydratedPost[] = [];
   for (const parsedUri of parsedUris) {
-    const row = rowMap.get(`${parsedUri.authorDid}:${parsedUri.collection}:${parsedUri.rkey}`);
+    const row = rowMap.get(
+      `${parsedUri.authorDid}:${parsedUri.collection}:${parsedUri.rkey}`,
+    );
     if (!row) continue;
     hydrated.push({
       id: row.id,
