@@ -17,7 +17,9 @@
         "VERCEL_BRANCH_URL",
         "VERCEL_ENV",
         "CRON_SECRET",
-        "PLC_DIRECTORY_URL"
+        "PLC_DIRECTORY_URL",
+        "FLAGS",
+        "FLAGS_SECRET"
       ]
     }
   }

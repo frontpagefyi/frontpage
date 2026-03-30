@@ -26,9 +26,9 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/lib/components/ui/dialog";
-import { NewPostForm } from "./post/new/_client";
 import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 import { redirect } from "next/navigation";
+import { NewPostForm } from "@/lib/components/new-post-form/new-post-form";
 
 export default async function Layout({
   children,
