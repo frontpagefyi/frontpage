@@ -62,7 +62,7 @@ function InfinteListInner<TCursor>({
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate, isLoading } = useSWRInfinite(
+  const { data, size, setSize, mutate } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
       if (previousPageData && !previousPageData.pageSize) return null; // reached the end
       return [cacheKey, previousPageData?.nextCursor ?? null];
@@ -70,7 +70,7 @@ function InfinteListInner<TCursor>({
     ([_, cursor]) => {
       return getMoreItemsAction(cursor);
     },
-    { revalidateOnMount: false, revalidateAll },
+    { suspense: true, revalidateOnMount: false, revalidateAll },
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
@@ -80,15 +80,8 @@ function InfinteListInner<TCursor>({
     },
   });
 
-  if (isLoading || !data) {
-    return (
-      <div className="flex justify-center py-8">
-        <Spinner className="h-6 w-6" />
-      </div>
-    );
-  }
-
-  const pages = data;
+  // Data can't be undefined because we are using suspense
+  const pages = data!;
 
   return (
     <div className="space-y-6">
