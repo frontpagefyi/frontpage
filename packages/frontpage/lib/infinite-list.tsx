@@ -61,7 +61,7 @@ function InfinteListInner<TCursor>({
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate } = useSWRInfinite(
+  const { data, size, setSize, mutate, isLoading } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
       if (previousPageData && !previousPageData.pageSize) return null; // reached the end
       return [cacheKey, previousPageData?.nextCursor ?? null];
@@ -69,7 +69,7 @@ function InfinteListInner<TCursor>({
     ([_, cursor]) => {
       return getMoreItemsAction(cursor);
     },
-    { suspense: true, revalidateOnMount: false, revalidateAll },
+    { revalidateOnMount: false, revalidateAll },
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
@@ -79,8 +79,13 @@ function InfinteListInner<TCursor>({
     },
   });
 
-  // Data can't be undefined because we are using suspense. This is likely a bug in the swr types.
-  const pages = data!;
+  if (isLoading || !data) {
+    return (
+      <p className="text-center text-gray-400">Loading...</p>
+    );
+  }
+
+  const pages = data;
 
   return (
     <div className="space-y-6">
