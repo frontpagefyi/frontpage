@@ -43,3 +43,6 @@ target
 packages/**/eslint_report.json
 
 .superpowers/
+
+# claude code local settings
+.claude/settings.local.json

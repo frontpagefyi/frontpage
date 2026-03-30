@@ -1,89 +1,13 @@
-# Frontpage
+# Frontpage — Claude Code Instructions
 
-Federated link aggregator built on AT Protocol (like Reddit/HN, but decentralized).
+See [AGENTS.md](./AGENTS.md) for universal project context (structure, commands, gotchas, feeds).
 
-## Monorepo Structure
+This file contains Claude Code-specific configuration only.
 
-- **pnpm workspaces** (`packages/`) + **Cargo workspace** (`packages-rs/`)
-- **Turbo** for task orchestration
-- Main app: `packages/frontpage` (Next.js, App Router)
-- Rust services: `packages-rs/` (drainpipe data pipeline, jetstream client)
+## Claude Code Plugins
 
-## Key Tech
+Shared plugins are configured in `.claude/settings.json`. Skills live in `~/.claude/skills/` (personal) or `.claude/skills/` (project-specific, committed).
 
-- **Next.js 16** with App Router, Turbopack, React Compiler
-- **React 19** with Server Components and Server Actions
-- **Drizzle ORM** with **Turso** (libSQL/SQLite)
-- **Tailwind CSS** + shadcn/ui
-- **Vitest** + React Testing Library for tests
-- **AT Protocol** libraries (`@atproto/*`, `@atcute/*`)
-- Deployed on **Vercel**
+## Memory
 
-## Code Style
-
-- ES modules everywhere (import/export, no CommonJS)
-- Path alias: `@/*` maps to frontpage package root
-- Shared ESLint config in `packages/eslint-config`
-- Shared TypeScript config in `packages/typescript-config`
-- Prettier for formatting
-
-## Commands
-
-```bash
-pnpm install              # Install dependencies
-pnpm turbo dev            # Run dev servers
-pnpm turbo build          # Build all packages
-pnpm turbo lint           # Lint
-pnpm turbo test           # Run tests
-pnpm turbo type-check     # Type check
-
-# In packages/frontpage:
-pnpm db:generate          # Generate Drizzle migrations
-pnpm db:generate --custom --name=<name>  # Create empty migration for custom SQL
-pnpm db:migrate           # Run migrations
-pnpm db:studio            # Open Drizzle Studio
-```
-
-## Before Every Commit
-
-Run these before committing — CI will catch failures but it's faster to catch them locally:
-
-```bash
-pnpm turbo lint type-check    # Lint + type errors
-pnpm prettier --check "packages/frontpage/**/*.{ts,tsx}"  # Formatting
-pnpm turbo build              # Full build (catches runtime config issues)
-```
-
-## Testing
-
-- Vitest with jsdom environment
-- Test files colocated next to source: `foo.test.tsx`
-- Use `@testing-library/react` for component tests
-- Run single package tests: `cd packages/frontpage && pnpm test`
-
-## Important Gotchas
-
-- All `@atproto/*` and `@atcute/*` packages must be version-bumped together (see catalog in `pnpm-workspace.yaml`). New `@atproto/*` deps MUST use `"catalog:"` not a pinned version.
-- `NODE_OPTIONS=--use-openssl-ca` is required for most commands (already baked into scripts)
-- `typescript.ignoreBuildErrors: true` in Next.js config — type errors won't fail builds
-- Secrets managed via 1Password (`dev-1pw` / `build-1pw` scripts)
-- Local dev infra setup: see `packages/frontpage/local-infra/README.md`
-- Node v24+ runs TypeScript natively — use `node script.ts` not `npx tsx`
-- Lexicon codegen: `pnpm exec lex gen-api ./src ../../lexicons/**/*.json` (must glob files, not pass directory)
-- `next.config.mjs` has `cacheComponents: false` (implicit) — `dynamic = "force-static"` in existing routes is incompatible with `cacheComponents: true`. Enable only after migrating those routes.
-
-## Feeds
-
-Feed generator system (issue #332). Key files:
-
-- **Lexicons**: `lexicons/fyi/frontpage/feed/{generator,getFeedSkeleton,describeFeedGenerator}.json`
-- **XRPC endpoints**: `app/xrpc/fyi.frontpage.feed.{getFeedSkeleton,describeFeedGenerator}/route.ts`, `app/.well-known/did.json/route.ts`
-- **Data layer**: `lib/data/db/feed-skeleton.ts` (skeleton queries), `lib/data/db/hydrate-posts.ts` (hydration), `lib/data/db/visibility.ts` (shared filters)
-- **Consumer**: `lib/data/feed-resolver.ts` (generic resolution), `lib/feed-action.tsx` (shared server action)
-- **Constants**: `lib/data/feed-constants.ts` (all feed-related DIDs, NSIDs, limits)
-- **Security**: `lib/data/ssrf.ts` (shared SSRF protection)
-
-Two DIDs:
-
-- `did:plc:klmr76mpewpv7rtm3xgpzd7x` — the `frontpage.fyi` repo (publishes generator records)
-- `did:web:frontpage.fyi` — the feed generator service (where `getFeedSkeleton` lives)
+Claude Code memory is stored in the project-level memory directory. Use it for user preferences, project context, and feedback — not for things derivable from the codebase.
