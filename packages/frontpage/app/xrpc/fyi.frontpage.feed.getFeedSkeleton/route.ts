@@ -6,7 +6,7 @@ import {
   isKnownFeed,
   getSkeletonByAlgorithm,
 } from "@/lib/data/db/feed-skeleton";
-import { getDidDoc, getDidDocFresh, parseDid } from "@/lib/data/atproto/did";
+import { getDidDoc, resolveDidDoc, parseDid } from "@/lib/data/atproto/did";
 import {
   FEED_SERVICE_DID,
   FEED_GENERATOR_COLLECTION,
@@ -35,7 +35,7 @@ async function getSigningKey(
   // verifyJwt calls with forceRefresh=true after initial key lookup fails,
   // to handle DID key rotation. Bypass the React.cache() wrapper in that case.
   const didDoc = forceRefresh
-    ? await getDidDocFresh(issuerDid)
+    ? await resolveDidDoc(issuerDid)
     : await getDidDoc(issuerDid);
   const verificationMethod = didDoc.verificationMethod?.find(
     (method) => method.id === `${iss}#atproto`,
