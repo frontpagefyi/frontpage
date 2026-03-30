@@ -807,6 +807,187 @@ export const schemaDict = {
       },
     },
   },
+  FyiFrontpageFeedDescribeFeedGenerator: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.describeFeedGenerator",
+    defs: {
+      main: {
+        type: "query",
+        description:
+          "Returns information about a feed generator service, including which feeds it provides.",
+        output: {
+          encoding: "application/json",
+          schema: {
+            type: "object",
+            required: ["did", "feeds"],
+            properties: {
+              did: {
+                type: "string",
+                format: "did",
+              },
+              feeds: {
+                type: "array",
+                items: {
+                  type: "ref",
+                  ref: "lex:fyi.frontpage.feed.describeFeedGenerator#feed",
+                },
+              },
+              links: {
+                type: "ref",
+                ref: "lex:fyi.frontpage.feed.describeFeedGenerator#links",
+              },
+            },
+          },
+        },
+      },
+      feed: {
+        type: "object",
+        required: ["uri"],
+        properties: {
+          uri: {
+            type: "string",
+            format: "at-uri",
+          },
+        },
+      },
+      links: {
+        type: "object",
+        properties: {
+          privacyPolicy: {
+            type: "string",
+          },
+          termsOfService: {
+            type: "string",
+          },
+        },
+      },
+    },
+  },
+  FyiFrontpageFeedGenerator: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.generator",
+    defs: {
+      main: {
+        type: "record",
+        description:
+          "Record declaring a feed generator. The did field points to the service that runs the feed algorithm.",
+        key: "any",
+        record: {
+          type: "object",
+          required: ["did", "displayName", "createdAt"],
+          properties: {
+            did: {
+              type: "string",
+              format: "did",
+              description: "DID of the feed generator service.",
+            },
+            displayName: {
+              type: "string",
+              maxLength: 3000,
+              maxGraphemes: 240,
+              description: "Display name for the feed.",
+            },
+            description: {
+              type: "string",
+              maxLength: 30000,
+              maxGraphemes: 3000,
+              description: "Description of the feed.",
+            },
+            avatar: {
+              type: "blob",
+              accept: ["image/png", "image/jpeg"],
+              maxSize: 1000000,
+              description: "Avatar image for the feed.",
+            },
+            acceptsInteractions: {
+              type: "boolean",
+              description:
+                "Whether the feed generator accepts interaction feedback.",
+            },
+            createdAt: {
+              type: "string",
+              format: "datetime",
+              description:
+                "Client-declared timestamp when this generator was created.",
+            },
+          },
+        },
+      },
+    },
+  },
+  FyiFrontpageFeedGetFeedSkeleton: {
+    lexicon: 1,
+    id: "fyi.frontpage.feed.getFeedSkeleton",
+    defs: {
+      main: {
+        type: "query",
+        description:
+          "Get a skeleton of a feed provided by a feed generator. Auth is optional, but may be required by the feed generator.",
+        parameters: {
+          type: "params",
+          required: ["feed"],
+          properties: {
+            feed: {
+              type: "string",
+              format: "at-uri",
+              description: "AT URI of the feed generator record.",
+            },
+            limit: {
+              type: "integer",
+              minimum: 1,
+              maximum: 100,
+              default: 50,
+              description: "Maximum number of items to return.",
+            },
+            cursor: {
+              type: "string",
+              description: "Pagination cursor.",
+            },
+          },
+        },
+        output: {
+          encoding: "application/json",
+          schema: {
+            type: "object",
+            required: ["feed"],
+            properties: {
+              cursor: {
+                type: "string",
+              },
+              feed: {
+                type: "array",
+                items: {
+                  type: "ref",
+                  ref: "lex:fyi.frontpage.feed.getFeedSkeleton#skeletonFeedPost",
+                },
+              },
+            },
+          },
+        },
+        errors: [
+          {
+            name: "UnknownFeed",
+          },
+        ],
+      },
+      skeletonFeedPost: {
+        type: "object",
+        required: ["post"],
+        properties: {
+          post: {
+            type: "string",
+            format: "at-uri",
+            description: "AT URI of the post.",
+          },
+          feedContext: {
+            type: "string",
+            maxLength: 2000,
+            description: "Opaque context passed back via sendInteractions.",
+          },
+        },
+      },
+    },
+  },
   FyiFrontpageFeedPost: {
     lexicon: 1,
     id: "fyi.frontpage.feed.post",
@@ -1052,6 +1233,10 @@ export const ids = {
   ComAtprotoRepoStrongRef: "com.atproto.repo.strongRef",
   ComAtprotoRepoUploadBlob: "com.atproto.repo.uploadBlob",
   FyiFrontpageFeedComment: "fyi.frontpage.feed.comment",
+  FyiFrontpageFeedDescribeFeedGenerator:
+    "fyi.frontpage.feed.describeFeedGenerator",
+  FyiFrontpageFeedGenerator: "fyi.frontpage.feed.generator",
+  FyiFrontpageFeedGetFeedSkeleton: "fyi.frontpage.feed.getFeedSkeleton",
   FyiFrontpageFeedPost: "fyi.frontpage.feed.post",
   FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
   FyiFrontpageRichtextBlock: "fyi.frontpage.richtext.block",

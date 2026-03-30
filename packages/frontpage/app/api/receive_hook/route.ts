@@ -4,7 +4,6 @@ import { Commit } from "@/lib/data/atproto/event";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
-import { exhaustiveCheck } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
 import { timingSafeEqual } from "node:crypto";
 
@@ -66,7 +65,7 @@ export async function POST(request: Request) {
       }
 
       default:
-        exhaustiveCheck(collection, `Unknown collection ${JSON.stringify(op)}`);
+        console.log(`Ignoring unknown collection: ${collection}`);
     }
   });
 

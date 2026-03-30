@@ -6,6 +6,8 @@ const nextConfig = {
     ignoreBuildErrors: true,
   },
 
+  cacheComponents: true,
+
   rewrites: () => [
     {
       source: "/.well-known/security.txt",

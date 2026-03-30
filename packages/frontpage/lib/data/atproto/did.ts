@@ -5,11 +5,10 @@ import type { DidDocument } from "@atcute/identity";
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "@/lib/constants";
 
 type Brand<K, T> = K & { __brand: T };
-export type DID = Brand<`did:plc:${string}`, "DID">;
+export type DID = Brand<`did:${string}`, "DID">;
 
 export function isDid(s: string): s is DID {
-  // We don't support did:web yet
-  return s.startsWith("did:plc:");
+  return s.startsWith("did:plc:") || s.startsWith("did:web:");
 }
 
 export const didSchema = z.string().refine((s) => isDid(s), {
@@ -38,8 +37,44 @@ const didResolver = new PlcDidDocumentResolver({
     }),
 });
 
+async function resolveDidWeb(did: string): Promise<DidDocument> {
+  // did:web:example.com → https://example.com/.well-known/did.json
+  const host = did.replace("did:web:", "");
+
+  // Security: reject private IPs and localhost in production
+  if (
+    process.env.NODE_ENV === "production" &&
+    (host === "localhost" ||
+      host.endsWith(".local") ||
+      host.startsWith("127.") ||
+      host.startsWith("10.") ||
+      host.startsWith("192.168.") ||
+      /^172\.(1[6-9]|2\d|3[01])\./.test(host))
+  ) {
+    throw new Error(`Refusing to resolve did:web for private host: ${host}`);
+  }
+
+  const url = `https://${host}/.well-known/did.json`;
+  const response = await fetch(url, {
+    headers: { "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT },
+    signal: AbortSignal.timeout(5000),
+    next: { revalidate: 60 * 60 }, // 1 hour
+    redirect: "error", // reject redirects (SSRF protection)
+  });
+
+  if (!response.ok) {
+    throw new Error(`Failed to resolve ${did}: ${response.status}`);
+  }
+
+  return response.json() as Promise<DidDocument>;
+}
+
 export const getDidDoc = cache(async (did: DID): Promise<DidDocument> => {
-  const resolution = await didResolver.resolve(did);
+  if (did.startsWith("did:web:")) {
+    return resolveDidWeb(did);
+  }
+  // After the did:web early return, this is always did:plc
+  const resolution = await didResolver.resolve(did as `did:plc:${string}`);
   return resolution;
 });
 
