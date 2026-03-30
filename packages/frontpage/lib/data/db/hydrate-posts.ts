@@ -1,7 +1,7 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { eq, and, or } from "drizzle-orm";
+import { eq, and, inArray } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { AtUri } from "@atproto/syntax";
 import { type DID, parseDid } from "../atproto/did";
@@ -38,13 +38,7 @@ export async function hydratePosts(
     return { authorDid, collection: atUri.collection, rkey: atUri.rkey, uri };
   });
 
-  const uriConditions = parsedUris.map((parsedUri) =>
-    and(
-      eq(schema.Post.authorDid, parsedUri.authorDid),
-      eq(schema.Post.collection, parsedUri.collection),
-      eq(schema.Post.rkey, parsedUri.rkey),
-    ),
-  );
+  const rkeys = parsedUris.map((p) => p.rkey);
 
   const userHasVoted = await buildUserHasVotedQuery();
 
@@ -73,7 +67,10 @@ export async function hydratePosts(
       eq(bannedUserSubQuery.did, schema.Post.authorDid),
     )
     .where(
-      and(postVisibilityFilters(bannedUserSubQuery), or(...uriConditions)),
+      and(
+        postVisibilityFilters(bannedUserSubQuery),
+        inArray(schema.Post.rkey, rkeys),
+      ),
     );
 
   const rowMap = new Map<string, (typeof rows)[number]>();
