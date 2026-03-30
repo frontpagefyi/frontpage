@@ -11,9 +11,9 @@ import {
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
 import { isPrivateHost } from "@/lib/data/ssrf";
 import {
-  FEED_SERVICE_DID,
   FEED_GENERATOR_COLLECTION,
   GET_FEED_SKELETON_NSID,
+  FRONTPAGE_DID,
   EXTERNAL_REQUEST_TIMEOUT_MS,
 } from "@/lib/data/feed-constants";
 
@@ -49,8 +49,10 @@ async function getSkeleton(
 }
 
 function isLocalFeed(feedUri: AtUri): boolean {
+  // The feed URI authority is the repo DID (did:plc:...) that published
+  // the generator record, not the service DID (did:web:frontpage.fyi)
   return (
-    feedUri.host === FEED_SERVICE_DID &&
+    feedUri.host === (FRONTPAGE_DID as string) &&
     feedUri.collection === FEED_GENERATOR_COLLECTION &&
     isKnownFeed(feedUri.rkey)
   );
