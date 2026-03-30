@@ -1,16 +1,14 @@
-import { FRONTPAGE_DID } from "@/app/blog/blog-data";
+import {
+  FRONTPAGE_DID,
+  FEED_GENERATOR_COLLECTION,
+  HOT_FEED_URI,
+} from "@/lib/constants";
 
 /** DID of the feed generator service (did:web identity) */
 export const FEED_SERVICE_DID = "did:web:frontpage.fyi";
 
-/** Collection NSID for feed generator records */
-export const FEED_GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
-
 /** NSID for the getFeedSkeleton XRPC method */
 export const GET_FEED_SKELETON_NSID = "fyi.frontpage.feed.getFeedSkeleton";
-
-/** AT URI for the default hot feed */
-export const HOT_FEED_URI = `at://${FRONTPAGE_DID}/fyi.frontpage.feed.generator/hot`;
 
 /** Timeout for external feed generator requests in milliseconds */
 export const EXTERNAL_REQUEST_TIMEOUT_MS = 5_000;
@@ -33,4 +31,4 @@ export const MIN_SKELETON_LIMIT = 1;
 /** Maximum skeleton page size */
 export const MAX_SKELETON_LIMIT = 100;
 
-export { FRONTPAGE_DID };
+export { FRONTPAGE_DID, FEED_GENERATOR_COLLECTION, HOT_FEED_URI };
