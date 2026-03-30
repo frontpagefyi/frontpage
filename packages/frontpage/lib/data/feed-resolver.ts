@@ -1,13 +1,15 @@
 import "server-only";
 
+import { z } from "zod";
 import { AtUri } from "@atproto/syntax";
-import { getDidDoc, type DID } from "@/lib/data/atproto/did";
+import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
   isKnownFeed,
   getSkeletonByAlgorithm,
   type SkeletonResult,
 } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
+import { isPrivateHost } from "@/lib/data/ssrf";
 
 const SERVICE_DID = "did:web:frontpage.fyi";
 const GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
@@ -46,9 +48,16 @@ async function getSkeleton(
 
 function isLocalFeed(feedUri: AtUri): boolean {
   return (
-    feedUri.collection === GENERATOR_COLLECTION && isKnownFeed(feedUri.rkey)
+    feedUri.host === SERVICE_DID &&
+    feedUri.collection === GENERATOR_COLLECTION &&
+    isKnownFeed(feedUri.rkey)
   );
 }
+
+const ExternalSkeletonSchema = z.object({
+  feed: z.array(z.object({ post: z.string() })).max(100),
+  cursor: z.string().optional(),
+});
 
 async function getExternalSkeleton(
   feedUri: AtUri,
@@ -56,7 +65,12 @@ async function getExternalSkeleton(
   limit: number,
 ): Promise<SkeletonResult> {
   const generatorRecord = await fetchGeneratorRecord(feedUri);
-  const serviceDid = generatorRecord.did;
+  const serviceDid = parseDid(generatorRecord.did);
+  if (!serviceDid) {
+    throw new Error(
+      `Generator record contains invalid DID: ${generatorRecord.did}`,
+    );
+  }
 
   const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
 
@@ -68,15 +82,30 @@ async function getExternalSkeleton(
   const response = await fetch(url.toString(), {
     headers: { Accept: "application/json" },
     signal: AbortSignal.timeout(5000),
+    redirect: "error",
   });
 
   if (!response.ok) {
+    const body = await response.text();
+    const truncated = body.length > 200 ? body.slice(0, 200) + "..." : body;
+    console.error(
+      `External feed generator error (${response.status}):`,
+      body,
+    );
     throw new Error(
-      `External feed generator returned ${response.status}: ${await response.text()}`,
+      `External feed generator returned ${response.status}: ${truncated}`,
     );
   }
 
-  return response.json() as Promise<SkeletonResult>;
+  const json: unknown = await response.json();
+  const parsed = ExternalSkeletonSchema.safeParse(json);
+  if (!parsed.success) {
+    throw new Error(
+      `External feed generator returned invalid response: ${parsed.error.message}`,
+    );
+  }
+
+  return parsed.data;
 }
 
 async function fetchGeneratorRecord(
@@ -99,8 +128,8 @@ async function fetchGeneratorRecord(
   return { did: record.did };
 }
 
-async function resolveServiceEndpoint(did: string): Promise<string> {
-  const didDoc = await getDidDoc(did as DID);
+async function resolveServiceEndpoint(did: DID): Promise<string> {
+  const didDoc = await getDidDoc(did);
   const service = didDoc.service?.find(
     (s) =>
       s.type === "FrontpageFeedGenerator" ||
@@ -116,6 +145,12 @@ async function resolveServiceEndpoint(did: string): Promise<string> {
   const url = new URL(service.serviceEndpoint);
   if (url.protocol !== "https:") {
     throw new Error("Feed generator endpoint must use HTTPS");
+  }
+
+  if (isPrivateHost(url.hostname)) {
+    throw new Error(
+      `Feed generator endpoint resolves to a private address: ${url.hostname}`,
+    );
   }
 
   return service.serviceEndpoint;

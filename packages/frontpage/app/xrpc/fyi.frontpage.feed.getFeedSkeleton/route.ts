@@ -6,7 +6,7 @@ import {
   isKnownFeed,
   getSkeletonByAlgorithm,
 } from "@/lib/data/db/feed-skeleton";
-import { getDidDoc, type DID } from "@/lib/data/atproto/did";
+import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 
 const SERVICE_DID = "did:web:frontpage.fyi";
 const GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
@@ -20,7 +20,11 @@ async function getSigningKey(
   iss: string,
   _forceRefresh: boolean,
 ): Promise<string> {
-  const didDoc = await getDidDoc(iss as DID);
+  const issDid = parseDid(iss);
+  if (!issDid) {
+    throw new Error(`Invalid DID in JWT issuer: ${iss}`);
+  }
+  const didDoc = await getDidDoc(issDid);
   const vm = didDoc.verificationMethod?.find(
     (m) => m.id === `${iss}#atproto`,
   );

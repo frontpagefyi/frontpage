@@ -6,7 +6,7 @@ import { eq, and, or, sql } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { AtUri } from "@atproto/syntax";
 import { getUser } from "../user";
-import { type DID } from "../atproto/did";
+import { type DID, parseDid } from "../atproto/did";
 import {
   bannedUserSubQuery,
   postVisibilityFilters,
@@ -40,16 +40,21 @@ export async function hydratePosts(
 ): Promise<HydratedPost[]> {
   if (postUris.length === 0) return [];
 
-  const parsed = postUris.map((uri) => {
+  const parsedUris = postUris.map((uri) => {
     const atUri = new AtUri(uri);
-    return { authorDid: atUri.host as DID, collection: atUri.collection, rkey: atUri.rkey, uri };
+    const authorDid = parseDid(atUri.host);
+    if (!authorDid) {
+      throw new Error(`Invalid DID in post URI: ${atUri.host}`);
+    }
+    return { authorDid, collection: atUri.collection, rkey: atUri.rkey, uri };
   });
 
-  const uriConditions = parsed.map(
-    (p) =>
+  const uriConditions = parsedUris.map(
+    (parsedUri) =>
       and(
-        eq(schema.Post.authorDid, p.authorDid),
-        eq(schema.Post.rkey, p.rkey),
+        eq(schema.Post.authorDid, parsedUri.authorDid),
+        eq(schema.Post.collection, parsedUri.collection),
+        eq(schema.Post.rkey, parsedUri.rkey),
       ),
   );
 
@@ -88,13 +93,13 @@ export async function hydratePosts(
 
   const rowMap = new Map<string, (typeof rows)[number]>();
   for (const row of rows) {
-    const key = `${row.authorDid}:${row.rkey}`;
+    const key = `${row.authorDid}:${row.collection}:${row.rkey}`;
     rowMap.set(key, row);
   }
 
   const hydrated: HydratedPost[] = [];
-  for (const p of parsed) {
-    const row = rowMap.get(`${p.authorDid}:${p.rkey}`);
+  for (const parsedUri of parsedUris) {
+    const row = rowMap.get(`${parsedUri.authorDid}:${parsedUri.collection}:${parsedUri.rkey}`);
     if (!row) continue;
     hydrated.push({
       id: row.id,

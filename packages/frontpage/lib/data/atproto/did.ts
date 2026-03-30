@@ -3,12 +3,25 @@ import { z } from "zod";
 import { PlcDidDocumentResolver } from "@atcute/identity-resolver";
 import type { DidDocument } from "@atcute/identity";
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "@/lib/constants";
+import { isPrivateHost } from "@/lib/data/ssrf";
 
 type Brand<K, T> = K & { __brand: T };
 export type DID = Brand<`did:${string}`, "DID">;
 
 export function isDid(s: string): s is DID {
-  return s.startsWith("did:plc:") || s.startsWith("did:web:");
+  if (s.startsWith("did:plc:")) {
+    // did:plc: must have a non-empty identifier after the prefix
+    return s.length > "did:plc:".length;
+  }
+  if (s.startsWith("did:web:")) {
+    const host = s.slice("did:web:".length);
+    // Reject empty host, path traversal, and slashes
+    if (host.length === 0 || host.includes("/") || host.includes("..")) {
+      return false;
+    }
+    return true;
+  }
+  return false;
 }
 
 export const didSchema = z.string().refine((s) => isDid(s), {
@@ -41,16 +54,8 @@ async function resolveDidWeb(did: string): Promise<DidDocument> {
   // did:web:example.com → https://example.com/.well-known/did.json
   const host = did.replace("did:web:", "");
 
-  // Security: reject private IPs and localhost in production
-  if (
-    process.env.NODE_ENV === "production" &&
-    (host === "localhost" ||
-      host.endsWith(".local") ||
-      host.startsWith("127.") ||
-      host.startsWith("10.") ||
-      host.startsWith("192.168.") ||
-      /^172\.(1[6-9]|2\d|3[01])\./.test(host))
-  ) {
+  // Security: reject private IPs and localhost in all environments
+  if (isPrivateHost(host)) {
     throw new Error(`Refusing to resolve did:web for private host: ${host}`);
   }
 
