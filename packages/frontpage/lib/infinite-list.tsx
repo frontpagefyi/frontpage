@@ -110,8 +110,9 @@ function InfinteListInner<TCursor>({
               page.pageSize === 0 ? (
                 <p className="text-center text-gray-400">{emptyMessage}</p>
               ) : (
-                <div ref={inViewRef} className="flex justify-center py-4">
+                <div ref={inViewRef} className="flex flex-col items-center gap-2 py-4 text-gray-400">
                   <Spinner className="h-5 w-5" />
+                  <p className="text-sm">Loading more posts...</p>
                 </div>
               )
             ) : null}

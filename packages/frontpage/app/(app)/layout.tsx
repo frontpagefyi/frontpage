@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Suspense } from "react";
 import { Button } from "@/lib/components/ui/button";
 import { isAdmin } from "@/lib/data/user";
-import { BellIcon, OpenInNewWindowIcon } from "@radix-ui/react-icons";
+import { BellIcon } from "@radix-ui/react-icons";
 import { ThemeToggleMenuGroup } from "./_components/theme-toggle";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 
@@ -72,18 +72,6 @@ export default async function Layout({
       </div>
 
       <div className="mb-6">{children}</div>
-
-      <footer className="flex justify-between items-center text-gray-500 dark:text-gray-400">
-        <p>
-          Made by{" "}
-          <a
-            href={`https://bsky.app/profile/${FRONTPAGE_ATPROTO_HANDLE}`}
-            className="font-medium text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300"
-          >
-            @frontpage.fyi <OpenInNewWindowIcon className="inline" />
-          </a>
-        </p>
-      </footer>
     </div>
   );
 }
