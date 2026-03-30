@@ -10,7 +10,12 @@ drainpipe:
   - changed-files:
       - any-glob-to-any-file: packages-rs/**
 
-# Add 'documentation' label to any change to .md files within the entire repository
+infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - packages/frontpage/local-infra/**
+
 documentation:
   - changed-files:
       - any-glob-to-any-file: "**/*.md"
