@@ -61,16 +61,28 @@ pnpm turbo build              # Full build (catches runtime config issues)
 - Use `@testing-library/react` for component tests
 - Run single package tests: `cd packages/frontpage && pnpm test`
 
+## Next.js Conventions
+
+- Page props and `generateMetadata` functions should be typed using the `PageProps` generic
+- Route handler functions should receive context as generic type `RouteHandlerContext`
+
+## Lexicon Tooling
+
+- Lexicon changes require Go toolchain (`glot lint`, `glot compat`)
+- Codegen: `pnpm exec lex gen-api ./src ../../lexicons/**/*.json` (must glob files, not pass directory)
+- Lexicon CI runs `glot lint` and `glot compat` on `lexicons/**` changes
+
 ## Important Gotchas
 
 - All `@atproto/*` and `@atcute/*` packages must be version-bumped together (see catalog in `pnpm-workspace.yaml`). New `@atproto/*` deps MUST use `"catalog:"` not a pinned version.
-- `NODE_OPTIONS=--use-openssl-ca` is required for most commands (already baked into scripts)
+- `NODE_OPTIONS=--use-openssl-ca` is required for most commands (already baked into scripts). Set it manually if running Node commands outside package scripts.
 - `typescript.ignoreBuildErrors: true` in Next.js config — type errors won't fail builds
 - Secrets managed via 1Password (`dev-1pw` / `build-1pw` scripts)
 - Local dev infra setup: see `packages/frontpage/local-infra/README.md`
 - Node v24+ runs TypeScript natively — use `node script.ts` not `npx tsx`
-- Lexicon codegen: `pnpm exec lex gen-api ./src ../../lexicons/**/*.json` (must glob files, not pass directory)
 - `next.config.mjs` has `cacheComponents: false` (implicit) — `dynamic = "force-static"` in existing routes is incompatible with `cacheComponents: true`. Enable only after migrating those routes.
+- If `pnpm install` fails with `ENOTFOUND npm.jsr.io`, it's a DNS issue — confirm network can reach `npm.jsr.io`
+- When adding new GitHub Actions, prefer fixed SHAs over floating tags. Include the version in a comment.
 
 ## Feeds
 
