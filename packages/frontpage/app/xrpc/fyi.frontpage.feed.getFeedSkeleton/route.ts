@@ -91,12 +91,24 @@ export async function GET(request: NextRequest) {
       );
       requesterDid = payload.iss;
     } catch {
-      return xrpcError("AuthRequired", "Invalid or expired token", 401);
+      return NextResponse.json(
+        { error: "AuthRequired", message: "Invalid or expired token" },
+        {
+          status: 401,
+          headers: { "WWW-Authenticate": 'Bearer realm="frontpage.fyi"' },
+        },
+      );
     }
   }
 
   // Get the skeleton
-  const result = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
+  let result;
+  try {
+    result = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
+  } catch (err) {
+    console.error("getFeedSkeleton db error:", err);
+    return xrpcError("InternalServerError", "Failed to fetch feed", 500);
+  }
 
   // Non-blocking logging
   after(() => {
@@ -107,8 +119,7 @@ export async function GET(request: NextRequest) {
 
   return NextResponse.json(result, {
     headers: {
-      "Cache-Control": "max-age=30, stale-while-revalidate=60",
-      Vary: "Authorization",
+      "Cache-Control": "public, max-age=30, stale-while-revalidate=60",
     },
   });
 }
