@@ -1,9 +1,19 @@
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
 import { HOT_FEED_URI } from "@/lib/data/feed-constants";
+import { FeedLoadingSkeleton } from "./feed/_components/feed-skeleton";
 
-export default async function Home() {
+export default function Home() {
+  return (
+    <Suspense fallback={<FeedLoadingSkeleton />}>
+      <HomeContent />
+    </Suspense>
+  );
+}
+
+async function HomeContent() {
   await connection();
 
   const getMorePostsAction = getMoreFeedPostsAction.bind(null, HOT_FEED_URI);
