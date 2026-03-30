@@ -1,12 +1,7 @@
 "use client";
 
 import useSWRInfinite, { unstable_serialize } from "swr/infinite";
-import {
-  createContext,
-  Fragment,
-  type ReactNode,
-  startTransition,
-} from "react";
+import { createContext, Fragment, type ReactNode } from "react";
 import { useInView } from "react-intersection-observer";
 import { mutate, SWRConfig } from "swr";
 import { Spinner } from "@/lib/components/ui/spinner";
@@ -62,7 +57,7 @@ function InfinteListInner<TCursor>({
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate } = useSWRInfinite(
+  const { data, size, setSize, mutate, isValidating } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
       if (previousPageData && !previousPageData.pageSize) return null; // reached the end
       return [cacheKey, previousPageData?.nextCursor ?? null];
@@ -70,18 +65,25 @@ function InfinteListInner<TCursor>({
     ([_, cursor]) => {
       return getMoreItemsAction(cursor);
     },
-    { suspense: true, revalidateOnMount: false, revalidateAll },
+    { revalidateOnMount: false, revalidateAll },
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
-      if (inView) {
-        startTransition(() => void setSize(size + 1));
+      if (inView && !isValidating) {
+        void setSize(size + 1);
       }
     },
   });
 
-  // Data can't be undefined because we are using suspense
-  const pages = data!;
+  if (!data) {
+    return (
+      <div className="flex justify-center py-8">
+        <Spinner className="h-6 w-6" />
+      </div>
+    );
+  }
+
+  const pages = data;
 
   return (
     <div className="space-y-6">
