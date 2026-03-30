@@ -18,7 +18,13 @@ export async function resolveFeed(
   cursor?: string,
   limit = 50,
 ): Promise<{ posts: HydratedPost[]; cursor?: string }> {
-  const atUri = new AtUri(feedUri);
+  // Validate feedUri before triggering any outbound requests
+  const atUri = new AtUri(feedUri); // throws on malformed URIs
+  if (atUri.collection !== GENERATOR_COLLECTION) {
+    throw new Error(
+      `Invalid feed URI: expected collection ${GENERATOR_COLLECTION}, got ${atUri.collection}`,
+    );
+  }
 
   const skeleton = await getSkeleton(atUri, cursor, limit);
   const posts = await hydratePosts(skeleton.feed.map((s) => s.post));

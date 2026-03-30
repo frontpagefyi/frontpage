@@ -34,7 +34,7 @@ async function getMorePostsAction(cursor: string | null) {
         {posts.map((post) => (
           <PostCard
             key={post.id}
-            author={post.authorDid as any}
+            author={post.authorDid}
             createdAt={post.createdAt}
             id={post.id}
             title={post.title}

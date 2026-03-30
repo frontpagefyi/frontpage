@@ -19,7 +19,7 @@ export type HydratedPost = {
   title: string;
   url: string;
   createdAt: Date;
-  authorDid: string;
+  authorDid: DID;
   voteCount: number;
   commentCount: number;
   userHasVoted: boolean;
