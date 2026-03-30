@@ -25,6 +25,7 @@
     "@atproto/common-web": "^0.3.2",
     "@atproto/oauth-types": "^0.1.5",
     "@atproto/syntax": "catalog:",
+    "@atproto/xrpc-server": "^0.10.18",
     "@libsql/client": "^0.15.10",
     "@markdoc/markdoc": "^0.4.0",
     "@next/env": "catalog:",
