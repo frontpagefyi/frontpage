@@ -1,30 +1,50 @@
+import { Suspense } from "react";
 import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
-import { PostCard } from "./_components/post-card";
+import { PostCard } from "../_components/post-card";
 import { resolveFeed } from "@/lib/data/feed-resolver";
+import { FeedLoadingSkeleton } from "./_components/feed-skeleton";
 
-const HOT_FEED_URI =
-  "at://did:plc:klmr76mpewpv7rtm3xgpzd7x/fyi.frontpage.feed.generator/hot";
+export default async function FeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ uri?: string }>;
+}) {
+  const { uri } = await searchParams;
 
-export default async function Home() {
+  if (!uri) {
+    return <p className="text-center text-gray-400">No feed URI provided</p>;
+  }
+
+  return (
+    <Suspense fallback={<FeedLoadingSkeleton />}>
+      <FeedContent uri={uri} />
+    </Suspense>
+  );
+}
+
+async function FeedContent({ uri }: { uri: string }) {
   await connection();
 
-  const initialData = await getMorePostsAction(null);
+  const initialData = await getMoreFeedPostsAction(uri, null);
 
   return (
     <InfiniteList
-      cacheKey="posts"
-      getMoreItemsAction={getMorePostsAction}
-      emptyMessage="No posts remaining"
+      cacheKey={`feed:${uri}`}
+      getMoreItemsAction={getMoreFeedPostsAction.bind(null, uri)}
       fallback={initialData}
+      emptyMessage="No posts in this feed"
     />
   );
 }
 
-async function getMorePostsAction(cursor: string | null) {
+async function getMoreFeedPostsAction(
+  feedUri: string,
+  cursor: string | null,
+) {
   "use server";
   const { posts, cursor: nextCursor } = await resolveFeed(
-    HOT_FEED_URI,
+    feedUri,
     cursor ?? undefined,
   );
 
