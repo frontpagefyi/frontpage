@@ -75,13 +75,25 @@ async function resolveDidWeb(did: string): Promise<DidDocument> {
 }
 
 export const getDidDoc = cache(async (did: DID): Promise<DidDocument> => {
+  return resolveDidDoc(did);
+});
+
+/**
+ * Resolve a DID document without React.cache() deduplication.
+ * Used when a fresh fetch is needed (e.g., JWT key rotation).
+ */
+export async function getDidDocFresh(did: DID): Promise<DidDocument> {
+  return resolveDidDoc(did);
+}
+
+async function resolveDidDoc(did: DID): Promise<DidDocument> {
   if (did.startsWith("did:web:")) {
     return resolveDidWeb(did);
   }
   // After the did:web early return, this is always did:plc
   const resolution = await didResolver.resolve(did as `did:plc:${string}`);
   return resolution;
-});
+}
 
 export const getPdsUrl = cache(async (did: DID) => {
   const plc = await getDidDoc(did);

@@ -30,6 +30,9 @@ catalogs:
     '@atproto/syntax':
       specifier: ^0.4.2
       version: 0.4.2
+    '@atproto/xrpc-server':
+      specifier: ^0.10.18
+      version: 0.10.18
     '@next/env':
       specifier: ^16.1.7
       version: 16.1.7
@@ -256,7 +259,7 @@ importers:
         specifier: 'catalog:'
         version: 0.4.2
       '@atproto/xrpc-server':
-        specifier: ^0.10.18
+        specifier: 'catalog:'
         version: 0.10.18(bufferutil@4.0.8)(utf-8-validate@6.0.3)
       '@libsql/client':
         specifier: ^0.15.10

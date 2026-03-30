@@ -6,7 +6,7 @@ import {
   isKnownFeed,
   getSkeletonByAlgorithm,
 } from "@/lib/data/db/feed-skeleton";
-import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
+import { getDidDoc, getDidDocFresh, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
   FEED_SERVICE_DID,
   FEED_GENERATOR_COLLECTION,
@@ -24,13 +24,17 @@ function xrpcError(name: string, message: string, status: number) {
 
 async function getSigningKey(
   iss: string,
-  _forceRefresh: boolean,
+  forceRefresh: boolean,
 ): Promise<string> {
   const issDid = parseDid(iss);
   if (!issDid) {
     throw new Error(`Invalid DID in JWT issuer: ${iss}`);
   }
-  const didDoc = await getDidDoc(issDid);
+  // verifyJwt calls with forceRefresh=true after initial key lookup fails,
+  // to handle DID key rotation. Bypass the React.cache() wrapper in that case.
+  const didDoc = forceRefresh
+    ? await getDidDocFresh(issDid)
+    : await getDidDoc(issDid);
   const vm = didDoc.verificationMethod?.find(
     (m) => m.id === `${iss}#atproto`,
   );
