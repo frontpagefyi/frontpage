@@ -5,7 +5,7 @@
  * as the frontpage.fyi account.
  *
  * Usage:
- *   npx tsx packages/frontpage/scripts/publish-feed-generators.ts
+ *   node packages/frontpage/scripts/publish-feed-generators.ts
  *
  * Environment:
  *   Requires the same env as the main app (PRIVATE_JWK, PUBLIC_JWK, etc.)
@@ -36,12 +36,12 @@ const FEEDS = [
 
 async function main() {
   // Resolve the PDS URL for frontpage.fyi
-  const plcResponse = await fetch(
-    `https://plc.directory/${FRONTPAGE_DID}`,
-  );
-  const didDoc = await plcResponse.json();
+  const plcResponse = await fetch(`https://plc.directory/${FRONTPAGE_DID}`);
+  const didDoc = (await plcResponse.json()) as {
+    service?: Array<{ type: string; serviceEndpoint: string }>;
+  };
   const pdsService = didDoc.service?.find(
-    (s: { type: string }) => s.type === "AtprotoPersonalDataServer",
+    (s) => s.type === "AtprotoPersonalDataServer",
   );
   if (!pdsService?.serviceEndpoint) {
     throw new Error("Could not find PDS for frontpage.fyi");
