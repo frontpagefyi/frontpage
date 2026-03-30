@@ -9,6 +9,7 @@ import {
 } from "react";
 import { useInView } from "react-intersection-observer";
 import { mutate, SWRConfig } from "swr";
+import { Spinner } from "@/lib/components/ui/spinner";
 
 export type Page<TCursor> = {
   content: ReactNode;
@@ -81,7 +82,9 @@ function InfinteListInner<TCursor>({
 
   if (isLoading || !data) {
     return (
-      <p className="text-center text-gray-400">Loading...</p>
+      <div className="flex justify-center py-8">
+        <Spinner className="h-6 w-6" />
+      </div>
     );
   }
 
@@ -112,9 +115,9 @@ function InfinteListInner<TCursor>({
               page.pageSize === 0 ? (
                 <p className="text-center text-gray-400">{emptyMessage}</p>
               ) : (
-                <p ref={inViewRef} className="text-center text-gray-400">
-                  Loading...
-                </p>
+                <div ref={inViewRef} className="flex justify-center py-4">
+                  <Spinner className="h-5 w-5" />
+                </div>
               )
             ) : null}
           </Fragment>
