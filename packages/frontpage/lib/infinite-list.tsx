@@ -126,9 +126,7 @@ function InfiniteListInner<TCursor>({
             </InfiniteListContext.Provider>
 
             {indx === pages.length - 1 ? (
-              page.itemCount === 0 ? (
-                <p className="text-center text-gray-400">{emptyMessage}</p>
-              ) : page.nextCursor ? (
+              page.nextCursor ? (
                 <div
                   ref={inViewRef}
                   className="flex flex-col items-center gap-2 py-4 text-gray-400"
@@ -136,7 +134,13 @@ function InfiniteListInner<TCursor>({
                   <Spinner className="h-5 w-5" />
                   <p className="text-sm">Loading more posts...</p>
                 </div>
-              ) : null
+              ) : page.itemCount === 0 && indx === 0 ? (
+                <p className="text-center text-gray-400">{emptyMessage}</p>
+              ) : (
+                <p className="py-4 text-center text-sm text-gray-400">
+                  You&apos;ve reached the end
+                </p>
+              )
             ) : null}
           </Fragment>
         );
