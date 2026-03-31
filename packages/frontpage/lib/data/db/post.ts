@@ -17,7 +17,33 @@ import { getUser, isAdmin } from "../user";
 import { type DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
 import { invariant } from "@/lib/utils";
-import type { PostCollectionType } from "../atproto/repo";
+import { nsids, type PostCollectionType } from "../atproto/repo";
+import { type AtUri } from "@atproto/syntax";
+import { getDidFromHandleOrDid } from "../atproto/identity";
+
+export type PostUri = {
+  actor: DID;
+  collection: PostCollectionType;
+  rkey: string;
+};
+
+export async function resolvePostUri(uri: AtUri): Promise<PostUri> {
+  invariant(
+    uri.collection === nsids.FyiUnravelFrontpagePost ||
+      uri.collection === nsids.FyiFrontpageFeedPost,
+    "Invalid post collection",
+  );
+
+  const actor = await getDidFromHandleOrDid(uri.host);
+
+  invariant(actor, "Failed to resolve actor from URI");
+
+  return {
+    actor,
+    collection: uri.collection,
+    rkey: uri.rkey,
+  };
+}
 
 const buildUserHasVotedQuery = cache(async () => {
   const user = await getUser();
@@ -134,14 +160,18 @@ export const getUserPosts = cache(async (userDid: DID) => {
   }));
 });
 
-export const getPost = cache(async (authorDid: DID, rkey: string) => {
+export const getPost = cache(async (uri: PostUri) => {
   const userHasVoted = await buildUserHasVotedQuery();
 
   const rows = await db
     .select()
     .from(schema.Post)
     .where(
-      and(eq(schema.Post.authorDid, authorDid), eq(schema.Post.rkey, rkey)),
+      and(
+        eq(schema.Post.authorDid, uri.actor),
+        eq(schema.Post.collection, uri.collection),
+        eq(schema.Post.rkey, uri.rkey),
+      ),
     )
     .innerJoin(
       schema.PostAggregates,
@@ -162,12 +192,16 @@ export const getPost = cache(async (authorDid: DID, rkey: string) => {
   };
 });
 
-export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
+export async function uncached_doesPostExist(uri: PostUri) {
   const row = await db
     .select({ id: schema.Post.id })
     .from(schema.Post)
     .where(
-      and(eq(schema.Post.authorDid, authorDid), eq(schema.Post.rkey, rkey)),
+      and(
+        eq(schema.Post.authorDid, uri.actor),
+        eq(schema.Post.collection, uri.collection),
+        eq(schema.Post.rkey, uri.rkey),
+      ),
     )
     .limit(1);
 
@@ -176,33 +210,24 @@ export async function uncached_doesPostExist(authorDid: DID, rkey: string) {
 
 export type CreatePostInput = {
   post: { title: string; url: string; createdAt: Date };
-  authorDid: DID;
-  rkey: string;
+  uri: PostUri;
   cid?: string;
   status: "live" | "pending";
-  collection: PostCollectionType;
 };
 
-export async function createPost({
-  post,
-  authorDid,
-  rkey,
-  cid,
-  status,
-  collection,
-}: CreatePostInput) {
+export async function createPost({ post, uri, cid, status }: CreatePostInput) {
   return await db.transaction(async (tx) => {
     const [insertedPostRow] = await tx
       .insert(schema.Post)
       .values({
-        rkey,
+        rkey: uri.rkey,
         cid: cid ?? "",
-        authorDid,
+        authorDid: uri.actor,
         title: post.title,
         url: post.url,
         createdAt: post.createdAt,
         status,
-        collection,
+        collection: uri.collection,
       })
       .returning({ postId: schema.Post.id });
 
@@ -222,33 +247,31 @@ type UpdatePostInput = Partial<
   Omit<InferSelectModel<typeof schema.Post>, "id">
 >;
 
-export const updatePost = async (
-  repo: DID,
-  rkey: string,
-  input: UpdatePostInput,
-) => {
+export const updatePost = async (uri: PostUri, input: UpdatePostInput) => {
   await db
     .update(schema.Post)
     .set(input)
-    .where(and(eq(schema.Post.authorDid, repo), eq(schema.Post.rkey, rkey)));
+    .where(
+      and(
+        eq(schema.Post.authorDid, uri.actor),
+        eq(schema.Post.collection, uri.collection),
+        eq(schema.Post.rkey, uri.rkey),
+      ),
+    );
 };
 
-export type DeletePostInput = {
-  authorDid: DID;
-  rkey: string;
-};
-
-export async function deletePost({ authorDid, rkey }: DeletePostInput) {
-  console.log("Deleting post", rkey);
+export async function deletePost(uri: PostUri) {
+  console.log("Deleting post", uri.rkey);
   await db.transaction(async (tx) => {
-    console.log("Updating post status to deleted", rkey);
+    console.log("Updating post status to deleted", uri.rkey);
     const [updatedPost] = await tx
       .update(schema.Post)
       .set({ status: "deleted" })
       .where(
         and(
-          eq(schema.Post.rkey, rkey),
-          eq(schema.Post.authorDid, authorDid),
+          eq(schema.Post.authorDid, uri.actor),
+          eq(schema.Post.collection, uri.collection),
+          eq(schema.Post.rkey, uri.rkey),
           ne(schema.Post.status, "deleted"),
         ),
       )
@@ -264,17 +287,11 @@ export async function deletePost({ authorDid, rkey }: DeletePostInput) {
 }
 
 type ModeratePostInput = {
-  rkey: string;
-  authorDid: DID;
+  uri: PostUri;
   cid: string;
   hide: boolean;
 };
-export async function moderatePost({
-  rkey,
-  authorDid,
-  cid,
-  hide,
-}: ModeratePostInput) {
+export async function moderatePost({ uri, cid, hide }: ModeratePostInput) {
   const adminUser = await isAdmin();
 
   if (!adminUser) {
@@ -286,8 +303,9 @@ export async function moderatePost({
     .set({ status: hide ? "moderator_hidden" : "live" })
     .where(
       and(
-        eq(schema.Post.rkey, rkey),
-        eq(schema.Post.authorDid, authorDid),
+        eq(schema.Post.authorDid, uri.actor),
+        eq(schema.Post.collection, uri.collection),
+        eq(schema.Post.rkey, uri.rkey),
         eq(schema.Post.cid, cid),
       ),
     );

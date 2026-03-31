@@ -57,27 +57,38 @@ async function performModerationAction(
   const modAction = async () => {
     switch (report.subjectCollection) {
       case nsids.FyiUnravelFrontpagePost:
+      case nsids.FyiFrontpageFeedPost: {
         return await moderatePost({
-          rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
+          uri: {
+            collection: report.subjectCollection,
+            rkey: report.subjectRkey!,
+            actor: report.subjectDid,
+          },
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });
+      }
 
       case nsids.FyiUnravelFrontpageComment:
+      case nsids.FyiFrontpageFeedComment: {
         return await moderateComment({
-          rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
+          uri: {
+            collection: report.subjectCollection,
+            rkey: report.subjectRkey!,
+            actor: report.subjectDid,
+          },
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });
+      }
 
-      default:
+      case null: {
         return await moderateUser({
           userDid: report.subjectDid as DID,
           hide: input.status === "accepted",
           label: report.reportReason,
         });
+      }
     }
   };
 
