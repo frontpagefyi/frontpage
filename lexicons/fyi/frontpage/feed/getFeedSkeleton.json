@@ -60,11 +60,6 @@
           "type": "string",
           "format": "at-uri",
           "description": "AT URI of the post."
-        },
-        "feedContext": {
-          "type": "string",
-          "maxLength": 2000,
-          "description": "Opaque context passed back via sendInteractions."
         }
       }
     }

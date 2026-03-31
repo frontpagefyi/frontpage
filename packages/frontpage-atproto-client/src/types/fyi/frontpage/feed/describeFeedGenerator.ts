@@ -1,72 +1,72 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { HeadersMap, XRPCError } from "@atproto/xrpc";
-import { type ValidationResult, BlobRef } from "@atproto/lexicon";
-import { CID } from "multiformats/cid";
-import { validate as _validate } from "../../../../lexicons";
+import { HeadersMap, XRPCError } from '@atproto/xrpc'
+import { type ValidationResult, BlobRef } from '@atproto/lexicon'
+import { CID } from 'multiformats/cid'
+import { validate as _validate } from '../../../../lexicons'
 import {
   type $Typed,
   is$typed as _is$typed,
   type OmitKey,
-} from "../../../../util";
+} from '../../../../util'
 
 const is$typed = _is$typed,
-  validate = _validate;
-const id = "fyi.frontpage.feed.describeFeedGenerator";
+  validate = _validate
+const id = 'fyi.frontpage.feed.describeFeedGenerator'
 
 export interface QueryParams {}
 
-export type InputSchema = undefined;
+export type InputSchema = undefined
 
 export interface OutputSchema {
-  did: string;
-  feeds: Feed[];
-  links?: Links;
+  did: string
+  feeds: Feed[]
+  links?: Links
 }
 
 export interface CallOptions {
-  signal?: AbortSignal;
-  headers?: HeadersMap;
+  signal?: AbortSignal
+  headers?: HeadersMap
 }
 
 export interface Response {
-  success: boolean;
-  headers: HeadersMap;
-  data: OutputSchema;
+  success: boolean
+  headers: HeadersMap
+  data: OutputSchema
 }
 
 export function toKnownErr(e: any) {
-  return e;
+  return e
 }
 
 export interface Feed {
-  $type?: "fyi.frontpage.feed.describeFeedGenerator#feed";
-  uri: string;
+  $type?: 'fyi.frontpage.feed.describeFeedGenerator#feed'
+  uri: string
 }
 
-const hashFeed = "feed";
+const hashFeed = 'feed'
 
 export function isFeed<V>(v: V) {
-  return is$typed(v, id, hashFeed);
+  return is$typed(v, id, hashFeed)
 }
 
 export function validateFeed<V>(v: V) {
-  return validate<Feed & V>(v, id, hashFeed);
+  return validate<Feed & V>(v, id, hashFeed)
 }
 
 export interface Links {
-  $type?: "fyi.frontpage.feed.describeFeedGenerator#links";
-  privacyPolicy?: string;
-  termsOfService?: string;
+  $type?: 'fyi.frontpage.feed.describeFeedGenerator#links'
+  privacyPolicy?: string
+  termsOfService?: string
 }
 
-const hashLinks = "links";
+const hashLinks = 'links'
 
 export function isLinks<V>(v: V) {
-  return is$typed(v, id, hashLinks);
+  return is$typed(v, id, hashLinks)
 }
 
 export function validateLinks<V>(v: V) {
-  return validate<Links & V>(v, id, hashLinks);
+  return validate<Links & V>(v, id, hashLinks)
 }

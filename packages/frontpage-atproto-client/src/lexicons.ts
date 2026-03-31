@@ -6,74 +6,74 @@ import {
   Lexicons,
   ValidationError,
   type ValidationResult,
-} from "@atproto/lexicon";
-import { type $Typed, is$typed, maybe$typed } from "./util.js";
+} from '@atproto/lexicon'
+import { type $Typed, is$typed, maybe$typed } from './util.js'
 
 export const schemaDict = {
   ComAtprotoRepoApplyWrites: {
     lexicon: 1,
-    id: "com.atproto.repo.applyWrites",
+    id: 'com.atproto.repo.applyWrites',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
-          "Apply a batch transaction of repository creates, updates, and deletes. Requires auth, implemented by PDS.",
+          'Apply a batch transaction of repository creates, updates, and deletes. Requires auth, implemented by PDS.',
         input: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["repo", "writes"],
+            type: 'object',
+            required: ['repo', 'writes'],
             properties: {
               repo: {
-                type: "string",
-                format: "at-identifier",
+                type: 'string',
+                format: 'at-identifier',
                 description:
-                  "The handle or DID of the repo (aka, current account).",
+                  'The handle or DID of the repo (aka, current account).',
               },
               validate: {
-                type: "boolean",
+                type: 'boolean',
                 description:
                   "Can be set to 'false' to skip Lexicon schema validation of record data across all operations, 'true' to require it, or leave unset to validate only for known Lexicons.",
               },
               writes: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "union",
+                  type: 'union',
                   refs: [
-                    "lex:com.atproto.repo.applyWrites#create",
-                    "lex:com.atproto.repo.applyWrites#update",
-                    "lex:com.atproto.repo.applyWrites#delete",
+                    'lex:com.atproto.repo.applyWrites#create',
+                    'lex:com.atproto.repo.applyWrites#update',
+                    'lex:com.atproto.repo.applyWrites#delete',
                   ],
                   closed: true,
                 },
               },
               swapCommit: {
-                type: "string",
+                type: 'string',
                 description:
-                  "If provided, the entire operation will fail if the current repo commit CID does not match this value. Used to prevent conflicting repo mutations.",
-                format: "cid",
+                  'If provided, the entire operation will fail if the current repo commit CID does not match this value. Used to prevent conflicting repo mutations.',
+                format: 'cid',
               },
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
+            type: 'object',
             required: [],
             properties: {
               commit: {
-                type: "ref",
-                ref: "lex:com.atproto.repo.defs#commitMeta",
+                type: 'ref',
+                ref: 'lex:com.atproto.repo.defs#commitMeta',
               },
               results: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "union",
+                  type: 'union',
                   refs: [
-                    "lex:com.atproto.repo.applyWrites#createResult",
-                    "lex:com.atproto.repo.applyWrites#updateResult",
-                    "lex:com.atproto.repo.applyWrites#deleteResult",
+                    'lex:com.atproto.repo.applyWrites#createResult',
+                    'lex:com.atproto.repo.applyWrites#updateResult',
+                    'lex:com.atproto.repo.applyWrites#deleteResult',
                   ],
                   closed: true,
                 },
@@ -83,99 +83,99 @@ export const schemaDict = {
         },
         errors: [
           {
-            name: "InvalidSwap",
+            name: 'InvalidSwap',
             description:
               "Indicates that the 'swapCommit' parameter did not match current commit.",
           },
         ],
       },
       create: {
-        type: "object",
-        description: "Operation which creates a new record.",
-        required: ["collection", "value"],
+        type: 'object',
+        description: 'Operation which creates a new record.',
+        required: ['collection', 'value'],
         properties: {
           collection: {
-            type: "string",
-            format: "nsid",
+            type: 'string',
+            format: 'nsid',
           },
           rkey: {
-            type: "string",
+            type: 'string',
             maxLength: 15,
           },
           value: {
-            type: "unknown",
+            type: 'unknown',
           },
         },
       },
       update: {
-        type: "object",
-        description: "Operation which updates an existing record.",
-        required: ["collection", "rkey", "value"],
+        type: 'object',
+        description: 'Operation which updates an existing record.',
+        required: ['collection', 'rkey', 'value'],
         properties: {
           collection: {
-            type: "string",
-            format: "nsid",
+            type: 'string',
+            format: 'nsid',
           },
           rkey: {
-            type: "string",
+            type: 'string',
           },
           value: {
-            type: "unknown",
+            type: 'unknown',
           },
         },
       },
       delete: {
-        type: "object",
-        description: "Operation which deletes an existing record.",
-        required: ["collection", "rkey"],
+        type: 'object',
+        description: 'Operation which deletes an existing record.',
+        required: ['collection', 'rkey'],
         properties: {
           collection: {
-            type: "string",
-            format: "nsid",
+            type: 'string',
+            format: 'nsid',
           },
           rkey: {
-            type: "string",
+            type: 'string',
           },
         },
       },
       createResult: {
-        type: "object",
-        required: ["uri", "cid"],
+        type: 'object',
+        required: ['uri', 'cid'],
         properties: {
           uri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
           validationStatus: {
-            type: "string",
-            knownValues: ["valid", "unknown"],
+            type: 'string',
+            knownValues: ['valid', 'unknown'],
           },
         },
       },
       updateResult: {
-        type: "object",
-        required: ["uri", "cid"],
+        type: 'object',
+        required: ['uri', 'cid'],
         properties: {
           uri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
           validationStatus: {
-            type: "string",
-            knownValues: ["valid", "unknown"],
+            type: 'string',
+            knownValues: ['valid', 'unknown'],
           },
         },
       },
       deleteResult: {
-        type: "object",
+        type: 'object',
         required: [],
         properties: {},
       },
@@ -183,80 +183,80 @@ export const schemaDict = {
   },
   ComAtprotoRepoCreateRecord: {
     lexicon: 1,
-    id: "com.atproto.repo.createRecord",
+    id: 'com.atproto.repo.createRecord',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
-          "Create a single new repository record. Requires auth, implemented by PDS.",
+          'Create a single new repository record. Requires auth, implemented by PDS.',
         input: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["repo", "collection", "record"],
+            type: 'object',
+            required: ['repo', 'collection', 'record'],
             properties: {
               repo: {
-                type: "string",
-                format: "at-identifier",
+                type: 'string',
+                format: 'at-identifier',
                 description:
-                  "The handle or DID of the repo (aka, current account).",
+                  'The handle or DID of the repo (aka, current account).',
               },
               collection: {
-                type: "string",
-                format: "nsid",
-                description: "The NSID of the record collection.",
+                type: 'string',
+                format: 'nsid',
+                description: 'The NSID of the record collection.',
               },
               rkey: {
-                type: "string",
-                description: "The Record Key.",
+                type: 'string',
+                description: 'The Record Key.',
                 maxLength: 15,
               },
               validate: {
-                type: "boolean",
+                type: 'boolean',
                 description:
                   "Can be set to 'false' to skip Lexicon schema validation of record data, 'true' to require it, or leave unset to validate only for known Lexicons.",
               },
               record: {
-                type: "unknown",
-                description: "The record itself. Must contain a $type field.",
+                type: 'unknown',
+                description: 'The record itself. Must contain a $type field.',
               },
               swapCommit: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
                 description:
-                  "Compare and swap with the previous commit by CID.",
+                  'Compare and swap with the previous commit by CID.',
               },
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["uri", "cid"],
+            type: 'object',
+            required: ['uri', 'cid'],
             properties: {
               uri: {
-                type: "string",
-                format: "at-uri",
+                type: 'string',
+                format: 'at-uri',
               },
               cid: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
               },
               commit: {
-                type: "ref",
-                ref: "lex:com.atproto.repo.defs#commitMeta",
+                type: 'ref',
+                ref: 'lex:com.atproto.repo.defs#commitMeta',
               },
               validationStatus: {
-                type: "string",
-                knownValues: ["valid", "unknown"],
+                type: 'string',
+                knownValues: ['valid', 'unknown'],
               },
             },
           },
         },
         errors: [
           {
-            name: "InvalidSwap",
+            name: 'InvalidSwap',
             description:
               "Indicates that 'swapCommit' didn't match current repo commit.",
           },
@@ -266,18 +266,18 @@ export const schemaDict = {
   },
   ComAtprotoRepoDefs: {
     lexicon: 1,
-    id: "com.atproto.repo.defs",
+    id: 'com.atproto.repo.defs',
     defs: {
       commitMeta: {
-        type: "object",
-        required: ["cid", "rev"],
+        type: 'object',
+        required: ['cid', 'rev'],
         properties: {
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
           rev: {
-            type: "string",
+            type: 'string',
           },
         },
       },
@@ -285,63 +285,63 @@ export const schemaDict = {
   },
   ComAtprotoRepoDeleteRecord: {
     lexicon: 1,
-    id: "com.atproto.repo.deleteRecord",
+    id: 'com.atproto.repo.deleteRecord',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
           "Delete a repository record, or ensure it doesn't exist. Requires auth, implemented by PDS.",
         input: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["repo", "collection", "rkey"],
+            type: 'object',
+            required: ['repo', 'collection', 'rkey'],
             properties: {
               repo: {
-                type: "string",
-                format: "at-identifier",
+                type: 'string',
+                format: 'at-identifier',
                 description:
-                  "The handle or DID of the repo (aka, current account).",
+                  'The handle or DID of the repo (aka, current account).',
               },
               collection: {
-                type: "string",
-                format: "nsid",
-                description: "The NSID of the record collection.",
+                type: 'string',
+                format: 'nsid',
+                description: 'The NSID of the record collection.',
               },
               rkey: {
-                type: "string",
-                description: "The Record Key.",
+                type: 'string',
+                description: 'The Record Key.',
               },
               swapRecord: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
                 description:
-                  "Compare and swap with the previous record by CID.",
+                  'Compare and swap with the previous record by CID.',
               },
               swapCommit: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
                 description:
-                  "Compare and swap with the previous commit by CID.",
+                  'Compare and swap with the previous commit by CID.',
               },
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
+            type: 'object',
             properties: {
               commit: {
-                type: "ref",
-                ref: "lex:com.atproto.repo.defs#commitMeta",
+                type: 'ref',
+                ref: 'lex:com.atproto.repo.defs#commitMeta',
               },
             },
           },
         },
         errors: [
           {
-            name: "InvalidSwap",
+            name: 'InvalidSwap',
           },
         ],
       },
@@ -349,60 +349,60 @@ export const schemaDict = {
   },
   ComAtprotoRepoDescribeRepo: {
     lexicon: 1,
-    id: "com.atproto.repo.describeRepo",
+    id: 'com.atproto.repo.describeRepo',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "Get information about an account and repository, including the list of collections. Does not require auth.",
+          'Get information about an account and repository, including the list of collections. Does not require auth.',
         parameters: {
-          type: "params",
-          required: ["repo"],
+          type: 'params',
+          required: ['repo'],
           properties: {
             repo: {
-              type: "string",
-              format: "at-identifier",
-              description: "The handle or DID of the repo.",
+              type: 'string',
+              format: 'at-identifier',
+              description: 'The handle or DID of the repo.',
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
+            type: 'object',
             required: [
-              "handle",
-              "did",
-              "didDoc",
-              "collections",
-              "handleIsCorrect",
+              'handle',
+              'did',
+              'didDoc',
+              'collections',
+              'handleIsCorrect',
             ],
             properties: {
               handle: {
-                type: "string",
-                format: "handle",
+                type: 'string',
+                format: 'handle',
               },
               did: {
-                type: "string",
-                format: "did",
+                type: 'string',
+                format: 'did',
               },
               didDoc: {
-                type: "unknown",
-                description: "The complete DID document for this account.",
+                type: 'unknown',
+                description: 'The complete DID document for this account.',
               },
               collections: {
-                type: "array",
+                type: 'array',
                 description:
-                  "List of all the collections (NSIDs) for which this repo contains at least one record.",
+                  'List of all the collections (NSIDs) for which this repo contains at least one record.',
                 items: {
-                  type: "string",
-                  format: "nsid",
+                  type: 'string',
+                  format: 'nsid',
                 },
               },
               handleIsCorrect: {
-                type: "boolean",
+                type: 'boolean',
                 description:
-                  "Indicates if handle is currently valid (resolves bi-directionally)",
+                  'Indicates if handle is currently valid (resolves bi-directionally)',
               },
             },
           },
@@ -412,61 +412,61 @@ export const schemaDict = {
   },
   ComAtprotoRepoGetRecord: {
     lexicon: 1,
-    id: "com.atproto.repo.getRecord",
+    id: 'com.atproto.repo.getRecord',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "Get a single record from a repository. Does not require auth.",
+          'Get a single record from a repository. Does not require auth.',
         parameters: {
-          type: "params",
-          required: ["repo", "collection", "rkey"],
+          type: 'params',
+          required: ['repo', 'collection', 'rkey'],
           properties: {
             repo: {
-              type: "string",
-              format: "at-identifier",
-              description: "The handle or DID of the repo.",
+              type: 'string',
+              format: 'at-identifier',
+              description: 'The handle or DID of the repo.',
             },
             collection: {
-              type: "string",
-              format: "nsid",
-              description: "The NSID of the record collection.",
+              type: 'string',
+              format: 'nsid',
+              description: 'The NSID of the record collection.',
             },
             rkey: {
-              type: "string",
-              description: "The Record Key.",
+              type: 'string',
+              description: 'The Record Key.',
             },
             cid: {
-              type: "string",
-              format: "cid",
+              type: 'string',
+              format: 'cid',
               description:
-                "The CID of the version of the record. If not specified, then return the most recent version.",
+                'The CID of the version of the record. If not specified, then return the most recent version.',
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["uri", "value"],
+            type: 'object',
+            required: ['uri', 'value'],
             properties: {
               uri: {
-                type: "string",
-                format: "at-uri",
+                type: 'string',
+                format: 'at-uri',
               },
               cid: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
               },
               value: {
-                type: "unknown",
+                type: 'unknown',
               },
             },
           },
         },
         errors: [
           {
-            name: "RecordNotFound",
+            name: 'RecordNotFound',
           },
         ],
       },
@@ -474,54 +474,54 @@ export const schemaDict = {
   },
   ComAtprotoRepoImportRepo: {
     lexicon: 1,
-    id: "com.atproto.repo.importRepo",
+    id: 'com.atproto.repo.importRepo',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
-          "Import a repo in the form of a CAR file. Requires Content-Length HTTP header to be set.",
+          'Import a repo in the form of a CAR file. Requires Content-Length HTTP header to be set.',
         input: {
-          encoding: "application/vnd.ipld.car",
+          encoding: 'application/vnd.ipld.car',
         },
       },
     },
   },
   ComAtprotoRepoListMissingBlobs: {
     lexicon: 1,
-    id: "com.atproto.repo.listMissingBlobs",
+    id: 'com.atproto.repo.listMissingBlobs',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "Returns a list of missing blobs for the requesting account. Intended to be used in the account migration flow.",
+          'Returns a list of missing blobs for the requesting account. Intended to be used in the account migration flow.',
         parameters: {
-          type: "params",
+          type: 'params',
           properties: {
             limit: {
-              type: "integer",
+              type: 'integer',
               minimum: 1,
               maximum: 1000,
               default: 500,
             },
             cursor: {
-              type: "string",
+              type: 'string',
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["blobs"],
+            type: 'object',
+            required: ['blobs'],
             properties: {
               cursor: {
-                type: "string",
+                type: 'string',
               },
               blobs: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "ref",
-                  ref: "lex:com.atproto.repo.listMissingBlobs#recordBlob",
+                  type: 'ref',
+                  ref: 'lex:com.atproto.repo.listMissingBlobs#recordBlob',
                 },
               },
             },
@@ -529,16 +529,16 @@ export const schemaDict = {
         },
       },
       recordBlob: {
-        type: "object",
-        required: ["cid", "recordUri"],
+        type: 'object',
+        required: ['cid', 'recordUri'],
         properties: {
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
           recordUri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
         },
       },
@@ -546,66 +546,66 @@ export const schemaDict = {
   },
   ComAtprotoRepoListRecords: {
     lexicon: 1,
-    id: "com.atproto.repo.listRecords",
+    id: 'com.atproto.repo.listRecords',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "List a range of records in a repository, matching a specific collection. Does not require auth.",
+          'List a range of records in a repository, matching a specific collection. Does not require auth.',
         parameters: {
-          type: "params",
-          required: ["repo", "collection"],
+          type: 'params',
+          required: ['repo', 'collection'],
           properties: {
             repo: {
-              type: "string",
-              format: "at-identifier",
-              description: "The handle or DID of the repo.",
+              type: 'string',
+              format: 'at-identifier',
+              description: 'The handle or DID of the repo.',
             },
             collection: {
-              type: "string",
-              format: "nsid",
-              description: "The NSID of the record type.",
+              type: 'string',
+              format: 'nsid',
+              description: 'The NSID of the record type.',
             },
             limit: {
-              type: "integer",
+              type: 'integer',
               minimum: 1,
               maximum: 100,
               default: 50,
-              description: "The number of records to return.",
+              description: 'The number of records to return.',
             },
             cursor: {
-              type: "string",
+              type: 'string',
             },
             rkeyStart: {
-              type: "string",
+              type: 'string',
               description:
-                "DEPRECATED: The lowest sort-ordered rkey to start from (exclusive)",
+                'DEPRECATED: The lowest sort-ordered rkey to start from (exclusive)',
             },
             rkeyEnd: {
-              type: "string",
+              type: 'string',
               description:
-                "DEPRECATED: The highest sort-ordered rkey to stop at (exclusive)",
+                'DEPRECATED: The highest sort-ordered rkey to stop at (exclusive)',
             },
             reverse: {
-              type: "boolean",
-              description: "Flag to reverse the order of the returned records.",
+              type: 'boolean',
+              description: 'Flag to reverse the order of the returned records.',
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["records"],
+            type: 'object',
+            required: ['records'],
             properties: {
               cursor: {
-                type: "string",
+                type: 'string',
               },
               records: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "ref",
-                  ref: "lex:com.atproto.repo.listRecords#record",
+                  type: 'ref',
+                  ref: 'lex:com.atproto.repo.listRecords#record',
                 },
               },
             },
@@ -613,19 +613,19 @@ export const schemaDict = {
         },
       },
       record: {
-        type: "object",
-        required: ["uri", "cid", "value"],
+        type: 'object',
+        required: ['uri', 'cid', 'value'],
         properties: {
           uri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
           value: {
-            type: "unknown",
+            type: 'unknown',
           },
         },
       },
@@ -633,87 +633,87 @@ export const schemaDict = {
   },
   ComAtprotoRepoPutRecord: {
     lexicon: 1,
-    id: "com.atproto.repo.putRecord",
+    id: 'com.atproto.repo.putRecord',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
-          "Write a repository record, creating or updating it as needed. Requires auth, implemented by PDS.",
+          'Write a repository record, creating or updating it as needed. Requires auth, implemented by PDS.',
         input: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["repo", "collection", "rkey", "record"],
-            nullable: ["swapRecord"],
+            type: 'object',
+            required: ['repo', 'collection', 'rkey', 'record'],
+            nullable: ['swapRecord'],
             properties: {
               repo: {
-                type: "string",
-                format: "at-identifier",
+                type: 'string',
+                format: 'at-identifier',
                 description:
-                  "The handle or DID of the repo (aka, current account).",
+                  'The handle or DID of the repo (aka, current account).',
               },
               collection: {
-                type: "string",
-                format: "nsid",
-                description: "The NSID of the record collection.",
+                type: 'string',
+                format: 'nsid',
+                description: 'The NSID of the record collection.',
               },
               rkey: {
-                type: "string",
-                description: "The Record Key.",
+                type: 'string',
+                description: 'The Record Key.',
                 maxLength: 15,
               },
               validate: {
-                type: "boolean",
+                type: 'boolean',
                 description:
                   "Can be set to 'false' to skip Lexicon schema validation of record data, 'true' to require it, or leave unset to validate only for known Lexicons.",
               },
               record: {
-                type: "unknown",
-                description: "The record to write.",
+                type: 'unknown',
+                description: 'The record to write.',
               },
               swapRecord: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
                 description:
-                  "Compare and swap with the previous record by CID. WARNING: nullable and optional field; may cause problems with golang implementation",
+                  'Compare and swap with the previous record by CID. WARNING: nullable and optional field; may cause problems with golang implementation',
               },
               swapCommit: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
                 description:
-                  "Compare and swap with the previous commit by CID.",
+                  'Compare and swap with the previous commit by CID.',
               },
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["uri", "cid"],
+            type: 'object',
+            required: ['uri', 'cid'],
             properties: {
               uri: {
-                type: "string",
-                format: "at-uri",
+                type: 'string',
+                format: 'at-uri',
               },
               cid: {
-                type: "string",
-                format: "cid",
+                type: 'string',
+                format: 'cid',
               },
               commit: {
-                type: "ref",
-                ref: "lex:com.atproto.repo.defs#commitMeta",
+                type: 'ref',
+                ref: 'lex:com.atproto.repo.defs#commitMeta',
               },
               validationStatus: {
-                type: "string",
-                knownValues: ["valid", "unknown"],
+                type: 'string',
+                knownValues: ['valid', 'unknown'],
               },
             },
           },
         },
         errors: [
           {
-            name: "InvalidSwap",
+            name: 'InvalidSwap',
           },
         ],
       },
@@ -721,20 +721,20 @@ export const schemaDict = {
   },
   ComAtprotoRepoStrongRef: {
     lexicon: 1,
-    id: "com.atproto.repo.strongRef",
-    description: "A URI with a content-hash fingerprint.",
+    id: 'com.atproto.repo.strongRef',
+    description: 'A URI with a content-hash fingerprint.',
     defs: {
       main: {
-        type: "object",
-        required: ["uri", "cid"],
+        type: 'object',
+        required: ['uri', 'cid'],
         properties: {
           uri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
           cid: {
-            type: "string",
-            format: "cid",
+            type: 'string',
+            format: 'cid',
           },
         },
       },
@@ -742,23 +742,23 @@ export const schemaDict = {
   },
   ComAtprotoRepoUploadBlob: {
     lexicon: 1,
-    id: "com.atproto.repo.uploadBlob",
+    id: 'com.atproto.repo.uploadBlob',
     defs: {
       main: {
-        type: "procedure",
+        type: 'procedure',
         description:
-          "Upload a new blob, to be referenced from a repository record. The blob will be deleted if it is not referenced within a time window (eg, minutes). Blob restrictions (mimetype, size, etc) are enforced when the reference is created. Requires auth, implemented by PDS.",
+          'Upload a new blob, to be referenced from a repository record. The blob will be deleted if it is not referenced within a time window (eg, minutes). Blob restrictions (mimetype, size, etc) are enforced when the reference is created. Requires auth, implemented by PDS.',
         input: {
-          encoding: "*/*",
+          encoding: '*/*',
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["blob"],
+            type: 'object',
+            required: ['blob'],
             properties: {
               blob: {
-                type: "blob",
+                type: 'blob',
               },
             },
           },
@@ -768,39 +768,39 @@ export const schemaDict = {
   },
   FyiFrontpageFeedComment: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.comment",
+    id: 'fyi.frontpage.feed.comment',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage comment.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage comment.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["createdAt", "post", "blocks"],
+          type: 'object',
+          required: ['createdAt', 'post', 'blocks'],
           properties: {
             blocks: {
-              type: "array",
+              type: 'array',
               maxLength: 200,
               description:
-                "The content of the comment. Note, there are additional constraints placed on the total size of the content within the Frontpage AppView that are not possible to express in lexicon. Generally a comment can have a maximum length of 10,000 graphemes, the Frontpage AppView will enforce this limit.",
+                'The content of the comment. Note, there are additional constraints placed on the total size of the content within the Frontpage AppView that are not possible to express in lexicon. Generally a comment can have a maximum length of 10,000 graphemes, the Frontpage AppView will enforce this limit.',
               items: {
-                type: "ref",
-                ref: "lex:fyi.frontpage.richtext.block",
+                type: 'ref',
+                ref: 'lex:fyi.frontpage.richtext.block',
               },
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this comment was originally created.",
+                'Client-declared timestamp when this comment was originally created.',
             },
             parent: {
-              type: "ref",
-              ref: "lex:com.atproto.repo.strongRef",
+              type: 'ref',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
             post: {
-              type: "ref",
-              ref: "lex:com.atproto.repo.strongRef",
+              type: 'ref',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
           },
         },
@@ -809,55 +809,55 @@ export const schemaDict = {
   },
   FyiFrontpageFeedDescribeFeedGenerator: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.describeFeedGenerator",
+    id: 'fyi.frontpage.feed.describeFeedGenerator',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "Returns information about a feed generator service, including which feeds it provides.",
+          'Returns information about a feed generator service, including which feeds it provides.',
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["did", "feeds"],
+            type: 'object',
+            required: ['did', 'feeds'],
             properties: {
               did: {
-                type: "string",
-                format: "did",
+                type: 'string',
+                format: 'did',
               },
               feeds: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "ref",
-                  ref: "lex:fyi.frontpage.feed.describeFeedGenerator#feed",
+                  type: 'ref',
+                  ref: 'lex:fyi.frontpage.feed.describeFeedGenerator#feed',
                 },
               },
               links: {
-                type: "ref",
-                ref: "lex:fyi.frontpage.feed.describeFeedGenerator#links",
+                type: 'ref',
+                ref: 'lex:fyi.frontpage.feed.describeFeedGenerator#links',
               },
             },
           },
         },
       },
       feed: {
-        type: "object",
-        required: ["uri"],
+        type: 'object',
+        required: ['uri'],
         properties: {
           uri: {
-            type: "string",
-            format: "at-uri",
+            type: 'string',
+            format: 'at-uri',
           },
         },
       },
       links: {
-        type: "object",
+        type: 'object',
         properties: {
           privacyPolicy: {
-            type: "string",
+            type: 'string',
           },
           termsOfService: {
-            type: "string",
+            type: 'string',
           },
         },
       },
@@ -865,50 +865,50 @@ export const schemaDict = {
   },
   FyiFrontpageFeedGenerator: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.generator",
+    id: 'fyi.frontpage.feed.generator',
     defs: {
       main: {
-        type: "record",
+        type: 'record',
         description:
-          "Record declaring a feed generator. The did field points to the service that runs the feed algorithm.",
-        key: "any",
+          'Record declaring a feed generator. The did field points to the service that runs the feed algorithm.',
+        key: 'any',
         record: {
-          type: "object",
-          required: ["did", "displayName", "createdAt"],
+          type: 'object',
+          required: ['did', 'displayName', 'createdAt'],
           properties: {
             did: {
-              type: "string",
-              format: "did",
-              description: "DID of the feed generator service.",
+              type: 'string',
+              format: 'did',
+              description: 'DID of the feed generator service.',
             },
             displayName: {
-              type: "string",
-              maxLength: 3000,
-              maxGraphemes: 240,
-              description: "Display name for the feed.",
+              type: 'string',
+              maxLength: 320,
+              maxGraphemes: 32,
+              description: 'Display name for the feed.',
             },
             description: {
-              type: "string",
-              maxLength: 30000,
-              maxGraphemes: 3000,
-              description: "Description of the feed.",
+              type: 'string',
+              maxLength: 3000,
+              maxGraphemes: 300,
+              description: 'Description of the feed.',
             },
             avatar: {
-              type: "blob",
-              accept: ["image/png", "image/jpeg"],
+              type: 'blob',
+              accept: ['image/png', 'image/jpeg'],
               maxSize: 1000000,
-              description: "Avatar image for the feed.",
+              description: 'Avatar image for the feed.',
             },
             acceptsInteractions: {
-              type: "boolean",
+              type: 'boolean',
               description:
-                "Whether the feed generator accepts interaction feedback.",
+                'Whether the feed generator accepts interaction feedback.',
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this generator was created.",
+                'Client-declared timestamp when this generator was created.',
             },
           },
         },
@@ -917,48 +917,48 @@ export const schemaDict = {
   },
   FyiFrontpageFeedGetFeedSkeleton: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.getFeedSkeleton",
+    id: 'fyi.frontpage.feed.getFeedSkeleton',
     defs: {
       main: {
-        type: "query",
+        type: 'query',
         description:
-          "Get a skeleton of a feed provided by a feed generator. Auth is optional, but may be required by the feed generator.",
+          'Get a skeleton of a feed provided by a feed generator. Auth is optional, but may be required by the feed generator.',
         parameters: {
-          type: "params",
-          required: ["feed"],
+          type: 'params',
+          required: ['feed'],
           properties: {
             feed: {
-              type: "string",
-              format: "at-uri",
-              description: "AT URI of the feed generator record.",
+              type: 'string',
+              format: 'at-uri',
+              description: 'AT URI of the feed generator record.',
             },
             limit: {
-              type: "integer",
+              type: 'integer',
               minimum: 1,
               maximum: 100,
               default: 50,
-              description: "Maximum number of items to return.",
+              description: 'Maximum number of items to return.',
             },
             cursor: {
-              type: "string",
-              description: "Pagination cursor.",
+              type: 'string',
+              description: 'Pagination cursor.',
             },
           },
         },
         output: {
-          encoding: "application/json",
+          encoding: 'application/json',
           schema: {
-            type: "object",
-            required: ["feed"],
+            type: 'object',
+            required: ['feed'],
             properties: {
               cursor: {
-                type: "string",
+                type: 'string',
               },
               feed: {
-                type: "array",
+                type: 'array',
                 items: {
-                  type: "ref",
-                  ref: "lex:fyi.frontpage.feed.getFeedSkeleton#skeletonFeedPost",
+                  type: 'ref',
+                  ref: 'lex:fyi.frontpage.feed.getFeedSkeleton#skeletonFeedPost',
                 },
               },
             },
@@ -966,23 +966,18 @@ export const schemaDict = {
         },
         errors: [
           {
-            name: "UnknownFeed",
+            name: 'UnknownFeed',
           },
         ],
       },
       skeletonFeedPost: {
-        type: "object",
-        required: ["post"],
+        type: 'object',
+        required: ['post'],
         properties: {
           post: {
-            type: "string",
-            format: "at-uri",
-            description: "AT URI of the post.",
-          },
-          feedContext: {
-            type: "string",
-            maxLength: 2000,
-            description: "Opaque context passed back via sendInteractions.",
+            type: 'string',
+            format: 'at-uri',
+            description: 'AT URI of the post.',
           },
         },
       },
@@ -990,44 +985,44 @@ export const schemaDict = {
   },
   FyiFrontpageFeedPost: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.post",
+    id: 'fyi.frontpage.feed.post',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage post.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage post.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["title", "createdAt", "subject"],
+          type: 'object',
+          required: ['title', 'createdAt', 'subject'],
           properties: {
             title: {
-              type: "string",
+              type: 'string',
               maxLength: 3000,
               maxGraphemes: 300,
-              description: "The title of the post.",
+              description: 'The title of the post.',
             },
             subject: {
-              type: "union",
+              type: 'union',
               description:
-                "The piece of content that this Frontpage post is about.",
-              refs: ["lex:fyi.frontpage.feed.post#urlSubject"],
+                'The piece of content that this Frontpage post is about.',
+              refs: ['lex:fyi.frontpage.feed.post#urlSubject'],
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this post was originally created.",
+                'Client-declared timestamp when this post was originally created.',
             },
           },
         },
       },
       urlSubject: {
-        type: "object",
-        required: ["url"],
+        type: 'object',
+        required: ['url'],
         properties: {
           url: {
-            type: "string",
-            format: "uri",
+            type: 'string',
+            format: 'uri',
           },
         },
       },
@@ -1035,27 +1030,27 @@ export const schemaDict = {
   },
   FyiFrontpageFeedVote: {
     lexicon: 1,
-    id: "fyi.frontpage.feed.vote",
+    id: 'fyi.frontpage.feed.vote',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage vote.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage vote.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["subject", "createdAt"],
+          type: 'object',
+          required: ['subject', 'createdAt'],
           properties: {
             subject: {
-              type: "ref",
+              type: 'ref',
               description:
-                "The post or comment that this Frontpage vote is for.",
-              ref: "lex:com.atproto.repo.strongRef",
+                'The post or comment that this Frontpage vote is for.',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this vote was originally created.",
+                'Client-declared timestamp when this vote was originally created.',
             },
           },
         },
@@ -1064,24 +1059,24 @@ export const schemaDict = {
   },
   FyiFrontpageRichtextBlock: {
     lexicon: 1,
-    id: "fyi.frontpage.richtext.block",
+    id: 'fyi.frontpage.richtext.block',
     defs: {
       main: {
-        type: "object",
-        required: ["content"],
+        type: 'object',
+        required: ['content'],
         properties: {
           content: {
-            type: "union",
-            refs: ["lex:fyi.frontpage.richtext.block#plaintextParagraph"],
+            type: 'union',
+            refs: ['lex:fyi.frontpage.richtext.block#plaintextParagraph'],
           },
         },
       },
       plaintextParagraph: {
-        type: "object",
-        required: ["text"],
+        type: 'object',
+        required: ['text'],
         properties: {
           text: {
-            type: "string",
+            type: 'string',
             maxLength: 100000,
             maxGraphemes: 10000,
           },
@@ -1091,35 +1086,35 @@ export const schemaDict = {
   },
   FyiUnravelFrontpageComment: {
     lexicon: 1,
-    id: "fyi.unravel.frontpage.comment",
+    id: 'fyi.unravel.frontpage.comment',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage comment.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage comment.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["content", "createdAt", "post"],
+          type: 'object',
+          required: ['content', 'createdAt', 'post'],
           properties: {
             content: {
-              type: "string",
+              type: 'string',
               maxLength: 100000,
               maxGraphemes: 10000,
-              description: "The content of the comment.",
+              description: 'The content of the comment.',
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this comment was originally created.",
+                'Client-declared timestamp when this comment was originally created.',
             },
             parent: {
-              type: "ref",
-              ref: "lex:com.atproto.repo.strongRef",
+              type: 'ref',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
             post: {
-              type: "ref",
-              ref: "lex:com.atproto.repo.strongRef",
+              type: 'ref',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
           },
         },
@@ -1128,32 +1123,32 @@ export const schemaDict = {
   },
   FyiUnravelFrontpagePost: {
     lexicon: 1,
-    id: "fyi.unravel.frontpage.post",
+    id: 'fyi.unravel.frontpage.post',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage post.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage post.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["title", "url", "createdAt"],
+          type: 'object',
+          required: ['title', 'url', 'createdAt'],
           properties: {
             title: {
-              type: "string",
+              type: 'string',
               maxLength: 3000,
               maxGraphemes: 300,
-              description: "The title of the post.",
+              description: 'The title of the post.',
             },
             url: {
-              type: "string",
-              format: "uri",
-              description: "The URL of the post.",
+              type: 'string',
+              format: 'uri',
+              description: 'The URL of the post.',
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this post was originally created.",
+                'Client-declared timestamp when this post was originally created.',
             },
           },
         },
@@ -1162,47 +1157,47 @@ export const schemaDict = {
   },
   FyiUnravelFrontpageVote: {
     lexicon: 1,
-    id: "fyi.unravel.frontpage.vote",
+    id: 'fyi.unravel.frontpage.vote',
     defs: {
       main: {
-        type: "record",
-        description: "Record containing a Frontpage vote.",
-        key: "tid",
+        type: 'record',
+        description: 'Record containing a Frontpage vote.',
+        key: 'tid',
         record: {
-          type: "object",
-          required: ["subject", "createdAt"],
+          type: 'object',
+          required: ['subject', 'createdAt'],
           properties: {
             subject: {
-              type: "ref",
-              ref: "lex:com.atproto.repo.strongRef",
+              type: 'ref',
+              ref: 'lex:com.atproto.repo.strongRef',
             },
             createdAt: {
-              type: "string",
-              format: "datetime",
+              type: 'string',
+              format: 'datetime',
               description:
-                "Client-declared timestamp when this vote was originally created.",
+                'Client-declared timestamp when this vote was originally created.',
             },
           },
         },
       },
     },
   },
-} as const satisfies Record<string, LexiconDoc>;
-export const schemas = Object.values(schemaDict) satisfies LexiconDoc[];
-export const lexicons: Lexicons = new Lexicons(schemas);
+} as const satisfies Record<string, LexiconDoc>
+export const schemas = Object.values(schemaDict) satisfies LexiconDoc[]
+export const lexicons: Lexicons = new Lexicons(schemas)
 
 export function validate<T extends { $type: string }>(
   v: unknown,
   id: string,
   hash: string,
   requiredType: true,
-): ValidationResult<T>;
+): ValidationResult<T>
 export function validate<T extends { $type?: string }>(
   v: unknown,
   id: string,
   hash: string,
   requiredType?: false,
-): ValidationResult<T>;
+): ValidationResult<T>
 export function validate(
   v: unknown,
   id: string,
@@ -1214,33 +1209,33 @@ export function validate(
     : {
         success: false,
         error: new ValidationError(
-          `Must be an object with "${hash === "main" ? id : `${id}#${hash}`}" $type property`,
+          `Must be an object with "${hash === 'main' ? id : `${id}#${hash}`}" $type property`,
         ),
-      };
+      }
 }
 
 export const ids = {
-  ComAtprotoRepoApplyWrites: "com.atproto.repo.applyWrites",
-  ComAtprotoRepoCreateRecord: "com.atproto.repo.createRecord",
-  ComAtprotoRepoDefs: "com.atproto.repo.defs",
-  ComAtprotoRepoDeleteRecord: "com.atproto.repo.deleteRecord",
-  ComAtprotoRepoDescribeRepo: "com.atproto.repo.describeRepo",
-  ComAtprotoRepoGetRecord: "com.atproto.repo.getRecord",
-  ComAtprotoRepoImportRepo: "com.atproto.repo.importRepo",
-  ComAtprotoRepoListMissingBlobs: "com.atproto.repo.listMissingBlobs",
-  ComAtprotoRepoListRecords: "com.atproto.repo.listRecords",
-  ComAtprotoRepoPutRecord: "com.atproto.repo.putRecord",
-  ComAtprotoRepoStrongRef: "com.atproto.repo.strongRef",
-  ComAtprotoRepoUploadBlob: "com.atproto.repo.uploadBlob",
-  FyiFrontpageFeedComment: "fyi.frontpage.feed.comment",
+  ComAtprotoRepoApplyWrites: 'com.atproto.repo.applyWrites',
+  ComAtprotoRepoCreateRecord: 'com.atproto.repo.createRecord',
+  ComAtprotoRepoDefs: 'com.atproto.repo.defs',
+  ComAtprotoRepoDeleteRecord: 'com.atproto.repo.deleteRecord',
+  ComAtprotoRepoDescribeRepo: 'com.atproto.repo.describeRepo',
+  ComAtprotoRepoGetRecord: 'com.atproto.repo.getRecord',
+  ComAtprotoRepoImportRepo: 'com.atproto.repo.importRepo',
+  ComAtprotoRepoListMissingBlobs: 'com.atproto.repo.listMissingBlobs',
+  ComAtprotoRepoListRecords: 'com.atproto.repo.listRecords',
+  ComAtprotoRepoPutRecord: 'com.atproto.repo.putRecord',
+  ComAtprotoRepoStrongRef: 'com.atproto.repo.strongRef',
+  ComAtprotoRepoUploadBlob: 'com.atproto.repo.uploadBlob',
+  FyiFrontpageFeedComment: 'fyi.frontpage.feed.comment',
   FyiFrontpageFeedDescribeFeedGenerator:
-    "fyi.frontpage.feed.describeFeedGenerator",
-  FyiFrontpageFeedGenerator: "fyi.frontpage.feed.generator",
-  FyiFrontpageFeedGetFeedSkeleton: "fyi.frontpage.feed.getFeedSkeleton",
-  FyiFrontpageFeedPost: "fyi.frontpage.feed.post",
-  FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
-  FyiFrontpageRichtextBlock: "fyi.frontpage.richtext.block",
-  FyiUnravelFrontpageComment: "fyi.unravel.frontpage.comment",
-  FyiUnravelFrontpagePost: "fyi.unravel.frontpage.post",
-  FyiUnravelFrontpageVote: "fyi.unravel.frontpage.vote",
-} as const;
+    'fyi.frontpage.feed.describeFeedGenerator',
+  FyiFrontpageFeedGenerator: 'fyi.frontpage.feed.generator',
+  FyiFrontpageFeedGetFeedSkeleton: 'fyi.frontpage.feed.getFeedSkeleton',
+  FyiFrontpageFeedPost: 'fyi.frontpage.feed.post',
+  FyiFrontpageFeedVote: 'fyi.frontpage.feed.vote',
+  FyiFrontpageRichtextBlock: 'fyi.frontpage.richtext.block',
+  FyiUnravelFrontpageComment: 'fyi.unravel.frontpage.comment',
+  FyiUnravelFrontpagePost: 'fyi.unravel.frontpage.post',
+  FyiUnravelFrontpageVote: 'fyi.unravel.frontpage.vote',
+} as const

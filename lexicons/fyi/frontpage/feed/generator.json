@@ -17,14 +17,14 @@
           },
           "displayName": {
             "type": "string",
-            "maxLength": 640,
-            "maxGraphemes": 240,
+            "maxLength": 320,
+            "maxGraphemes": 32,
             "description": "Display name for the feed."
           },
           "description": {
             "type": "string",
-            "maxLength": 10000,
-            "maxGraphemes": 3000,
+            "maxLength": 3000,
+            "maxGraphemes": 300,
             "description": "Description of the feed."
           },
           "avatar": {
