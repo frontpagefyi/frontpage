@@ -1,10 +1,11 @@
 import "server-only";
 
 import { db } from "@/lib/db";
-import { eq, and, inArray } from "drizzle-orm";
+import { eq, and, or } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { AtUri } from "@atproto/syntax";
 import { type DID, parseDid } from "../atproto/did";
+import { invariant } from "@/lib/utils";
 import {
   bannedUserSubQuery,
   postVisibilityFilters,
@@ -32,13 +33,9 @@ export async function hydratePosts(
   const parsedUris = postUris.map((uri) => {
     const atUri = new AtUri(uri);
     const authorDid = parseDid(atUri.host);
-    if (!authorDid) {
-      throw new Error(`Invalid DID in post URI: ${atUri.host}`);
-    }
+    invariant(authorDid, `Invalid DID in post URI: ${atUri.host}`);
     return { authorDid, collection: atUri.collection, rkey: atUri.rkey, uri };
   });
-
-  const rkeys = parsedUris.map((p) => p.rkey);
 
   const userHasVoted = await buildUserHasVotedQuery();
 
@@ -69,7 +66,14 @@ export async function hydratePosts(
     .where(
       and(
         postVisibilityFilters(bannedUserSubQuery),
-        inArray(schema.Post.rkey, rkeys),
+        or(
+          ...parsedUris.map((p) =>
+            and(
+              eq(schema.Post.authorDid, p.authorDid),
+              eq(schema.Post.rkey, p.rkey),
+            ),
+          ),
+        ),
       ),
     );
 
@@ -97,6 +101,13 @@ export async function hydratePosts(
       commentCount: row.commentCount,
       userHasVoted: Boolean(row.userHasVoted),
     });
+  }
+
+  const dropped = parsedUris.length - hydrated.length;
+  if (dropped > 0) {
+    console.warn(
+      `hydratePosts: ${dropped}/${parsedUris.length} posts not found in DB`,
+    );
   }
 
   return hydrated;

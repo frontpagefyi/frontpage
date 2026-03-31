@@ -1,11 +1,7 @@
-import {
-  FRONTPAGE_DID,
-  FEED_GENERATOR_COLLECTION,
-  HOT_FEED_URI,
-} from "@/lib/constants";
+import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 
 /** DID of the feed generator service (did:web identity) */
-export const FEED_SERVICE_DID = "did:web:frontpage.fyi";
+export const FEED_SERVICE_DID = `did:web:${FRONTPAGE_ATPROTO_HANDLE}`;
 
 /** NSID for the getFeedSkeleton XRPC method */
 export const GET_FEED_SKELETON_NSID = "fyi.frontpage.feed.getFeedSkeleton";
@@ -30,5 +26,3 @@ export const MIN_SKELETON_LIMIT = 1;
 
 /** Maximum skeleton page size */
 export const MAX_SKELETON_LIMIT = 100;
-
-export { FRONTPAGE_DID, FEED_GENERATOR_COLLECTION, HOT_FEED_URI };

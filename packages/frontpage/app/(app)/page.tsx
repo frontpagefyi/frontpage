@@ -13,7 +13,7 @@ export default async function Home() {
   return (
     <FeedSwitcherLayout>
       <InfiniteList
-        cacheKey="posts"
+        cacheKey={`feed:${HOT_FEED_URI}`}
         getMoreItemsAction={getMorePostsAction}
         emptyMessage="No posts remaining"
         fallback={initialData}

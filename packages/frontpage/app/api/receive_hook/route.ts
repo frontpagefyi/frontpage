@@ -1,6 +1,6 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { Commit } from "@/lib/data/atproto/event";
+import { Commit, KnownCollection } from "@/lib/data/atproto/event";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
@@ -64,8 +64,18 @@ export async function POST(request: Request) {
         break;
       }
 
-      default:
-        console.log(`Ignoring unknown collection: ${collection}`);
+      default: {
+        const knownResult = KnownCollection.safeParse(collection);
+        if (knownResult.success) {
+          // Known collection without a handler — this is a programming error.
+          // Throw to prevent the offset from being committed so the op
+          // can be reprocessed after a code fix.
+          throw new Error(
+            `Unhandled known collection: ${collection} in op ${JSON.stringify(op)}`,
+          );
+        }
+        // Unknown collections are expected (e.g. user-created records)
+      }
     }
   });
 

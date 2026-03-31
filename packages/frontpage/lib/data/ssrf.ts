@@ -1,10 +1,31 @@
 import "server-only";
 
+import { lookup } from "node:dns/promises";
+
 /**
- * Returns true if the given hostname resolves to a private / loopback address
- * or is otherwise unsuitable for outbound server-side requests (SSRF protection).
+ * Resolve hostname via DNS and reject if it points to a private/loopback IP.
+ * Call this before making outbound fetch requests to untrusted hosts.
  *
- * This check is NOT gated on NODE_ENV — it applies in all environments.
+ * Note: there is a small TOCTOU window between this check and the actual
+ * fetch connection (DNS could change). Native fetch does not support custom
+ * agents/dispatchers that would eliminate this gap. This still catches the
+ * vast majority of real SSRF attacks.
+ */
+export async function assertPublicHostname(hostname: string): Promise<void> {
+  if (isPrivateHost(hostname)) {
+    throw new Error(`Hostname is a private address: ${hostname}`);
+  }
+
+  const { address } = await lookup(hostname);
+  if (isPrivateHost(address)) {
+    throw new Error(
+      `Hostname ${hostname} resolves to private address: ${address}`,
+    );
+  }
+}
+
+/**
+ * Returns true if the given hostname or IP is private / loopback.
  */
 export function isPrivateHost(hostname: string): boolean {
   const h = hostname.toLowerCase();
@@ -14,8 +35,11 @@ export function isPrivateHost(hostname: string): boolean {
     h === "localhost" ||
     h.endsWith(".local") ||
     h === "0.0.0.0" ||
+    h === "0" ||
     h === "::1" ||
-    h === "[::1]"
+    h === "[::1]" ||
+    h === "::" ||
+    h === "[::]"
   ) {
     return true;
   }
@@ -37,6 +61,12 @@ export function isPrivateHost(hostname: string): boolean {
   if (h.startsWith("fe80:") || h.startsWith("[fe80:")) return true;
   if (h.startsWith("fc00:") || h.startsWith("[fc00:")) return true;
   if (h.startsWith("fd") || h.startsWith("[fd")) return true;
+
+  // IPv6-mapped IPv4 private ranges (::ffff:10.0.0.1, [::ffff:127.0.0.1])
+  const mappedMatch = h.match(/^\[?::ffff:([\d.]+)\]?$/);
+  if (mappedMatch && mappedMatch[1]) {
+    return isPrivateHost(mappedMatch[1]);
+  }
 
   return false;
 }

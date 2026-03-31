@@ -57,7 +57,7 @@ async function getMoreNotifications(
     ),
 
     nextCursor: notifications.cursor,
-    pageSize: notifications.notifications.length,
+    itemCount: notifications.notifications.length,
   };
 }
 

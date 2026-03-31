@@ -4,16 +4,20 @@ import { z } from "zod";
 import { AtUri } from "@atproto/syntax";
 import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
-  isKnownFeed,
   getSkeletonByAlgorithm,
   type SkeletonResult,
 } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
-import { isPrivateHost } from "@/lib/data/ssrf";
+import { assertPublicHostname } from "@/lib/data/ssrf";
+import { invariant } from "@/lib/utils";
+import { FyiFrontpageFeedGenerator } from "@repo/frontpage-atproto-client";
 import {
-  FEED_GENERATOR_COLLECTION,
-  GET_FEED_SKELETON_NSID,
+  isFeedSlug,
   FRONTPAGE_DID,
+  FEED_GENERATOR_COLLECTION,
+} from "@/lib/constants";
+import {
+  GET_FEED_SKELETON_NSID,
   EXTERNAL_REQUEST_TIMEOUT_MS,
 } from "@/lib/data/feed-constants";
 
@@ -41,7 +45,7 @@ async function getSkeleton(
   cursor: string | undefined,
   limit: number,
 ): Promise<SkeletonResult> {
-  if (isLocalFeed(feedUri)) {
+  if (isLocalFeed(feedUri) && isFeedSlug(feedUri.rkey)) {
     return getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
   }
 
@@ -52,9 +56,9 @@ function isLocalFeed(feedUri: AtUri): boolean {
   // The feed URI authority is the repo DID (did:plc:...) that published
   // the generator record, not the service DID (did:web:frontpage.fyi)
   return (
-    feedUri.host === (FRONTPAGE_DID as string) &&
+    feedUri.host === FRONTPAGE_DID &&
     feedUri.collection === FEED_GENERATOR_COLLECTION &&
-    isKnownFeed(feedUri.rkey)
+    isFeedSlug(feedUri.rkey)
   );
 }
 
@@ -70,11 +74,10 @@ async function getExternalSkeleton(
 ): Promise<SkeletonResult> {
   const generatorRecord = await fetchGeneratorRecord(feedUri);
   const serviceDid = parseDid(generatorRecord.did);
-  if (!serviceDid) {
-    throw new Error(
-      `Generator record contains invalid DID: ${generatorRecord.did}`,
-    );
-  }
+  invariant(
+    serviceDid,
+    `Generator record contains invalid DID: ${generatorRecord.did}`,
+  );
 
   const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
 
@@ -119,12 +122,10 @@ async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
     rkey: feedUri.rkey,
   });
 
-  const record = result.data.value as Record<string, unknown>;
-  if (!record.did || typeof record.did !== "string") {
-    throw new Error("Generator record missing did field");
-  }
+  const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
+  invariant(validated.success, "Invalid generator record");
 
-  return { did: record.did };
+  return { did: validated.value.did };
 }
 
 async function resolveServiceEndpoint(did: DID): Promise<string> {
@@ -135,22 +136,18 @@ async function resolveServiceEndpoint(did: DID): Promise<string> {
       serviceEntry.type === "BskyFeedGenerator",
   );
 
-  if (!service || typeof service.serviceEndpoint !== "string") {
-    throw new Error(
-      `No feed generator service found in DID document for ${did}`,
-    );
-  }
+  invariant(
+    service && typeof service.serviceEndpoint === "string",
+    `No feed generator service found in DID document for ${did}`,
+  );
 
   const url = new URL(service.serviceEndpoint);
-  if (url.protocol !== "https:") {
-    throw new Error("Feed generator endpoint must use HTTPS");
-  }
+  invariant(
+    url.protocol === "https:",
+    "Feed generator endpoint must use HTTPS",
+  );
 
-  if (isPrivateHost(url.hostname)) {
-    throw new Error(
-      `Feed generator endpoint resolves to a private address: ${url.hostname}`,
-    );
-  }
+  await assertPublicHostname(url.hostname);
 
   return service.serviceEndpoint;
 }

@@ -3,26 +3,37 @@ import { notFound, redirect } from "next/navigation";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
 import { FeedSwitcherLayout } from "../../_components/feed-switcher";
-import { FEED_URIS } from "@/lib/constants";
+import {
+  FEED_URIS,
+  FEED_REGISTRY,
+  DEFAULT_FEED_SLUG,
+  isFeedSlug,
+} from "@/lib/constants";
+import type { Metadata } from "next";
 
-export default async function FeedSlugPage({
-  params,
-}: {
-  params: Promise<{ slug: string }>;
-}) {
-  const { slug } = await params;
+export async function generateMetadata(
+  props: PageProps<"/feed/[slug]">,
+): Promise<Metadata> {
+  const { slug } = await props.params;
+  if (!isFeedSlug(slug)) return {};
+  const feed = FEED_REGISTRY.find((f) => f.slug === slug);
+  if (!feed) return {};
+  return { title: `${feed.label} - Frontpage`, description: feed.description };
+}
 
-  if (slug === "hot") {
+export default async function FeedSlugPage(props: PageProps<"/feed/[slug]">) {
+  await connection();
+  const { slug } = await props.params;
+
+  if (slug === DEFAULT_FEED_SLUG) {
     redirect("/");
   }
 
-  const uri = FEED_URIS[slug as keyof typeof FEED_URIS];
-
-  if (!uri) {
+  if (!isFeedSlug(slug)) {
     notFound();
   }
 
-  await connection();
+  const uri = FEED_URIS[slug];
 
   const initialData = await getMoreFeedPostsAction(uri, null);
 

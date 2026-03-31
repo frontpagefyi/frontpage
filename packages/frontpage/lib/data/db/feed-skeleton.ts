@@ -4,18 +4,14 @@ import { db } from "@/lib/db";
 import { eq, desc, and, or, lt, type SQL } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { bannedUserSubQuery, postVisibilityFilters } from "./visibility";
+import { type FeedSlug } from "@/lib/constants";
+import { exhaustiveCheck, invariant } from "@/lib/utils";
 
 export type SkeletonPost = { post: string };
 export type SkeletonResult = {
   feed: SkeletonPost[];
   cursor?: string;
 };
-
-const KNOWN_FEEDS = new Set(["hot", "new", "top"]);
-
-export function isKnownFeed(rkey: string): boolean {
-  return KNOWN_FEEDS.has(rkey);
-}
 
 function buildAtUri(
   authorDid: string,
@@ -29,50 +25,67 @@ const CURSOR_SEPARATOR = "::";
 
 /**
  * Parse a compound cursor of the form "value::id".
- * The value portion is the ordering column value, id is the tiebreaker.
+ * Returns null when no cursor is provided (first page).
+ * Throws on malformed cursors.
  */
-function parseCompoundCursor(
+export function parseCompoundCursor(
   cursor: string | undefined,
 ): { value: string; id: number } | null {
   if (!cursor) return null;
   const separatorIndex = cursor.lastIndexOf(CURSOR_SEPARATOR);
-  if (separatorIndex === -1) return null;
+  if (separatorIndex === -1) {
+    throw new Error(`Invalid cursor format: missing separator`);
+  }
   const value = cursor.slice(0, separatorIndex);
   const id = parseInt(
     cursor.slice(separatorIndex + CURSOR_SEPARATOR.length),
     10,
   );
-  if (!value || isNaN(id)) return null;
+  if (!value || isNaN(id)) {
+    throw new Error(`Invalid cursor format: malformed value or id`);
+  }
   return { value, id };
 }
 
-function buildCompoundCursor(value: string | number, id: number): string {
+export function buildCompoundCursor(
+  value: string | number,
+  id: number,
+): string {
   return `${value}${CURSOR_SEPARATOR}${id}`;
 }
 
-// ---------------------------------------------------------------------------
-// Parameterised skeleton queries
-// ---------------------------------------------------------------------------
-
-/**
- * Configuration for skeleton queries that require a PostAggregates join.
- * Used by hot (rank) and top (voteCount) feeds.
- */
-type AggregateSkeletonConfig<T> = {
-  /** Extra columns to select from PostAggregates */
-  extraSelect: Record<string, unknown>;
-  /** Order by expressions */
-  orderBy: SQL[];
-  /** Parse the cursor value portion into a typed value */
-  parseCursorValue: (value: string) => T;
-  /** Build the cursor WHERE filter */
-  buildCursorFilter: (cursorValue: T, cursorId: number) => SQL | undefined;
-  /** Serialize cursor value from the last row */
-  serializeCursorValue: (row: Record<string, unknown>) => string;
+const basePostColumns = {
+  id: schema.Post.id,
+  authorDid: schema.Post.authorDid,
+  collection: schema.Post.collection,
+  rkey: schema.Post.rkey,
 };
 
-async function queryAggregateSkeletonPosts<T>(
-  config: AggregateSkeletonConfig<T>,
+function toSkeletonResult<
+  TRow extends {
+    id: number;
+    authorDid: string;
+    collection: string;
+    rkey: string;
+  },
+>(rows: TRow[], serializeCursorValue: (row: TRow) => string): SkeletonResult {
+  const feed: SkeletonPost[] = rows.map((row) => ({
+    post: buildAtUri(row.authorDid, row.collection, row.rkey),
+  }));
+
+  const lastRow = rows[rows.length - 1];
+  const cursor = lastRow
+    ? buildCompoundCursor(serializeCursorValue(lastRow), lastRow.id)
+    : undefined;
+
+  return { feed, cursor };
+}
+
+// ---------------------------------------------------------------------------
+// Public skeleton functions
+// ---------------------------------------------------------------------------
+
+export function getHotSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
@@ -80,18 +93,16 @@ async function queryAggregateSkeletonPosts<T>(
 
   let cursorFilter: SQL | undefined;
   if (parsed) {
-    const cursorValue = config.parseCursorValue(parsed.value);
-    cursorFilter = config.buildCursorFilter(cursorValue, parsed.id);
+    const rank = parseFloat(parsed.value);
+    invariant(!isNaN(rank), "Invalid cursor: rank is not a number");
+    cursorFilter = or(
+      lt(schema.PostAggregates.rank, rank),
+      and(eq(schema.PostAggregates.rank, rank), lt(schema.Post.id, parsed.id)),
+    );
   }
 
-  const rows = await db
-    .select({
-      id: schema.Post.id,
-      authorDid: schema.Post.authorDid,
-      collection: schema.Post.collection,
-      rkey: schema.Post.rkey,
-      ...config.extraSelect,
-    })
+  return db
+    .select({ ...basePostColumns, rank: schema.PostAggregates.rank })
     .from(schema.Post)
     .innerJoin(
       schema.PostAggregates,
@@ -102,45 +113,12 @@ async function queryAggregateSkeletonPosts<T>(
       eq(bannedUserSubQuery.did, schema.Post.authorDid),
     )
     .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
-    .orderBy(...config.orderBy)
-    .limit(limit);
-
-  const feed: SkeletonPost[] = rows.map((row) => ({
-    post: buildAtUri(row.authorDid, row.collection, row.rkey),
-  }));
-
-  const lastRow = rows[rows.length - 1];
-  const nextCursor = lastRow
-    ? buildCompoundCursor(
-        config.serializeCursorValue(
-          lastRow as unknown as Record<string, unknown>,
-        ),
-        lastRow.id,
-      )
-    : undefined;
-
-  return { feed, cursor: nextCursor };
+    .orderBy(desc(schema.PostAggregates.rank), desc(schema.Post.id))
+    .limit(limit)
+    .then((rows) => toSkeletonResult(rows, (row) => String(row.rank)));
 }
 
-/**
- * Configuration for skeleton queries that only need the Post table.
- * Used by the new (createdAt) feed.
- */
-type PostOnlySkeletonConfig<T> = {
-  /** Extra columns to select from Post */
-  extraSelect: Record<string, unknown>;
-  /** Order by expressions */
-  orderBy: SQL[];
-  /** Parse the cursor value portion into a typed value */
-  parseCursorValue: (value: string) => T;
-  /** Build the cursor WHERE filter */
-  buildCursorFilter: (cursorValue: T, cursorId: number) => SQL | undefined;
-  /** Serialize cursor value from the last row */
-  serializeCursorValue: (row: Record<string, unknown>) => string;
-};
-
-async function queryPostOnlySkeletonPosts<T>(
-  config: PostOnlySkeletonConfig<T>,
+export function getNewSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
@@ -148,124 +126,70 @@ async function queryPostOnlySkeletonPosts<T>(
 
   let cursorFilter: SQL | undefined;
   if (parsed) {
-    const cursorValue = config.parseCursorValue(parsed.value);
-    cursorFilter = config.buildCursorFilter(cursorValue, parsed.id);
+    const createdAt = new Date(parsed.value);
+    invariant(
+      !isNaN(createdAt.getTime()),
+      "Invalid cursor: createdAt is not a valid date",
+    );
+    cursorFilter = or(
+      lt(schema.Post.createdAt, createdAt),
+      and(eq(schema.Post.createdAt, createdAt), lt(schema.Post.id, parsed.id)),
+    );
   }
 
-  const rows = await db
-    .select({
-      id: schema.Post.id,
-      authorDid: schema.Post.authorDid,
-      collection: schema.Post.collection,
-      rkey: schema.Post.rkey,
-      ...config.extraSelect,
-    })
+  return db
+    .select({ ...basePostColumns, createdAt: schema.Post.createdAt })
     .from(schema.Post)
     .leftJoin(
       bannedUserSubQuery,
       eq(bannedUserSubQuery.did, schema.Post.authorDid),
     )
     .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
-    .orderBy(...config.orderBy)
-    .limit(limit);
-
-  const feed: SkeletonPost[] = rows.map((row) => ({
-    post: buildAtUri(row.authorDid, row.collection, row.rkey),
-  }));
-
-  const lastRow = rows[rows.length - 1];
-  const nextCursor = lastRow
-    ? buildCompoundCursor(
-        config.serializeCursorValue(
-          lastRow as unknown as Record<string, unknown>,
-        ),
-        lastRow.id,
-      )
-    : undefined;
-
-  return { feed, cursor: nextCursor };
-}
-
-// ---------------------------------------------------------------------------
-// Public skeleton functions (thin wrappers)
-// ---------------------------------------------------------------------------
-
-export function getHotSkeleton(
-  limit: number,
-  cursor: string | undefined,
-): Promise<SkeletonResult> {
-  return queryAggregateSkeletonPosts(
-    {
-      extraSelect: { rank: schema.PostAggregates.rank },
-      orderBy: [desc(schema.PostAggregates.rank), desc(schema.Post.id)],
-      parseCursorValue: (value) => parseFloat(value),
-      buildCursorFilter: (cursorValue, cursorId) =>
-        or(
-          lt(schema.PostAggregates.rank, cursorValue),
-          and(
-            eq(schema.PostAggregates.rank, cursorValue),
-            lt(schema.Post.id, cursorId),
-          ),
-        ),
-      serializeCursorValue: (row) => String((row as { rank: number }).rank),
-    },
-    limit,
-    cursor,
-  );
-}
-
-export function getNewSkeleton(
-  limit: number,
-  cursor: string | undefined,
-): Promise<SkeletonResult> {
-  return queryPostOnlySkeletonPosts(
-    {
-      extraSelect: { createdAt: schema.Post.createdAt },
-      orderBy: [desc(schema.Post.createdAt), desc(schema.Post.id)],
-      parseCursorValue: (value) => new Date(value),
-      buildCursorFilter: (cursorValue, cursorId) =>
-        or(
-          lt(schema.Post.createdAt, cursorValue),
-          and(
-            eq(schema.Post.createdAt, cursorValue),
-            lt(schema.Post.id, cursorId),
-          ),
-        ),
-      serializeCursorValue: (row) =>
-        (row as { createdAt: Date }).createdAt.toISOString(),
-    },
-    limit,
-    cursor,
-  );
+    .orderBy(desc(schema.Post.createdAt), desc(schema.Post.id))
+    .limit(limit)
+    .then((rows) =>
+      toSkeletonResult(rows, (row) => row.createdAt.toISOString()),
+    );
 }
 
 export function getTopSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
-  return queryAggregateSkeletonPosts(
-    {
-      extraSelect: { voteCount: schema.PostAggregates.voteCount },
-      orderBy: [desc(schema.PostAggregates.voteCount), desc(schema.Post.id)],
-      parseCursorValue: (value) => parseInt(value, 10),
-      buildCursorFilter: (cursorValue, cursorId) =>
-        or(
-          lt(schema.PostAggregates.voteCount, cursorValue),
-          and(
-            eq(schema.PostAggregates.voteCount, cursorValue),
-            lt(schema.Post.id, cursorId),
-          ),
-        ),
-      serializeCursorValue: (row) =>
-        String((row as { voteCount: number }).voteCount),
-    },
-    limit,
-    cursor,
-  );
+  const parsed = parseCompoundCursor(cursor);
+
+  let cursorFilter: SQL | undefined;
+  if (parsed) {
+    const voteCount = parseInt(parsed.value, 10);
+    invariant(!isNaN(voteCount), "Invalid cursor: voteCount is not a number");
+    cursorFilter = or(
+      lt(schema.PostAggregates.voteCount, voteCount),
+      and(
+        eq(schema.PostAggregates.voteCount, voteCount),
+        lt(schema.Post.id, parsed.id),
+      ),
+    );
+  }
+
+  return db
+    .select({ ...basePostColumns, voteCount: schema.PostAggregates.voteCount })
+    .from(schema.Post)
+    .innerJoin(
+      schema.PostAggregates,
+      eq(schema.PostAggregates.postId, schema.Post.id),
+    )
+    .leftJoin(
+      bannedUserSubQuery,
+      eq(bannedUserSubQuery.did, schema.Post.authorDid),
+    )
+    .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
+    .orderBy(desc(schema.PostAggregates.voteCount), desc(schema.Post.id))
+    .limit(limit)
+    .then((rows) => toSkeletonResult(rows, (row) => String(row.voteCount)));
 }
 
 export function getSkeletonByAlgorithm(
-  algorithm: string,
+  algorithm: FeedSlug,
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
@@ -277,6 +201,6 @@ export function getSkeletonByAlgorithm(
     case "top":
       return getTopSkeleton(limit, cursor);
     default:
-      throw new Error(`Unknown algorithm: ${algorithm}`);
+      exhaustiveCheck(algorithm);
   }
 }

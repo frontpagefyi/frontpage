@@ -12,10 +12,14 @@
  *   or an authenticated session with the frontpage.fyi account.
  */
 
+// Canonical source: packages/frontpage/lib/constants.ts (FRONTPAGE_DID)
 const FRONTPAGE_DID = "did:plc:klmr76mpewpv7rtm3xgpzd7x";
+// Canonical source: packages/frontpage/lib/data/feed-constants.ts (FEED_SERVICE_DID)
 const FEED_SERVICE_DID = "did:web:frontpage.fyi";
+// Canonical source: packages/frontpage/lib/constants.ts (FEED_GENERATOR_COLLECTION)
 const COLLECTION = "fyi.frontpage.feed.generator";
 
+// Canonical source: packages/frontpage/lib/constants.ts (FEED_REGISTRY)
 const FEEDS = [
   {
     rkey: "hot",

@@ -2,14 +2,12 @@ import { type NextRequest, NextResponse } from "next/server";
 import { AtUri } from "@atproto/syntax";
 import { verifyJwt } from "@atproto/xrpc-server";
 import { after } from "next/server";
-import {
-  isKnownFeed,
-  getSkeletonByAlgorithm,
-} from "@/lib/data/db/feed-skeleton";
+import { getSkeletonByAlgorithm } from "@/lib/data/db/feed-skeleton";
 import { getDidDoc, resolveDidDoc, parseDid } from "@/lib/data/atproto/did";
+import { invariant } from "@/lib/utils";
+import { isFeedSlug, FEED_GENERATOR_COLLECTION } from "@/lib/constants";
 import {
   FEED_SERVICE_DID,
-  FEED_GENERATOR_COLLECTION,
   GET_FEED_SKELETON_NSID,
   DEFAULT_SKELETON_LIMIT,
   MIN_SKELETON_LIMIT,
@@ -29,9 +27,8 @@ async function getSigningKey(
   forceRefresh: boolean,
 ): Promise<string> {
   const issuerDid = parseDid(iss);
-  if (!issuerDid) {
-    throw new Error(`Invalid DID in JWT issuer: ${iss}`);
-  }
+  invariant(issuerDid, `Invalid DID in JWT issuer: ${iss}`);
+
   // verifyJwt calls with forceRefresh=true after initial key lookup fails,
   // to handle DID key rotation. Bypass the React.cache() wrapper in that case.
   const didDoc = forceRefresh
@@ -40,11 +37,12 @@ async function getSigningKey(
   const verificationMethod = didDoc.verificationMethod?.find(
     (method) => method.id === `${iss}#atproto`,
   );
-  if (!verificationMethod) {
-    throw new Error(`No atproto verification method for ${iss}`);
-  }
-  return (verificationMethod as unknown as { publicKeyMultibase: string })
-    .publicKeyMultibase;
+  invariant(verificationMethod, `No atproto verification method for ${iss}`);
+  invariant(
+    verificationMethod.publicKeyMultibase,
+    `Verification method for ${iss} does not contain publicKeyMultibase`,
+  );
+  return verificationMethod.publicKeyMultibase;
 }
 
 export async function GET(request: NextRequest) {
@@ -76,7 +74,7 @@ export async function GET(request: NextRequest) {
   }
 
   // Validate algorithm
-  if (!isKnownFeed(feedUri.rkey)) {
+  if (!isFeedSlug(feedUri.rkey)) {
     return xrpcError("UnknownFeed", `Unknown feed: ${feedUri.rkey}`, 400);
   }
 
@@ -105,7 +103,20 @@ export async function GET(request: NextRequest) {
         getSigningKey,
       );
       requesterDid = payload.iss;
-    } catch {
+    } catch (err) {
+      if (
+        err instanceof Error &&
+        (err.message.includes("fetch") ||
+          err.message.includes("resolve") ||
+          err.message.includes("timeout"))
+      ) {
+        console.error("JWT key resolution failed:", err);
+        return xrpcError(
+          "InternalServerError",
+          "Unable to verify authentication",
+          500,
+        );
+      }
       return NextResponse.json(
         { error: "AuthRequired", message: "Invalid or expired token" },
         {
@@ -121,6 +132,9 @@ export async function GET(request: NextRequest) {
   try {
     result = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
   } catch (err) {
+    if (err instanceof Error && err.message.startsWith("Invalid cursor")) {
+      return xrpcError("InvalidRequest", err.message, 400);
+    }
     console.error("getFeedSkeleton db error:", err);
     return xrpcError("InternalServerError", "Failed to fetch feed", 500);
   }
@@ -135,6 +149,7 @@ export async function GET(request: NextRequest) {
   return NextResponse.json(result, {
     headers: {
       "Cache-Control": `public, max-age=${SKELETON_CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${SKELETON_SWR_SECONDS}`,
+      Vary: "Authorization",
     },
   });
 }

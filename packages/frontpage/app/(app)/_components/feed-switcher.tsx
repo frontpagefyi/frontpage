@@ -6,36 +6,41 @@ import { Button } from "@/lib/components/ui/button";
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
   DropdownMenuTrigger,
 } from "@/lib/components/ui/dropdown-menu";
 import { ChevronDownIcon } from "@radix-ui/react-icons";
 import { Spinner } from "@/lib/components/ui/spinner";
 import { FeedLoadingSkeleton } from "../feed/_components/feed-skeleton";
+import {
+  FEED_REGISTRY,
+  DEFAULT_FEED_SLUG,
+  type FeedSlug,
+} from "@/lib/constants";
 
-const FEEDS = [
-  { label: "Hot", slug: "hot" },
-  { label: "New", slug: "new" },
-  { label: "Top", slug: "top" },
-] as const;
-
-const DEFAULT_FEED = FEEDS[0];
-
-function feedHref(slug: string) {
-  return slug === "hot" ? "/" : `/feed/${slug}`;
+function feedHref(slug: FeedSlug) {
+  return slug === DEFAULT_FEED_SLUG ? "/" : `/feed/${slug}`;
 }
 
 export function FeedSwitcherLayout({
-  currentSlug = "hot",
+  currentSlug = DEFAULT_FEED_SLUG,
   children,
 }: {
-  currentSlug?: string;
+  currentSlug?: FeedSlug;
   children: ReactNode;
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [optimisticSlug, setOptimisticSlug] = useState(currentSlug);
-  const current = FEEDS.find((f) => f.slug === optimisticSlug) ?? DEFAULT_FEED;
+  const [selectedSlug, setSelectedSlug] = useState(currentSlug);
+
+  // Sync when server prop changes (e.g., browser back/forward navigation)
+  if (selectedSlug !== currentSlug && !isPending) {
+    setSelectedSlug(currentSlug);
+  }
+
+  const current =
+    FEED_REGISTRY.find((f) => f.slug === selectedSlug) ?? FEED_REGISTRY[0];
 
   return (
     <>
@@ -52,20 +57,22 @@ export function FeedSwitcherLayout({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            {FEEDS.map((feed) => (
-              <DropdownMenuItem
-                key={feed.slug}
-                className={feed.slug === optimisticSlug ? "font-medium" : ""}
-                onSelect={() => {
-                  setOptimisticSlug(feed.slug);
-                  startTransition(() => {
-                    router.push(feedHref(feed.slug));
-                  });
-                }}
-              >
-                {feed.label}
-              </DropdownMenuItem>
-            ))}
+            <DropdownMenuRadioGroup value={selectedSlug}>
+              {FEED_REGISTRY.map((feed) => (
+                <DropdownMenuRadioItem
+                  key={feed.slug}
+                  value={feed.slug}
+                  onSelect={() => {
+                    setSelectedSlug(feed.slug);
+                    startTransition(() => {
+                      router.push(feedHref(feed.slug));
+                    });
+                  }}
+                >
+                  {feed.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

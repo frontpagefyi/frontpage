@@ -9,14 +9,14 @@ import { Spinner } from "@/lib/components/ui/spinner";
 export type Page<TCursor> = {
   content: ReactNode;
   nextCursor: TCursor | null;
-  pageSize: number;
+  itemCount: number;
 };
 
 type Props<TCursor> = {
   getMoreItemsAction: (cursor: TCursor | null) => Promise<Page<TCursor>>;
   emptyMessage: string;
   cacheKey: string;
-  fallback: Page<TCursor> | Promise<Page<TCursor>>;
+  fallback: Page<TCursor>;
   revalidateAll?: boolean;
 };
 
@@ -36,7 +36,7 @@ export function InfiniteList<TCursor>({ fallback, ...props }: Props<TCursor>) {
         },
       }}
     >
-      <InfinteListInner {...props} />
+      <InfiniteListInner {...props} />
     </SWRConfig>
   );
 }
@@ -51,21 +51,27 @@ export const InfiniteListContext = createContext<{
   },
 });
 
-function InfinteListInner<TCursor>({
+function InfiniteListInner<TCursor>({
   getMoreItemsAction,
   emptyMessage,
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate, isValidating } = useSWRInfinite(
+  const { data, size, setSize, mutate, isValidating, error } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
-      if (previousPageData && !previousPageData.pageSize) return null; // reached the end
+      if (previousPageData && previousPageData.nextCursor === null) return null;
       return [cacheKey, previousPageData?.nextCursor ?? null];
     },
     ([_, cursor]) => {
       return getMoreItemsAction(cursor);
     },
-    { revalidateOnMount: false, revalidateAll },
+    {
+      revalidateOnMount: false,
+      revalidateAll,
+      onError: (err: unknown) => {
+        console.error("Feed pagination error:", err);
+      },
+    },
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
@@ -74,6 +80,20 @@ function InfinteListInner<TCursor>({
       }
     },
   });
+
+  if (error) {
+    return (
+      <div className="flex flex-col items-center gap-2 py-8 text-gray-500">
+        <p>Failed to load posts.</p>
+        <button
+          onClick={() => void mutate()}
+          className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
+        >
+          Try again
+        </button>
+      </div>
+    );
+  }
 
   if (!data) {
     return (
@@ -89,16 +109,15 @@ function InfinteListInner<TCursor>({
     <div className="space-y-6">
       {pages.map((page, indx) => {
         return (
-          <Fragment key={String(page.nextCursor)}>
+          <Fragment key={String(pages[indx - 1]?.nextCursor ?? "initial")}>
             <InfiniteListContext.Provider
               value={{
                 revalidatePage: async () => {
                   const currentCursor = pages[indx - 1]?.nextCursor;
                   await mutate(data, {
-                    revalidate: (_data, args) =>
+                    revalidate: (_data, key) =>
                       !currentCursor ||
-                      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-                      (args as any)[1] === currentCursor,
+                      (Array.isArray(key) && key[1] === currentCursor),
                   });
                 },
               }}
@@ -107,9 +126,9 @@ function InfinteListInner<TCursor>({
             </InfiniteListContext.Provider>
 
             {indx === pages.length - 1 ? (
-              page.pageSize === 0 ? (
+              page.itemCount === 0 ? (
                 <p className="text-center text-gray-400">{emptyMessage}</p>
-              ) : (
+              ) : page.nextCursor ? (
                 <div
                   ref={inViewRef}
                   className="flex flex-col items-center gap-2 py-4 text-gray-400"
@@ -117,7 +136,7 @@ function InfinteListInner<TCursor>({
                   <Spinner className="h-5 w-5" />
                   <p className="text-sm">Loading more posts...</p>
                 </div>
-              )
+              ) : null
             ) : null}
           </Fragment>
         );
