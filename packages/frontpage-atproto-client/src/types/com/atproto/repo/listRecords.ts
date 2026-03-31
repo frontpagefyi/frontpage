@@ -1,71 +1,71 @@
 /**
  * GENERATED CODE - DO NOT MODIFY
  */
-import { HeadersMap, XRPCError } from '@atproto/xrpc'
-import { type ValidationResult, BlobRef } from '@atproto/lexicon'
-import { CID } from 'multiformats/cid'
-import { validate as _validate } from '../../../../lexicons'
+import { HeadersMap, XRPCError } from "@atproto/xrpc";
+import { type ValidationResult, BlobRef } from "@atproto/lexicon";
+import { CID } from "multiformats/cid";
+import { validate as _validate } from "../../../../lexicons";
 import {
   type $Typed,
   is$typed as _is$typed,
   type OmitKey,
-} from '../../../../util'
+} from "../../../../util";
 
 const is$typed = _is$typed,
-  validate = _validate
-const id = 'com.atproto.repo.listRecords'
+  validate = _validate;
+const id = "com.atproto.repo.listRecords";
 
 export interface QueryParams {
   /** The handle or DID of the repo. */
-  repo: string
+  repo: string;
   /** The NSID of the record type. */
-  collection: string
+  collection: string;
   /** The number of records to return. */
-  limit?: number
-  cursor?: string
+  limit?: number;
+  cursor?: string;
   /** DEPRECATED: The lowest sort-ordered rkey to start from (exclusive) */
-  rkeyStart?: string
+  rkeyStart?: string;
   /** DEPRECATED: The highest sort-ordered rkey to stop at (exclusive) */
-  rkeyEnd?: string
+  rkeyEnd?: string;
   /** Flag to reverse the order of the returned records. */
-  reverse?: boolean
+  reverse?: boolean;
 }
 
-export type InputSchema = undefined
+export type InputSchema = undefined;
 
 export interface OutputSchema {
-  cursor?: string
-  records: Record[]
+  cursor?: string;
+  records: Record[];
 }
 
 export interface CallOptions {
-  signal?: AbortSignal
-  headers?: HeadersMap
+  signal?: AbortSignal;
+  headers?: HeadersMap;
 }
 
 export interface Response {
-  success: boolean
-  headers: HeadersMap
-  data: OutputSchema
+  success: boolean;
+  headers: HeadersMap;
+  data: OutputSchema;
 }
 
 export function toKnownErr(e: any) {
-  return e
+  return e;
 }
 
 export interface Record {
-  $type?: 'com.atproto.repo.listRecords#record'
-  uri: string
-  cid: string
-  value: { [_ in string]: unknown }
+  $type?: "com.atproto.repo.listRecords#record";
+  uri: string;
+  cid: string;
+  value: { [_ in string]: unknown };
 }
 
-const hashRecord = 'record'
+const hashRecord = "record";
 
 export function isRecord<V>(v: V) {
-  return is$typed(v, id, hashRecord)
+  return is$typed(v, id, hashRecord);
 }
 
 export function validateRecord<V>(v: V) {
-  return validate<Record & V>(v, id, hashRecord)
+  return validate<Record & V>(v, id, hashRecord);
 }
