@@ -5,7 +5,7 @@ import { nsids } from "./repo";
 
 // This module refers to the event emitted by Jetstream
 
-export const Collection = z.union([
+export const KnownCollection = z.union([
   z.literal(nsids.FyiUnravelFrontpagePost),
   z.literal(nsids.FyiFrontpageFeedPost),
   z.literal(nsids.FyiUnravelFrontpageComment),
@@ -14,16 +14,14 @@ export const Collection = z.union([
   z.literal(nsids.FyiFrontpageFeedVote),
 ]);
 
-export type Collection = z.infer<typeof Collection>;
+export type KnownCollection = z.infer<typeof KnownCollection>;
 
 const Path = z.string().transform((p, ctx) => {
-  const collectionResult = Collection.safeParse(p.split("/")[0]);
-  if (!collectionResult.success) {
+  const collection = p.split("/")[0];
+  if (!collection) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: `Invalid collection: "${p.split("/")[0]}". Expected one of ${Collection.options
-        .map((c) => c.value)
-        .join(", ")}`,
+      message: `Invalid path: ${p}`,
     });
     return z.NEVER;
   }
@@ -33,12 +31,11 @@ const Path = z.string().transform((p, ctx) => {
       code: z.ZodIssueCode.custom,
       message: `Invalid path: ${p}`,
     });
-
     return z.NEVER;
   }
 
   return {
-    collection: collectionResult.data,
+    collection,
     rkey,
     value: p,
   };

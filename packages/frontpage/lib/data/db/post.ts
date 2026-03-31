@@ -2,40 +2,18 @@ import "server-only";
 
 import { cache } from "react";
 import { db } from "@/lib/db";
-import {
-  eq,
-  sql,
-  desc,
-  and,
-  isNull,
-  or,
-  type InferSelectModel,
-  ne,
-} from "drizzle-orm";
+import { eq, desc, and, type InferSelectModel, ne } from "drizzle-orm";
 import * as schema from "@/lib/schema";
-import { getUser, isAdmin } from "../user";
+import { isAdmin } from "../user";
 import { type DID } from "../atproto/did";
 import { newPostAggregateTrigger } from "./triggers";
+import {
+  bannedUserSubQuery,
+  postVisibilityFilters,
+  buildUserHasVotedQuery,
+} from "./visibility";
 import { invariant } from "@/lib/utils";
 import type { PostCollectionType } from "../atproto/repo";
-
-const buildUserHasVotedQuery = cache(async () => {
-  const user = await getUser();
-
-  return db
-    .select({ postId: schema.PostVote.postId })
-    .from(schema.PostVote)
-    .where(user ? eq(schema.PostVote.authorDid, user.did) : sql`false`)
-    .as("hasVoted");
-});
-
-const bannedUserSubQuery = db
-  .select({
-    did: schema.LabelledProfile.did,
-    isHidden: schema.LabelledProfile.isHidden,
-  })
-  .from(schema.LabelledProfile)
-  .as("bannedUser");
 
 export const getFrontpagePosts = cache(async (offset: number) => {
   const POSTS_PER_PAGE = 10;
@@ -64,15 +42,7 @@ export const getFrontpagePosts = cache(async (offset: number) => {
       bannedUserSubQuery,
       eq(bannedUserSubQuery.did, schema.Post.authorDid),
     )
-    .where(
-      and(
-        eq(schema.Post.status, "live"),
-        or(
-          isNull(bannedUserSubQuery.isHidden),
-          eq(bannedUserSubQuery.isHidden, false),
-        ),
-      ),
-    )
+    .where(postVisibilityFilters(bannedUserSubQuery))
     .orderBy(desc(schema.PostAggregates.rank))
     .limit(POSTS_PER_PAGE)
     .offset(offset);

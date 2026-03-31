@@ -1,49 +1,23 @@
 import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
-import { getFrontpagePosts } from "@/lib/data/db/post";
-import { PostCard } from "./_components/post-card";
+import { getMoreFeedPostsAction } from "@/lib/feed-action";
+import { HOT_FEED_URI } from "@/lib/constants";
+import { FeedSwitcherLayout } from "./_components/feed-switcher";
 
 export default async function Home() {
   await connection();
 
-  // Calling an action directly is not recommended in the doc but here we do it as a DRY shortcut.
-  const initialData = await getMorePostsAction(0);
+  const getMorePostsAction = getMoreFeedPostsAction.bind(null, HOT_FEED_URI);
+  const initialData = await getMorePostsAction(null);
 
   return (
-    <InfiniteList
-      cacheKey="posts"
-      getMoreItemsAction={getMorePostsAction}
-      emptyMessage="No posts remaining"
-      fallback={initialData}
-    />
+    <FeedSwitcherLayout>
+      <InfiniteList
+        cacheKey={`feed:${HOT_FEED_URI}`}
+        getMoreItemsAction={getMorePostsAction}
+        emptyMessage="No posts remaining"
+        fallback={initialData}
+      />
+    </FeedSwitcherLayout>
   );
-}
-
-async function getMorePostsAction(cursor: number | null) {
-  "use server";
-  const { posts, nextCursor } = await getFrontpagePosts(cursor ?? 0);
-
-  return {
-    content: (
-      <>
-        {posts.map((post) => (
-          <PostCard
-            key={post.id}
-            author={post.authorDid}
-            createdAt={post.createdAt}
-            id={post.id}
-            title={post.title}
-            url={post.url}
-            votes={post.voteCount}
-            commentCount={post.commentCount}
-            cid={post.cid}
-            rkey={post.rkey}
-            isUpvoted={post.userHasVoted}
-          />
-        ))}
-      </>
-    ),
-    pageSize: posts.length,
-    nextCursor,
-  };
 }

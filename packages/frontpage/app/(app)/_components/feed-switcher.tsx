@@ -1,0 +1,82 @@
+"use client";
+
+import { type ReactNode, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
+import { Button } from "@/lib/components/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuRadioGroup,
+  DropdownMenuRadioItem,
+  DropdownMenuTrigger,
+} from "@/lib/components/ui/dropdown-menu";
+import { ChevronDownIcon } from "@radix-ui/react-icons";
+import { Spinner } from "@/lib/components/ui/spinner";
+import { FeedLoadingSkeleton } from "../feed/_components/feed-skeleton";
+import {
+  FEED_REGISTRY,
+  DEFAULT_FEED_SLUG,
+  type FeedSlug,
+} from "@/lib/constants";
+
+function feedHref(slug: FeedSlug) {
+  return slug === DEFAULT_FEED_SLUG ? "/" : `/feed/${slug}`;
+}
+
+export function FeedSwitcherLayout({
+  currentSlug = DEFAULT_FEED_SLUG,
+  children,
+}: {
+  currentSlug?: FeedSlug;
+  children: ReactNode;
+}) {
+  const router = useRouter();
+  const [isPending, startTransition] = useTransition();
+  const [selectedSlug, setSelectedSlug] = useState(currentSlug);
+
+  // Sync when server prop changes (e.g., browser back/forward navigation)
+  if (selectedSlug !== currentSlug && !isPending) {
+    setSelectedSlug(currentSlug);
+  }
+
+  const current =
+    FEED_REGISTRY.find((f) => f.slug === selectedSlug) ?? FEED_REGISTRY[0];
+
+  return (
+    <>
+      <div className="mb-4">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button variant="ghost" size="sm" className="gap-1 text-base">
+              {current.label}
+              {isPending ? (
+                <Spinner className="h-3 w-3" />
+              ) : (
+                <ChevronDownIcon />
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuRadioGroup value={selectedSlug}>
+              {FEED_REGISTRY.map((feed) => (
+                <DropdownMenuRadioItem
+                  key={feed.slug}
+                  value={feed.slug}
+                  onSelect={() => {
+                    setSelectedSlug(feed.slug);
+                    startTransition(() => {
+                      router.push(feedHref(feed.slug));
+                    });
+                  }}
+                >
+                  {feed.label}
+                </DropdownMenuRadioItem>
+              ))}
+            </DropdownMenuRadioGroup>
+          </DropdownMenuContent>
+        </DropdownMenu>
+      </div>
+      {isPending ? <FeedLoadingSkeleton /> : children}
+    </>
+  );
+}
