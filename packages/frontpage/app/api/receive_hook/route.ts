@@ -1,11 +1,20 @@
 import { db } from "@/lib/db";
 import * as schema from "@/lib/schema";
-import { Commit, KnownCollection } from "@/lib/data/atproto/event";
+import { Commit } from "@/lib/data/atproto/event";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
 import { nsids } from "@/lib/data/atproto/repo";
 import { timingSafeEqual } from "node:crypto";
+
+const knownCollections = [
+  nsids.FyiUnravelFrontpagePost,
+  nsids.FyiFrontpageFeedPost,
+  nsids.FyiUnravelFrontpageComment,
+  nsids.FyiFrontpageFeedComment,
+  nsids.FyiUnravelFrontpageVote,
+  nsids.FyiFrontpageFeedVote,
+] as const;
 
 const EXPECTED_AUTH_HEADER = Buffer.from(
   `Bearer ${process.env.DRAINPIPE_CONSUMER_SECRET}`,
@@ -65,8 +74,11 @@ export async function POST(request: Request) {
       }
 
       default: {
-        const knownResult = KnownCollection.safeParse(collection);
-        if (knownResult.success) {
+        if (
+          knownCollections.includes(
+            collection as (typeof knownCollections)[number],
+          )
+        ) {
           // Known collection without a handler — this is a programming error.
           // Throw to prevent the offset from being committed so the op
           // can be reprocessed after a code fix.
@@ -75,6 +87,7 @@ export async function POST(request: Request) {
           );
         }
         // Unknown collections are expected (e.g. user-created records)
+        console.log(`Skipping unknown collection: ${collection}`);
       }
     }
   });

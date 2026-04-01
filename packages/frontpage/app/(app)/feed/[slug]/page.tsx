@@ -15,9 +15,9 @@ export async function generateMetadata(
   props: PageProps<"/feed/[slug]">,
 ): Promise<Metadata> {
   const { slug } = await props.params;
-  if (!isFeedSlug(slug)) return {};
+  if (!isFeedSlug(slug)) notFound();
   const feed = FEED_REGISTRY.find((f) => f.slug === slug);
-  if (!feed) return {};
+  if (!feed) notFound();
   return { title: `${feed.label} - Frontpage`, description: feed.description };
 }
 

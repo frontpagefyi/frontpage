@@ -36,7 +36,7 @@ async function performModerationAction(
 
   const newModEvent: ModerationEventDTO = {
     subjectUri: report.subjectUri,
-    subjectDid: report.subjectDid as DID,
+    subjectDid: report.subjectDid,
     createdBy: user.did,
     createdAt: new Date(),
     labelsAdded: report.reportReason,
@@ -59,7 +59,7 @@ async function performModerationAction(
       case nsids.FyiUnravelFrontpagePost:
         return await moderatePost({
           rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
+          authorDid: report.subjectDid,
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });
@@ -67,14 +67,14 @@ async function performModerationAction(
       case nsids.FyiUnravelFrontpageComment:
         return await moderateComment({
           rkey: report.subjectRkey!,
-          authorDid: report.subjectDid as DID,
+          authorDid: report.subjectDid,
           cid: report.subjectCid!,
           hide: input.status === "accepted",
         });
 
       default:
         return await moderateUser({
-          userDid: report.subjectDid as DID,
+          userDid: report.subjectDid,
           hide: input.status === "accepted",
           label: report.reportReason,
         });
@@ -145,7 +145,7 @@ export async function ReportCard({ report }: { report: Report }) {
         <div className="flex flex-col mb-4 gap-1 flex-wrap">
           <p>
             <strong>Reported User: </strong>
-            <UserHandle key={report.id} userDid={report.subjectDid as DID} />
+            <UserHandle key={report.id} userDid={report.subjectDid} />
           </p>
           <p>
             <strong className="mr-2">Reason:</strong>
@@ -153,7 +153,7 @@ export async function ReportCard({ report }: { report: Report }) {
           </p>
           <p>
             <strong className="mr-2">Reported By:</strong>
-            <UserHandle userDid={report.createdBy as DID} />
+            <UserHandle userDid={report.createdBy} />
           </p>
           <p>
             <strong className="mr-2">Comment:</strong>
@@ -171,7 +171,7 @@ export async function ReportCard({ report }: { report: Report }) {
             <p>
               <strong className="mr-2">Actioned By:</strong>
 
-              <UserHandle userDid={report.actionedBy as DID} />
+              <UserHandle userDid={report.actionedBy} />
             </p>
           </div>
         ) : null}
@@ -202,7 +202,7 @@ export async function ReportCard({ report }: { report: Report }) {
             className="ml-2"
             href={await createLink(
               report.subjectCollection,
-              report.subjectDid as DID,
+              report.subjectDid,
               report.subjectRkey,
             )}
             target="_blank"

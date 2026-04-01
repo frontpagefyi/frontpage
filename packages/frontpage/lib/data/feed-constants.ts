@@ -1,28 +1,13 @@
-import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
+import { z } from "zod";
 
-/** DID of the feed generator service (did:web identity) */
-export const FEED_SERVICE_DID = `did:web:${FRONTPAGE_ATPROTO_HANDLE}`;
+const feedEnv = z
+  .object({
+    FEED_SERVICE_DID: z.string().min(1).default("did:web:frontpage.fyi"),
+  })
+  .parse(process.env);
 
-/** NSID for the getFeedSkeleton XRPC method */
-export const GET_FEED_SKELETON_NSID = "fyi.frontpage.feed.getFeedSkeleton";
-
-/** Timeout for external feed generator requests in milliseconds */
-export const EXTERNAL_REQUEST_TIMEOUT_MS = 5_000;
+/** DID of the feed generator service */
+export const FEED_SERVICE_DID = feedEnv.FEED_SERVICE_DID;
 
 /** Cache duration for static XRPC endpoints (1 day in seconds) */
 export const STATIC_CACHE_MAX_AGE_SECONDS = 86400;
-
-/** Cache duration for skeleton responses (seconds) */
-export const SKELETON_CACHE_MAX_AGE_SECONDS = 30;
-
-/** Skeleton stale-while-revalidate (seconds) */
-export const SKELETON_SWR_SECONDS = 60;
-
-/** Default skeleton page size */
-export const DEFAULT_SKELETON_LIMIT = 50;
-
-/** Minimum skeleton page size */
-export const MIN_SKELETON_LIMIT = 1;
-
-/** Maximum skeleton page size */
-export const MAX_SKELETON_LIMIT = 100;

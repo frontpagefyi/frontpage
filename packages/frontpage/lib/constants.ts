@@ -1,12 +1,11 @@
+import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
+
 export const FRONTPAGE_ATPROTO_HANDLE = "frontpage.fyi";
 export const FRONTPAGE_APPVIEW_USER_AGENT =
   "appview/@frontpage.fyi (@frontpage.fyi, @tom.sherman.is)";
 
 /** DID for the frontpage.fyi AT Protocol repo */
 export const FRONTPAGE_DID = "did:plc:klmr76mpewpv7rtm3xgpzd7x";
-
-/** Feed generator collection NSID */
-export const FEED_GENERATOR_COLLECTION = "fyi.frontpage.feed.generator";
 
 /** Central feed registry — single source of truth for all feed definitions */
 export const FEED_REGISTRY = [
@@ -32,7 +31,7 @@ export function isFeedSlug(s: string): s is FeedSlug {
 }
 
 export function feedUri(slug: FeedSlug): string {
-  return `at://${FRONTPAGE_DID}/${FEED_GENERATOR_COLLECTION}/${slug}`;
+  return `at://${FRONTPAGE_DID}/${nsids.FyiFrontpageFeedGenerator}/${slug}`;
 }
 
 /** Feed URIs derived from the registry */

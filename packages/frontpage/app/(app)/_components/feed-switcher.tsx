@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useState, useTransition } from "react";
+import { type ReactNode, useOptimistic, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { Button } from "@/lib/components/ui/button";
 import {
@@ -32,15 +32,10 @@ export function FeedSwitcherLayout({
 }) {
   const router = useRouter();
   const [isPending, startTransition] = useTransition();
-  const [selectedSlug, setSelectedSlug] = useState(currentSlug);
-
-  // Sync when server prop changes (e.g., browser back/forward navigation)
-  if (selectedSlug !== currentSlug && !isPending) {
-    setSelectedSlug(currentSlug);
-  }
+  const [optimisticSlug, setOptimisticSlug] = useOptimistic(currentSlug);
 
   const current =
-    FEED_REGISTRY.find((f) => f.slug === selectedSlug) ?? FEED_REGISTRY[0];
+    FEED_REGISTRY.find((f) => f.slug === optimisticSlug) ?? FEED_REGISTRY[0];
 
   return (
     <>
@@ -57,14 +52,14 @@ export function FeedSwitcherLayout({
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="start">
-            <DropdownMenuRadioGroup value={selectedSlug}>
+            <DropdownMenuRadioGroup value={optimisticSlug}>
               {FEED_REGISTRY.map((feed) => (
                 <DropdownMenuRadioItem
                   key={feed.slug}
                   value={feed.slug}
                   onSelect={() => {
-                    setSelectedSlug(feed.slug);
                     startTransition(() => {
+                      setOptimisticSlug(feed.slug);
                       router.push(feedHref(feed.slug));
                     });
                   }}

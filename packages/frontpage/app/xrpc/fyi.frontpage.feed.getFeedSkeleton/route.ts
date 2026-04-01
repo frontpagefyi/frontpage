@@ -1,20 +1,17 @@
 import { type NextRequest, NextResponse } from "next/server";
-import { AtUri } from "@atproto/syntax";
 import { verifyJwt } from "@atproto/xrpc-server";
 import { after } from "next/server";
-import { getSkeletonByAlgorithm } from "@/lib/data/db/feed-skeleton";
-import { getDidDoc, resolveDidDoc, parseDid } from "@/lib/data/atproto/did";
+import { getDidDoc, parseDid } from "@/lib/data/atproto/did";
 import { invariant } from "@/lib/utils";
-import { isFeedSlug, FEED_GENERATOR_COLLECTION } from "@/lib/constants";
-import {
-  FEED_SERVICE_DID,
-  GET_FEED_SKELETON_NSID,
-  DEFAULT_SKELETON_LIMIT,
-  MIN_SKELETON_LIMIT,
-  MAX_SKELETON_LIMIT,
-  SKELETON_CACHE_MAX_AGE_SECONDS,
-  SKELETON_SWR_SECONDS,
-} from "@/lib/data/feed-constants";
+import { nsids } from "@/lib/data/atproto/repo";
+import { FEED_SERVICE_DID } from "@/lib/data/feed-constants";
+import { getFeedSkeleton } from "@/lib/data/feed-resolver";
+
+const DEFAULT_SKELETON_LIMIT = 50;
+const MIN_SKELETON_LIMIT = 1;
+const MAX_SKELETON_LIMIT = 100;
+const SKELETON_CACHE_MAX_AGE_SECONDS = 30;
+const SKELETON_SWR_SECONDS = 60;
 
 const BEARER_PREFIX = "Bearer ";
 
@@ -24,16 +21,12 @@ function xrpcError(name: string, message: string, status: number) {
 
 async function getSigningKey(
   iss: string,
-  forceRefresh: boolean,
+  _forceRefresh: boolean,
 ): Promise<string> {
   const issuerDid = parseDid(iss);
   invariant(issuerDid, `Invalid DID in JWT issuer: ${iss}`);
 
-  // verifyJwt calls with forceRefresh=true after initial key lookup fails,
-  // to handle DID key rotation. Bypass the React.cache() wrapper in that case.
-  const didDoc = forceRefresh
-    ? await resolveDidDoc(issuerDid)
-    : await getDidDoc(issuerDid);
+  const didDoc = await getDidDoc(issuerDid);
   const verificationMethod = didDoc.verificationMethod?.find(
     (method) => method.id === `${iss}#atproto`,
   );
@@ -51,34 +44,11 @@ export async function GET(request: NextRequest) {
   const limitParam = searchParams.get("limit");
   const cursor = searchParams.get("cursor") ?? undefined;
 
-  // Validate feed param exists
   if (!feed) {
     return xrpcError("InvalidRequest", "Missing required parameter: feed", 400);
   }
 
-  // Parse and validate the feed URI
-  let feedUri: AtUri;
-  try {
-    feedUri = new AtUri(feed);
-  } catch {
-    return xrpcError("InvalidRequest", "Invalid feed URI", 400);
-  }
-
-  // Validate collection
-  if (feedUri.collection !== FEED_GENERATOR_COLLECTION) {
-    return xrpcError(
-      "UnknownFeed",
-      `Unknown collection: ${feedUri.collection}`,
-      400,
-    );
-  }
-
-  // Validate algorithm
-  if (!isFeedSlug(feedUri.rkey)) {
-    return xrpcError("UnknownFeed", `Unknown feed: ${feedUri.rkey}`, 400);
-  }
-
-  // Parse limit (default DEFAULT_SKELETON_LIMIT, clamp MIN..MAX)
+  // Parse limit (default 50, clamp 1..100)
   let limit = DEFAULT_SKELETON_LIMIT;
   if (limitParam) {
     limit = Math.max(
@@ -99,7 +69,7 @@ export async function GET(request: NextRequest) {
       const payload = await verifyJwt(
         jwt,
         FEED_SERVICE_DID,
-        GET_FEED_SKELETON_NSID,
+        nsids.FyiFrontpageFeedGetFeedSkeleton,
         getSigningKey,
       );
       requesterDid = payload.iss;
@@ -127,26 +97,29 @@ export async function GET(request: NextRequest) {
     }
   }
 
-  // Get the skeleton
-  let result;
-  try {
-    result = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
-  } catch (err) {
-    if (err instanceof Error && err.message.startsWith("Invalid cursor")) {
-      return xrpcError("InvalidRequest", err.message, 400);
+  const result = await getFeedSkeleton(feed, cursor, limit);
+  if (!result.ok) {
+    const { error } = result;
+    switch (error.code) {
+      case "InvalidUri":
+        return xrpcError("InvalidRequest", error.message, 400);
+      case "InvalidCollection":
+      case "UnknownFeed":
+        return xrpcError("UnknownFeed", error.message, 400);
+      case "ExternalError":
+      case "InvalidResponse":
+        return xrpcError("InternalServerError", error.message, 500);
     }
-    console.error("getFeedSkeleton db error:", err);
-    return xrpcError("InternalServerError", "Failed to fetch feed", 500);
   }
 
   // Non-blocking logging
   after(() => {
     console.log(
-      `getFeedSkeleton: algorithm=${feedUri.rkey} limit=${limit} cursor=${cursor ?? "none"} results=${result.feed.length} requester=${requesterDid ?? "anonymous"}`,
+      `getFeedSkeleton: feed=${feed} limit=${limit} cursor=${cursor ?? "none"} results=${result.data.feed.length} requester=${requesterDid ?? "anonymous"}`,
     );
   });
 
-  return NextResponse.json(result, {
+  return NextResponse.json(result.data, {
     headers: {
       "Cache-Control": `public, max-age=${SKELETON_CACHE_MAX_AGE_SECONDS}, stale-while-revalidate=${SKELETON_SWR_SECONDS}`,
       Vary: "Authorization",

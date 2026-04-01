@@ -11,54 +11,83 @@ import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
 import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
 import { FyiFrontpageFeedGenerator } from "@repo/frontpage-atproto-client";
-import {
-  isFeedSlug,
-  FRONTPAGE_DID,
-  FEED_GENERATOR_COLLECTION,
-} from "@/lib/constants";
-import {
-  GET_FEED_SKELETON_NSID,
-  EXTERNAL_REQUEST_TIMEOUT_MS,
-} from "@/lib/data/feed-constants";
+import { isFeedSlug, FRONTPAGE_DID } from "@/lib/constants";
+import { nsids } from "@/lib/data/atproto/repo";
 
-export async function resolveFeed(
+export type FeedError =
+  | { code: "InvalidUri"; message: string }
+  | { code: "InvalidCollection"; message: string }
+  | { code: "UnknownFeed"; message: string }
+  | { code: "ExternalError"; message: string }
+  | { code: "InvalidResponse"; message: string };
+
+export type FeedSkeletonResult =
+  | { ok: true; data: SkeletonResult }
+  | { ok: false; error: FeedError };
+
+export type FeedResult =
+  | { ok: true; posts: HydratedPost[]; cursor?: string }
+  | { ok: false; error: FeedError };
+
+export async function getFeed(
   feedUri: string,
   cursor?: string,
   limit = 50,
-): Promise<{ posts: HydratedPost[]; cursor?: string }> {
-  // Validate feedUri before triggering any outbound requests
-  const atUri = new AtUri(feedUri); // throws on malformed URIs
-  if (atUri.collection !== FEED_GENERATOR_COLLECTION) {
-    throw new Error(
-      `Invalid feed URI: expected collection ${FEED_GENERATOR_COLLECTION}, got ${atUri.collection}`,
-    );
-  }
+): Promise<FeedResult> {
+  const skeletonResult = await getFeedSkeleton(feedUri, cursor, limit);
+  if (!skeletonResult.ok) return skeletonResult;
 
-  const skeleton = await getSkeleton(atUri, cursor, limit);
-  const posts = await hydratePosts(skeleton.feed.map((s) => s.post));
+  const posts = await hydratePosts(skeletonResult.data.feed.map((s) => s.post));
 
-  return { posts, cursor: skeleton.cursor };
+  return { ok: true, posts, cursor: skeletonResult.data.cursor };
 }
 
-async function getSkeleton(
-  feedUri: AtUri,
-  cursor: string | undefined,
-  limit: number,
-): Promise<SkeletonResult> {
-  if (isLocalFeed(feedUri) && isFeedSlug(feedUri.rkey)) {
-    return getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
+export async function getFeedSkeleton(
+  feedUri: string,
+  cursor?: string,
+  limit = 50,
+): Promise<FeedSkeletonResult> {
+  let atUri: AtUri;
+  try {
+    atUri = new AtUri(feedUri);
+  } catch {
+    return {
+      ok: false,
+      error: { code: "InvalidUri", message: `Invalid feed URI: ${feedUri}` },
+    };
   }
 
-  return getExternalSkeleton(feedUri, cursor, limit);
+  if (atUri.collection !== nsids.FyiFrontpageFeedGenerator) {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidCollection",
+        message: `Expected collection ${nsids.FyiFrontpageFeedGenerator}, got ${atUri.collection}`,
+      },
+    };
+  }
+
+  if (!isFeedSlug(atUri.rkey)) {
+    if (isLocalFeed(atUri)) {
+      return {
+        ok: false,
+        error: { code: "UnknownFeed", message: `Unknown feed: ${atUri.rkey}` },
+      };
+    }
+  }
+
+  const skeleton =
+    isLocalFeed(atUri) && isFeedSlug(atUri.rkey)
+      ? await getSkeletonByAlgorithm(atUri.rkey, limit, cursor)
+      : await getExternalSkeleton(atUri, cursor, limit);
+
+  return { ok: true, data: skeleton };
 }
 
 function isLocalFeed(feedUri: AtUri): boolean {
-  // The feed URI authority is the repo DID (did:plc:...) that published
-  // the generator record, not the service DID (did:web:frontpage.fyi)
   return (
     feedUri.host === FRONTPAGE_DID &&
-    feedUri.collection === FEED_GENERATOR_COLLECTION &&
-    isFeedSlug(feedUri.rkey)
+    feedUri.collection === nsids.FyiFrontpageFeedGenerator
   );
 }
 
@@ -81,14 +110,17 @@ async function getExternalSkeleton(
 
   const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
 
-  const url = new URL(`/xrpc/${GET_FEED_SKELETON_NSID}`, serviceEndpoint);
+  const url = new URL(
+    `/xrpc/${nsids.FyiFrontpageFeedGetFeedSkeleton}`,
+    serviceEndpoint,
+  );
   url.searchParams.set("feed", feedUri.toString());
   url.searchParams.set("limit", String(limit));
   if (cursor) url.searchParams.set("cursor", cursor);
 
   const response = await fetch(url.toString(), {
     headers: { Accept: "application/json" },
-    signal: AbortSignal.timeout(EXTERNAL_REQUEST_TIMEOUT_MS),
+    signal: AbortSignal.timeout(5_000),
     redirect: "error",
   });
 

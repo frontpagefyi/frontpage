@@ -5,7 +5,11 @@ import {
   WebDidDocumentResolver,
   CompositeDidDocumentResolver,
 } from "@atcute/identity-resolver";
-import type { DidDocument } from "@atcute/identity";
+import {
+  type DidDocument,
+  isAtprotoDid,
+  getPdsEndpoint,
+} from "@atcute/identity";
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "@/lib/constants";
 import { invariant } from "@/lib/utils";
 import { assertPublicHostname } from "@/lib/data/ssrf";
@@ -16,23 +20,7 @@ export type DID =
   | Brand<`did:web:${string}`, "DID">;
 
 export function isDid(s: string): s is DID {
-  if (s.startsWith("did:plc:")) {
-    return s.length > "did:plc:".length;
-  }
-  if (s.startsWith("did:web:")) {
-    const host = s.slice("did:web:".length);
-    if (
-      host.length === 0 ||
-      host.includes("/") ||
-      host.includes("..") ||
-      host.includes("%") ||
-      !/^[a-z0-9._:-]+$/i.test(host)
-    ) {
-      return false;
-    }
-    return true;
-  }
-  return false;
+  return isAtprotoDid(s);
 }
 
 export const didSchema = z.string().refine((s) => isDid(s), {
@@ -84,13 +72,9 @@ const didResolver = new CompositeDidDocumentResolver({
   },
 });
 
-/**
- * Resolve a DID document. Deduplicated per-request via React.cache().
- * Use resolveDidDoc directly when a fresh (uncached) fetch is needed.
- */
 export const getDidDoc = cache(resolveDidDoc);
 
-export async function resolveDidDoc(did: DID): Promise<DidDocument> {
+async function resolveDidDoc(did: DID): Promise<DidDocument> {
   const doc = await didResolver.resolve(did);
   invariant(
     doc.id === did,
@@ -100,13 +84,6 @@ export async function resolveDidDoc(did: DID): Promise<DidDocument> {
 }
 
 export const getPdsUrl = cache(async (did: DID) => {
-  const plc = await getDidDoc(did);
-  const service = plc.service?.find(
-    (s) => s.type === "AtprotoPersonalDataServer",
-  );
-
-  // TODO: Investigate and handle the other possible types of serviceEndpoint (eg. Record<string, string>)
-  return typeof service?.serviceEndpoint === "string"
-    ? service.serviceEndpoint
-    : null;
+  const doc = await getDidDoc(did);
+  return getPdsEndpoint(doc) ?? null;
 });

@@ -1,7 +1,12 @@
 "use client";
 
 import useSWRInfinite, { unstable_serialize } from "swr/infinite";
-import { createContext, Fragment, type ReactNode } from "react";
+import {
+  createContext,
+  Fragment,
+  type ReactNode,
+  startTransition,
+} from "react";
 import { useInView } from "react-intersection-observer";
 import { mutate, SWRConfig } from "swr";
 import { Spinner } from "@/lib/components/ui/spinner";
@@ -16,7 +21,7 @@ type Props<TCursor> = {
   getMoreItemsAction: (cursor: TCursor | null) => Promise<Page<TCursor>>;
   emptyMessage: string;
   cacheKey: string;
-  fallback: Page<TCursor>;
+  fallback: Page<TCursor> | Promise<Page<TCursor>>;
   revalidateAll?: boolean;
 };
 
@@ -57,7 +62,7 @@ function InfiniteListInner<TCursor>({
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate, isValidating, error } = useSWRInfinite(
+  const { data, size, setSize, mutate, isValidating } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
       if (previousPageData && previousPageData.nextCursor === null) return null;
       return [cacheKey, previousPageData?.nextCursor ?? null];
@@ -65,45 +70,18 @@ function InfiniteListInner<TCursor>({
     ([_, cursor]) => {
       return getMoreItemsAction(cursor);
     },
-    {
-      revalidateOnMount: false,
-      revalidateAll,
-      onError: (err: unknown) => {
-        console.error("Feed pagination error:", err);
-      },
-    },
+    { suspense: true, revalidateOnMount: false, revalidateAll },
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
       if (inView && !isValidating) {
-        void setSize(size + 1);
+        startTransition(() => void setSize(size + 1));
       }
     },
   });
 
-  if (error) {
-    return (
-      <div className="flex flex-col items-center gap-2 py-8 text-gray-500">
-        <p>Failed to load posts.</p>
-        <button
-          onClick={() => void mutate()}
-          className="text-sm text-indigo-600 hover:underline dark:text-indigo-400"
-        >
-          Try again
-        </button>
-      </div>
-    );
-  }
-
-  if (!data) {
-    return (
-      <div className="flex justify-center py-8">
-        <Spinner className="h-6 w-6" />
-      </div>
-    );
-  }
-
-  const pages = data;
+  // Data can't be undefined because we are using suspense. This is likely a bug in the swr types.
+  const pages = data!;
 
   return (
     <div className="space-y-6">

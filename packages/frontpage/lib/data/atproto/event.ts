@@ -1,41 +1,34 @@
 import "server-only";
 import { z } from "zod";
+import { NSID } from "@atproto/syntax";
 import { isDid } from "./did";
-import { nsids } from "./repo";
 
 // This module refers to the event emitted by Jetstream
 
-export const KnownCollection = z.union([
-  z.literal(nsids.FyiUnravelFrontpagePost),
-  z.literal(nsids.FyiFrontpageFeedPost),
-  z.literal(nsids.FyiUnravelFrontpageComment),
-  z.literal(nsids.FyiFrontpageFeedComment),
-  z.literal(nsids.FyiUnravelFrontpageVote),
-  z.literal(nsids.FyiFrontpageFeedVote),
-]);
-
-export type KnownCollection = z.infer<typeof KnownCollection>;
-
 const Path = z.string().transform((p, ctx) => {
-  const collection = p.split("/")[0];
-  if (!collection) {
+  const parts = p.split("/");
+  const [nsidStr, rkey] = parts;
+
+  if (!nsidStr || !rkey) {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
       message: `Invalid path: ${p}`,
     });
     return z.NEVER;
   }
-  const rkey = p.split("/")[1];
-  if (!rkey) {
+
+  try {
+    NSID.parse(nsidStr);
+  } catch {
     ctx.addIssue({
       code: z.ZodIssueCode.custom,
-      message: `Invalid path: ${p}`,
+      message: `Invalid NSID in path: ${nsidStr}`,
     });
     return z.NEVER;
   }
 
   return {
-    collection,
+    collection: nsidStr,
     rkey,
     value: p,
   };
