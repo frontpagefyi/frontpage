@@ -39,7 +39,7 @@ export default function Layout({ children }: { children: React.ReactNode }) {
         className={cn(
           sourceSans.variable,
           sourceSerif.variable,
-          "bg-slate-50/50 dark:bg-slate-950 min-h-screen",
+          "min-h-screen",
         )}
       >
         <ThemeProvider

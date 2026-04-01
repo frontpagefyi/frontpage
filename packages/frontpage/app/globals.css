@@ -14,54 +14,83 @@
   }
 }
 
+/* ============================================================
+   90s CLASSIC WEB THEME — Windows 95 / Netscape Navigator Era
+   ============================================================ */
 :root {
-  --background: oklch(100% 0 0);
-  --foreground: oklch(13.627% 0.0364 259.20245);
-  --card: oklch(100% 0 0);
-  --card-foreground: oklch(13.627% 0.0364 259.20245);
-  --popover: oklch(100% 0 0);
-  --popover-foreground: oklch(13.627% 0.0364 259.20245);
-  --primary: oklch(20.768% 0.03983 265.75245);
-  --primary-foreground: oklch(98.415% 0.00341 247.79335);
-  --secondary: oklch(96.826% 0.00685 247.88813);
-  --secondary-foreground: oklch(20.768% 0.03983 265.75245);
-  --muted: oklch(96.826% 0.00685 247.88813);
-  --muted-foreground: oklch(55.439% 0.04072 257.41777);
-  --accent: oklch(96.826% 0.00685 247.88813);
-  --accent-foreground: oklch(20.768% 0.03983 265.75245);
-  --destructive: oklch(63.683% 0.20785 25.33215);
-  --destructive-foreground: oklch(98.415% 0.00341 247.79335);
-  --success: oklch(71.983% 0.19184 149.51977);
-  --success-foreground: oklch(98.415% 0.00341 247.79335);
-  --border: oklch(92.876% 0.01262 255.50135);
-  --input: oklch(92.876% 0.01262 255.50135);
-  --ring: oklch(13.627% 0.0364 259.20245);
+  /* Classic system grey palette */
+  --background: #c0c0c0;
+  --foreground: #000000;
 
-  --radius: 0.5rem;
+  /* Window / card backgrounds */
+  --card: #d4d0c8;
+  --card-foreground: #000000;
+
+  --popover: #d4d0c8;
+  --popover-foreground: #000000;
+
+  /* Win95 navy title-bar blue as primary */
+  --primary: #000080;
+  --primary-foreground: #ffffff;
+
+  --secondary: #c0c0c0;
+  --secondary-foreground: #000000;
+
+  --muted: #a0a098;
+  --muted-foreground: #404040;
+
+  --accent: #000080;
+  --accent-foreground: #ffffff;
+
+  --destructive: #800000;
+  --destructive-foreground: #ffffff;
+
+  --success: #008000;
+  --success-foreground: #ffffff;
+
+  /* Beveled border trick: light on top-left, dark on bottom-right */
+  --border: #808080;
+  --input: #ffffff;
+  --ring: #000080;
+
+  /* Square corners — very 90s */
+  --radius: 0rem;
+
+  /* Custom 90s tokens */
+  --win-highlight: #ffffff;
+  --win-shadow: #404040;
+  --win-dark-shadow: #000000;
+  --win-face: #d4d0c8;
+  --titlebar-bg: #000080;
+  --titlebar-fg: #ffffff;
+  --link-color: #0000ee;
+  --link-visited: #551a8b;
+  --link-active: #ee0000;
 }
 
+/* No dark mode — 90s sites didn't have dark mode */
 .dark {
-  --background: oklch(13.627% 0.0364 259.20245);
-  --foreground: oklch(98.415% 0.00341 247.79335);
-  --card: oklch(13.627% 0.0364 259.20245);
-  --card-foreground: oklch(98.415% 0.00341 247.79335);
-  --popover: oklch(13.627% 0.0364 259.20245);
-  --popover-foreground: oklch(98.415% 0.00341 247.79335);
-  --primary: oklch(98.415% 0.00341 247.79335);
-  --primary-foreground: oklch(20.768% 0.03983 265.75245);
-  --secondary: oklch(27.95% 0.03685 260.02895);
-  --secondary-foreground: oklch(98.415% 0.00341 247.79335);
-  --muted: oklch(27.95% 0.03685 260.02895);
-  --muted-foreground: oklch(71.067% 0.03511 256.7791);
-  --accent: oklch(27.95% 0.03685 260.02895);
-  --accent-foreground: oklch(98.415% 0.00341 247.79335);
-  --destructive: oklch(39.584% 0.13308 25.7236);
-  --destructive-foreground: oklch(98.415% 0.00341 247.79335);
-  --success: oklch(41.939% 0.07699 153.85097);
-  --success-foreground: oklch(98.415% 0.00341 247.79335);
-  --border: oklch(27.95% 0.03685 260.02895);
-  --input: oklch(27.95% 0.03685 260.02895);
-  --ring: oklch(55.439% 0.04072 257.41777);
+  --background: #c0c0c0;
+  --foreground: #000000;
+  --card: #d4d0c8;
+  --card-foreground: #000000;
+  --popover: #d4d0c8;
+  --popover-foreground: #000000;
+  --primary: #000080;
+  --primary-foreground: #ffffff;
+  --secondary: #c0c0c0;
+  --secondary-foreground: #000000;
+  --muted: #a0a098;
+  --muted-foreground: #404040;
+  --accent: #000080;
+  --accent-foreground: #ffffff;
+  --destructive: #800000;
+  --destructive-foreground: #ffffff;
+  --success: #008000;
+  --success-foreground: #ffffff;
+  --border: #808080;
+  --input: #ffffff;
+  --ring: #000080;
 }
 
 @theme inline {
@@ -96,55 +125,126 @@
   --color-card-foreground: var(--card-foreground);
 
   --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-md: var(--radius);
+  --radius-sm: var(--radius);
 
   --animate-accordion-down: accordion-down 0.2s ease-out;
   --animate-accordion-up: accordion-up 0.2s ease-out;
 
-  --font-serif:
-    var(--font-source_serif), ui-serif, Georgia, Cambria, "Times New Roman",
-    Times, serif;
+  --font-sans: "Comic Sans MS", "Comic Sans", cursive;
+  --font-mono: "Courier New", Courier, monospace;
+  --font-serif: "Times New Roman", Times, serif;
 
   @keyframes accordion-down {
-    from {
-      height: 0;
-    }
-    to {
-      height: var(--radix-accordion-content-height);
-    }
+    from { height: 0; }
+    to { height: var(--radix-accordion-content-height); }
   }
   @keyframes accordion-up {
-    from {
-      height: var(--radix-accordion-content-height);
-    }
-    to {
-      height: 0;
-    }
+    from { height: var(--radix-accordion-content-height); }
+    to { height: 0; }
+  }
+
+  @keyframes marquee {
+    0% { transform: translateX(100%); }
+    100% { transform: translateX(-100%); }
   }
 }
 
+/* ========================
+   Windows 95 beveled helpers
+   ======================== */
+.win95-raised {
+  border-top: 2px solid var(--win-highlight);
+  border-left: 2px solid var(--win-highlight);
+  border-bottom: 2px solid var(--win-dark-shadow);
+  border-right: 2px solid var(--win-dark-shadow);
+  outline: 1px solid var(--win-shadow);
+  outline-offset: -1px;
+}
+
+.win95-inset {
+  border-top: 2px solid var(--win-shadow);
+  border-left: 2px solid var(--win-shadow);
+  border-bottom: 2px solid var(--win-highlight);
+  border-right: 2px solid var(--win-highlight);
+}
+
+.win95-btn {
+  background: var(--win-face);
+  border-top: 2px solid var(--win-highlight);
+  border-left: 2px solid var(--win-highlight);
+  border-bottom: 2px solid var(--win-dark-shadow);
+  border-right: 2px solid var(--win-dark-shadow);
+  color: #000000;
+  font-family: "Comic Sans MS", "Comic Sans", cursive;
+  font-size: 13px;
+  padding: 3px 10px;
+  cursor: pointer;
+  min-width: 75px;
+}
+
+.win95-btn:active {
+  border-top: 2px solid var(--win-dark-shadow);
+  border-left: 2px solid var(--win-dark-shadow);
+  border-bottom: 2px solid var(--win-highlight);
+  border-right: 2px solid var(--win-highlight);
+  padding: 4px 9px 2px 11px;
+}
+
+.titlebar {
+  background: linear-gradient(to right, #000080, #1084d0);
+  color: #ffffff;
+  font-family: "Comic Sans MS", cursive;
+  font-size: 12px;
+  font-weight: bold;
+  padding: 3px 6px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  user-select: none;
+}
+
+/* ========================
+   Global base styles
+   ======================== */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
 
   body {
-    @apply bg-background text-foreground;
-    font-family: var(--font-source_sans), sans-serif;
+    background-color: var(--background);
+    color: var(--foreground);
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
   }
 
-  h1,
-  h2,
-  h3,
-  h4,
-  h5,
-  h6 {
-    font-family: var(--font-source_serif), serif;
+  h1, h2, h3, h4, h5, h6 {
+    font-family: "Comic Sans MS", "Comic Sans", cursive;
+    font-weight: bold;
+  }
+
+  a {
+    color: var(--link-color);
+    text-decoration: underline;
+  }
+  a:visited {
+    color: var(--link-visited);
+  }
+  a:active {
+    color: var(--link-active);
+  }
+  a:hover {
+    color: var(--link-active);
+  }
+
+  hr {
+    border: none;
+    border-top: 2px solid var(--win-shadow);
+    border-bottom: 1px solid var(--win-highlight);
   }
 
   .prose :where(a):not(:where([class~="not-prose"], [class~="not-prose"] *)) {
-    @apply text-indigo-600 hover:text-indigo-500 dark:text-indigo-400 dark:hover:text-indigo-300;
+    color: var(--link-color);
   }
 }
 
@@ -152,5 +252,9 @@
   html {
     overflow-y: scroll;
     scrollbar-gutter: stable;
+  }
+
+  .animate-marquee {
+    animation: marquee 18s linear infinite;
   }
 }

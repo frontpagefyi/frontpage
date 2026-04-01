@@ -51,8 +51,20 @@ export async function PostCard({
 
   return (
     // TODO: Make article route to postHref via onClick on card except innser links or buttons
-    <article className="flex items-center gap-4 shadow-xs rounded-lg p-4 bg-white dark:bg-slate-900">
-      <div className="flex flex-col items-center">
+    <article
+      className="win95-raised"
+      style={{
+        background: "#d4d0c8",
+        marginBottom: "4px",
+        padding: "4px 6px",
+        display: "flex",
+        alignItems: "center",
+        gap: "8px",
+        fontFamily: "'Comic Sans MS', cursive",
+      }}
+    >
+      {/* Vote column */}
+      <div style={{ display: "flex", flexDirection: "column", alignItems: "center", minWidth: "44px" }}>
         <VoteButton
           disabled={!cid}
           voteAction={async () => {
@@ -71,7 +83,6 @@ export async function PostCard({
             const user = await ensureUser();
             const vote = await getVoteForPost(id);
             if (!vote) {
-              // TODO: Show error notification
               console.error("Vote not found for post", id);
               return;
             }
@@ -87,36 +98,38 @@ export async function PostCard({
           votes={votes}
         />
       </div>
-      <div className="w-full">
-        <h2 className="mb-1 text-xl">
+
+      {/* Content column */}
+      <div style={{ flex: 1, minWidth: 0 }}>
+        <div style={{ marginBottom: "2px" }}>
           <a
             href={url}
             rel="ugc noopener"
-            className="hover:underline flex flex-wrap items-center gap-x-2"
+            style={{ color: "#0000ee", textDecoration: "underline", fontSize: "14px", fontWeight: "bold", wordBreak: "break-word" }}
           >
-            {title}{" "}
-            <span className="text-gray-500 dark:text-gray-400 font-normal text-sm md:text-base">
-              ({new URL(url).host})
-            </span>
+            {title}
           </a>
-        </h2>
-        <div className="flex flex-nowrap text-gray-500 dark:text-gray-400 sm:gap-4 justify-between">
-          <div className="flex flex-wrap items-center gap-x-4">
-            <UserHoverCard did={author} asChild>
-              <Link
-                href={`/profile/${handle ?? author}`}
-                className="hover:underline"
-              >
-                @{handle ?? "handle.invalid"}
-              </Link>
-            </UserHoverCard>
-            {/* <span aria-hidden>•</span> */}
-            <TimeAgo createdAt={createdAt} side="bottom" />
-            {/* <span aria-hidden>•</span> */}
-            <Link href={postHref} className="hover:underline">
-              {commentCount} comments
+          {" "}
+          <span style={{ color: "#808080", fontSize: "11px", fontFamily: "monospace" }}>
+            ({new URL(url).host})
+          </span>
+        </div>
+        <div style={{ display: "flex", flexWrap: "wrap", gap: "8px", fontSize: "11px", color: "#404040", alignItems: "center" }}>
+          <span>📧</span>
+          <UserHoverCard did={author} asChild>
+            <Link
+              href={`/profile/${handle ?? author}`}
+              style={{ color: "#551a8b", textDecoration: "underline" }}
+            >
+              @{handle ?? "handle.invalid"}
             </Link>
-          </div>
+          </UserHoverCard>
+          <span>|</span>
+          <TimeAgo createdAt={createdAt} side="bottom" />
+          <span>|</span>
+          <Link href={postHref} style={{ color: "#0000ee", textDecoration: "underline" }}>
+            💬 {commentCount} comments
+          </Link>
 
           {user ? (
             <EllipsisDropdown aria-label="Post actions">
@@ -128,7 +141,6 @@ export async function PostCard({
                   author,
                 })}
               />
-              {/* TODO: there's a bug here where delete shows on deleted posts */}
               {user?.did === author ? (
                 <DeleteButton
                   deleteAction={deletePostAction.bind(null, rkey)}
