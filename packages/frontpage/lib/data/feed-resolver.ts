@@ -1,6 +1,5 @@
 import "server-only";
 
-import { z } from "zod";
 import { AtUri } from "@atproto/syntax";
 import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
@@ -10,7 +9,11 @@ import {
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
 import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
-import { FyiFrontpageFeedGenerator } from "@repo/frontpage-atproto-client";
+import {
+  FyiFrontpageFeedGenerator,
+  type FyiFrontpageFeedGetFeedSkeleton,
+} from "@repo/frontpage-atproto-client";
+import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
 import { isFeedSlug, FRONTPAGE_DID } from "@/lib/constants";
 import { nsids } from "@/lib/data/atproto/repo";
 
@@ -91,11 +94,6 @@ function isLocalFeed(feedUri: AtUri): boolean {
   );
 }
 
-const ExternalSkeletonSchema = z.object({
-  feed: z.array(z.object({ post: z.string() })).max(100),
-  cursor: z.string().optional(),
-});
-
 async function getExternalSkeleton(
   feedUri: AtUri,
   cursor: string | undefined,
@@ -138,18 +136,22 @@ async function getExternalSkeleton(
   }
 
   const json: unknown = await response.json();
-  const parsed = ExternalSkeletonSchema.safeParse(json);
-  if (!parsed.success) {
+  try {
+    lexicons.assertValidXrpcOutput(nsids.FyiFrontpageFeedGetFeedSkeleton, json);
+  } catch (err) {
     return {
       ok: false,
       error: {
         code: "InvalidResponse",
-        message: `External feed generator returned invalid response: ${parsed.error.message}`,
+        message: `External feed generator returned invalid response: ${err instanceof Error ? err.message : String(err)}`,
       },
     };
   }
 
-  return { ok: true, data: parsed.data };
+  return {
+    ok: true,
+    data: json as FyiFrontpageFeedGetFeedSkeleton.OutputSchema,
+  };
 }
 
 async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {

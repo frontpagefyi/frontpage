@@ -50,7 +50,8 @@ const didResolver = new CompositeDidDocumentResolver({
     }),
     web: new WebDidDocumentResolver({
       fetch: async (input, init) => {
-        // SSRF protection: validate hostname resolves to a public IP
+        // SSRF protection: did:web resolves by fetching https://<domain>/.well-known/did.json,
+        // so a crafted did:web:localhost or did:web:169.254.x.x could hit internal services.
         const url =
           input instanceof URL
             ? input

@@ -6,12 +6,9 @@ import * as schema from "@/lib/schema";
 import { bannedUserSubQuery, postVisibilityFilters } from "./visibility";
 import { type FeedSlug } from "@/lib/constants";
 import { exhaustiveCheck, invariant } from "@/lib/utils";
+import { type FyiFrontpageFeedGetFeedSkeleton } from "@repo/frontpage-atproto-client";
 
-export type SkeletonPost = { post: string };
-export type SkeletonResult = {
-  feed: SkeletonPost[];
-  cursor?: string;
-};
+export type SkeletonResult = FyiFrontpageFeedGetFeedSkeleton.OutputSchema;
 
 function buildAtUri(
   authorDid: string,
@@ -69,7 +66,7 @@ function toSkeletonResult<
     rkey: string;
   },
 >(rows: TRow[], serializeCursorValue: (row: TRow) => string): SkeletonResult {
-  const feed: SkeletonPost[] = rows.map((row) => ({
+  const feed: SkeletonResult["feed"] = rows.map((row) => ({
     post: buildAtUri(row.authorDid, row.collection, row.rkey),
   }));
 

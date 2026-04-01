@@ -42,7 +42,7 @@ async function getSigningKey(
   return verificationMethod.publicKeyMultibase;
 }
 
-export async function GET(request: NextRequest) {
+export async function GET(request: NextRequest): Promise<NextResponse> {
   const searchParams = request.nextUrl.searchParams;
   const feed = searchParams.get("feed");
   const limitParam = searchParams.get("limit");
