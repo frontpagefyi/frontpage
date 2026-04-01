@@ -74,7 +74,7 @@ const didResolver = new CompositeDidDocumentResolver({
 
 export const getDidDoc = cache(resolveDidDoc);
 
-async function resolveDidDoc(did: DID): Promise<DidDocument> {
+export async function resolveDidDoc(did: DID): Promise<DidDocument> {
   const doc = await didResolver.resolve(did);
   invariant(
     doc.id === did,

@@ -274,11 +274,11 @@ export const OauthSession = sqliteTable("oauth_sessions", {
 export const ModerationEvent = sqliteTable("moderation_events", {
   id: integer("id").primaryKey(),
   subjectUri: text("subject_uri").notNull(),
-  subjectDid: text("subject_did").notNull(),
+  subjectDid: did("subject_did").notNull(),
   subjectCollection: text("subject_collection"),
   subjectRkey: text("subject_rkey"),
   subjectCid: text("subject_cid"),
-  createdBy: text("created_by").notNull(),
+  createdBy: did("created_by").notNull(),
   createdAt: dateIsoText("created_at")
     .notNull()
     .default(sql`(current_timestamp)`),
@@ -289,7 +289,7 @@ export const ModerationEvent = sqliteTable("moderation_events", {
 
 export const LabelledProfile = sqliteTable("labelled_profiles", {
   id: integer("id").primaryKey(),
-  did: text("did").notNull().unique(),
+  did: did("did").notNull().unique(),
   isHidden: integer("is_hidden", { mode: "boolean" }).notNull().default(false),
   labels: text("labels"),
   createdAt: dateIsoText("created_at")
@@ -303,13 +303,13 @@ export const LabelledProfile = sqliteTable("labelled_profiles", {
 export const Report = sqliteTable("reports", {
   id: integer("id").primaryKey(),
   actionedAt: dateIsoText("actioned_at"),
-  actionedBy: text("actioned_by"),
+  actionedBy: did("actioned_by"),
   subjectUri: text("subject_uri").notNull(),
   subjectDid: did("subject_did").notNull(),
   subjectCollection: text("subject_collection"),
   subjectRkey: text("subject_rkey"),
   subjectCid: text("subject_cid"),
-  createdBy: text("created_by").notNull(),
+  createdBy: did("created_by").notNull(),
   createdAt: dateIsoText("created_at")
     .notNull()
     .default(sql`(current_timestamp)`),

@@ -70,7 +70,7 @@ export const getReports = cache(
 export const updateReport = async (
   reportId: number,
   status: "pending" | "accepted" | "rejected",
-  actionedBy?: string,
+  actionedBy?: DID,
 ) => {
   const adminUser = await isAdmin();
 

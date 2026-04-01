@@ -76,12 +76,12 @@ export async function getFeedSkeleton(
     }
   }
 
-  const skeleton =
-    isLocalFeed(atUri) && isFeedSlug(atUri.rkey)
-      ? await getSkeletonByAlgorithm(atUri.rkey, limit, cursor)
-      : await getExternalSkeleton(atUri, cursor, limit);
+  if (isLocalFeed(atUri) && isFeedSlug(atUri.rkey)) {
+    const skeleton = await getSkeletonByAlgorithm(atUri.rkey, limit, cursor);
+    return { ok: true, data: skeleton };
+  }
 
-  return { ok: true, data: skeleton };
+  return getExternalSkeleton(atUri, cursor, limit);
 }
 
 function isLocalFeed(feedUri: AtUri): boolean {
@@ -100,7 +100,7 @@ async function getExternalSkeleton(
   feedUri: AtUri,
   cursor: string | undefined,
   limit: number,
-): Promise<SkeletonResult> {
+): Promise<FeedSkeletonResult> {
   const generatorRecord = await fetchGeneratorRecord(feedUri);
   const serviceDid = parseDid(generatorRecord.did);
   invariant(
@@ -128,20 +128,28 @@ async function getExternalSkeleton(
     const body = await response.text();
     const truncated = body.length > 200 ? body.slice(0, 200) + "..." : body;
     console.error(`External feed generator error (${response.status}):`, body);
-    throw new Error(
-      `External feed generator returned ${response.status}: ${truncated}`,
-    );
+    return {
+      ok: false,
+      error: {
+        code: "ExternalError",
+        message: `External feed generator returned ${response.status}: ${truncated}`,
+      },
+    };
   }
 
   const json: unknown = await response.json();
   const parsed = ExternalSkeletonSchema.safeParse(json);
   if (!parsed.success) {
-    throw new Error(
-      `External feed generator returned invalid response: ${parsed.error.message}`,
-    );
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `External feed generator returned invalid response: ${parsed.error.message}`,
+      },
+    };
   }
 
-  return parsed.data;
+  return { ok: true, data: parsed.data };
 }
 
 async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {

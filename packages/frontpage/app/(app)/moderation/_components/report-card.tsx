@@ -160,7 +160,7 @@ export async function ReportCard({ report }: { report: Report }) {
             {report.creatorComment}
           </p>
         </div>
-        {report.actionedAt ? (
+        {report.actionedAt && report.actionedBy ? (
           <div className="mb-2 flex flex-row gap-5">
             <p>
               <strong className="mr-2">Actioned at:</strong>

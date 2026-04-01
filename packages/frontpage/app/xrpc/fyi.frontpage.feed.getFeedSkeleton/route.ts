@@ -1,7 +1,7 @@
 import { type NextRequest, NextResponse } from "next/server";
 import { verifyJwt } from "@atproto/xrpc-server";
 import { after } from "next/server";
-import { getDidDoc, parseDid } from "@/lib/data/atproto/did";
+import { getDidDoc, parseDid, resolveDidDoc } from "@/lib/data/atproto/did";
 import { invariant } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
 import { FEED_SERVICE_DID } from "@/lib/data/feed-constants";
@@ -21,12 +21,16 @@ function xrpcError(name: string, message: string, status: number) {
 
 async function getSigningKey(
   iss: string,
-  _forceRefresh: boolean,
+  forceRefresh: boolean,
 ): Promise<string> {
   const issuerDid = parseDid(iss);
   invariant(issuerDid, `Invalid DID in JWT issuer: ${iss}`);
 
-  const didDoc = await getDidDoc(issuerDid);
+  // verifyJwt compares the cached vs fresh key to detect rotation.
+  // React.cache dedupes within a request, so we must bypass it on retry.
+  const didDoc = forceRefresh
+    ? await resolveDidDoc(issuerDid)
+    : await getDidDoc(issuerDid);
   const verificationMethod = didDoc.verificationMethod?.find(
     (method) => method.id === `${iss}#atproto`,
   );
@@ -109,6 +113,10 @@ export async function GET(request: NextRequest) {
       case "ExternalError":
       case "InvalidResponse":
         return xrpcError("InternalServerError", error.message, 500);
+      default: {
+        const _exhaustive: never = error;
+        return xrpcError("InternalServerError", "Unexpected error", 500);
+      }
     }
   }
 
