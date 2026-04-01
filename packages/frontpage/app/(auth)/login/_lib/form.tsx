@@ -2,27 +2,7 @@
 
 import { startTransition, useActionState, useState } from "react";
 import { loginWithIdentifierAction, loginWithPdsAction } from "./action";
-import { Input } from "@/lib/components/ui/input";
-import { Button } from "@/lib/components/ui/button";
-import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
-import { CrossCircledIcon, OpenInNewWindowIcon } from "@radix-ui/react-icons";
-import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-  DialogTrigger,
-} from "@/lib/components/ui/dialog";
-
-import { Field } from "@/lib/components/ui/field";
-import { Separator } from "@/lib/components/ui/separator";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/lib/components/ui/accordion";
+import { OpenInNewWindowIcon } from "@radix-ui/react-icons";
 import { type ErrorReason } from "@/lib/auth-sign-in";
 
 const DEFAULT_PDS = process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST
@@ -35,87 +15,86 @@ const DEFAULT_PDS = process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST
       label: "Bluesky",
     };
 
-export function LoginForm() {
-  const [pdsDialogOpen, setPdsDialogOpen] = useState(false);
+// ─── shared Win2k styles ────────────────────────────────────────────────────
 
+const win2kInput: React.CSSProperties = {
+  fontFamily: "Arial, sans-serif",
+  fontSize: "11px",
+  background: "#ffffff",
+  color: "#000000",
+  border: "1px solid",
+  borderColor: "#808080 #ffffff #ffffff #808080",
+  padding: "2px 4px",
+  width: "100%",
+  outline: "none",
+  boxSizing: "border-box",
+};
+
+const win2kButton: React.CSSProperties = {
+  fontFamily: "Arial, sans-serif",
+  fontSize: "11px",
+  background: "#d4d0c8",
+  color: "#000000",
+  border: "2px solid",
+  borderColor: "#ffffff #808080 #808080 #ffffff",
+  padding: "3px 12px",
+  cursor: "default",
+  minWidth: "75px",
+  width: "100%",
+  textAlign: "center",
+  boxSizing: "border-box",
+};
+
+const win2kButtonActive: React.CSSProperties = {
+  ...win2kButton,
+  borderColor: "#808080 #ffffff #ffffff #808080",
+};
+
+const win2kButtonDisabled: React.CSSProperties = {
+  ...win2kButton,
+  color: "#808080",
+  cursor: "default",
+};
+
+const labelStyle: React.CSSProperties = {
+  fontFamily: "Arial, sans-serif",
+  fontSize: "11px",
+  color: "#000000",
+  display: "block",
+  marginBottom: "2px",
+};
+
+// ─── components ─────────────────────────────────────────────────────────────
+
+function Win2kGroupBox({
+  title,
+  children,
+}: {
+  title: string;
+  children: React.ReactNode;
+}) {
   return (
-    <div className="flex flex-col gap-4">
-      <IdentifierForm />
-
-      <Separator />
-
-      <DefaultPdsSignupButton />
-      <Dialog
-        open={pdsDialogOpen}
-        onOpenChange={setPdsDialogOpen}
-        // This autoFocus prop is not the same at the autoFocus prop on HTML elements.
-        // eslint-disable-next-line jsx-a11y/no-autofocus
-        autoFocus={true}
+    <fieldset
+      style={{
+        border: "1px solid",
+        borderColor: "#808080 #ffffff #ffffff #808080",
+        padding: "8px 8px 8px 8px",
+        marginTop: "4px",
+        background: "#d4d0c8",
+      }}
+    >
+      <legend
+        style={{
+          fontFamily: "Arial, sans-serif",
+          fontSize: "11px",
+          color: "#000000",
+          padding: "0 4px",
+        }}
       >
-        <DialogTrigger asChild>
-          <Button className="w-full" variant="ghost">
-            Sign up with a PDS
-          </Button>
-        </DialogTrigger>
-        <DialogContent>
-          <DialogHeader>
-            <DialogTitle>Login with PDS</DialogTitle>
-            <DialogDescription>
-              Enter the URL of your PDS to login or sign up. By continuing, you
-              accept the Terms of Service of your chosen PDS.
-            </DialogDescription>
-          </DialogHeader>
-
-          <PdsForm />
-        </DialogContent>
-      </Dialog>
-
-      <Accordion type="multiple">
-        <AccordionItem value="internet-handle-help">
-          <AccordionTrigger>What is an internet handle?</AccordionTrigger>
-          <AccordionContent className="text-pretty prose dark:prose-invert prose-sm">
-            <p>
-              Some open social apps, such as Bluesky, set you up with a free
-              domain and open social hosting when you sign up. You might not
-              have realized that, but if you sign up on one of those services,
-              the username you get is a domain, such as you.bsky.social.
-              That&apos;s an internet handle.
-            </p>
-            <p>
-              If you don&apos;t have one, choose &quot;Continue with your
-              PDS&quot; and select a service to login or sign up.
-            </p>
-            <p>
-              Read more at{" "}
-              <a
-                href="https://internethandle.org"
-                target="_blank"
-                rel="noreferrer"
-              >
-                internethandle.org <OpenInNewWindowIcon className="inline" />
-              </a>
-              .
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-
-        <AccordionItem value="pds-help">
-          <AccordionTrigger>What is my PDS?</AccordionTrigger>
-          <AccordionContent className="text-pretty prose dark:prose-invert prose-sm">
-            <p>
-              Your Personal Data Server (PDS) is a service that stores your
-              social data and allows you to interact with open social apps on AT
-              Protocol.
-            </p>
-            <p>
-              If you don&apos;t have a specific PDS, it&apos;s best to continue
-              with Bluesky using the button above. You can always move to a
-              different PDS later.
-            </p>
-          </AccordionContent>
-        </AccordionItem>
-      </Accordion>
-    </div>
+        {title}
+      </legend>
+      {children}
+    </fieldset>
   );
 }
 
@@ -127,15 +106,31 @@ function LoginError({
   children?: React.ReactNode;
 }) {
   return (
-    <div>
-      <Alert variant="destructive">
-        <CrossCircledIcon className="size-4" />
-        <AlertTitle>{error ?? "Login error"}</AlertTitle>
-
-        <AlertDescription>
+    <div
+      role="alert"
+      style={{
+        border: "1px solid",
+        borderColor: "#808080 #ffffff #ffffff #808080",
+        background: "#fff8f8",
+        padding: "6px",
+        fontFamily: "Arial, sans-serif",
+        fontSize: "11px",
+        display: "flex",
+        gap: "6px",
+        alignItems: "flex-start",
+        marginTop: "4px",
+      }}
+    >
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true" style={{ flexShrink: 0, marginTop: "1px" }}>
+        <circle cx="8" cy="8" r="7" fill="#cc0000" stroke="#990000" />
+        <text x="8" y="12" textAnchor="middle" fill="white" fontSize="10" fontWeight="bold">!</text>
+      </svg>
+      <div>
+        <div style={{ fontWeight: "bold", color: "#cc0000" }}>{error ?? "Login error"}</div>
+        <div style={{ color: "#333333" }}>
           {children ?? "Please try again or use a different login method."}
-        </AlertDescription>
-      </Alert>
+        </div>
+      </div>
     </div>
   );
 }
@@ -143,10 +138,10 @@ function LoginError({
 function IdentifierForm() {
   const [identifierState, identifierAction, isIdentifierPending] =
     useActionState(loginWithIdentifierAction, null);
+  const [active, setActive] = useState(false);
 
   return (
     <form
-      className="flex flex-col gap-2"
       action={identifierAction}
       onSubmit={(event) => {
         event.preventDefault();
@@ -155,22 +150,42 @@ function IdentifierForm() {
         });
       }}
     >
-      <Field>
-        <Input
-          id="identifier"
-          name="identifier"
-          required
-          placeholder="eg. dril.bsky.social"
-          aria-label="Internet handle"
-        />
-      </Field>
-      <Button type="submit" disabled={isIdentifierPending} className="w-full">
-        Login with internet handle
-      </Button>
-
-      {identifierState?.error ? (
-        <IdentifierFormError reason={identifierState.error} />
-      ) : null}
+      <Win2kGroupBox title="Internet Handle">
+        <div style={{ display: "flex", flexDirection: "column", gap: "6px" }}>
+          <label htmlFor="identifier" style={labelStyle}>
+            Enter your internet handle:
+          </label>
+          <input
+            id="identifier"
+            name="identifier"
+            required
+            placeholder="eg. dril.bsky.social"
+            aria-label="Internet handle"
+            style={win2kInput}
+          />
+          <div style={{ display: "flex", justifyContent: "flex-end" }}>
+            <button
+              type="submit"
+              disabled={isIdentifierPending}
+              style={
+                isIdentifierPending
+                  ? win2kButtonDisabled
+                  : active
+                  ? win2kButtonActive
+                  : win2kButton
+              }
+              onMouseDown={() => setActive(true)}
+              onMouseUp={() => setActive(false)}
+              onMouseLeave={() => setActive(false)}
+            >
+              {isIdentifierPending ? "Please wait..." : "Login →"}
+            </button>
+          </div>
+          {identifierState?.error ? (
+            <IdentifierFormError reason={identifierState.error} />
+          ) : null}
+        </div>
+      </Win2kGroupBox>
     </form>
   );
 }
@@ -198,14 +213,10 @@ function IdentifierFormError({ reason }: { reason: ErrorReason }) {
     );
   }
 
-  // TODO: Handle other error reasons
-
   return (
     <LoginError error="Login error">
-      <div className="prose dark:prose-invert prose-sm">
-        <p>An unexpected error occurred. Please try again later.</p>
-        <p>Error code: {reason}</p>
-      </div>
+      <p>An unexpected error occurred. Please try again later.</p>
+      <p>Error code: {reason}</p>
     </LoginError>
   );
 }
@@ -215,52 +226,313 @@ function DefaultPdsSignupButton() {
     loginWithPdsAction,
     null,
   );
+  const [active, setActive] = useState(false);
 
   return (
-    <form className="contents" action={pdsAction}>
-      <Button
+    <form action={pdsAction}>
+      <button
         type="submit"
-        className="w-full"
-        variant="outline"
         disabled={isPdsPending}
         name="pdsUrl"
         value={`https://${DEFAULT_PDS.host}`}
+        style={
+          isPdsPending
+            ? win2kButtonDisabled
+            : active
+            ? win2kButtonActive
+            : win2kButton
+        }
+        onMouseDown={() => setActive(true)}
+        onMouseUp={() => setActive(false)}
+        onMouseLeave={() => setActive(false)}
       >
-        Sign up with {DEFAULT_PDS.label}
-      </Button>
-
+        {isPdsPending ? "Please wait..." : `Sign up with ${DEFAULT_PDS.label}`}
+      </button>
       {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
     </form>
   );
 }
 
-function PdsForm() {
+function PdsDialog({
+  open,
+  onClose,
+}: {
+  open: boolean;
+  onClose: () => void;
+}) {
   const [pdsState, pdsAction, isPdsPending] = useActionState(
     loginWithPdsAction,
     null,
   );
+  const [active, setActive] = useState(false);
+
+  if (!open) return null;
+
   return (
-    <form
-      className="space-y-6"
-      action={pdsAction}
-      onSubmit={(event) => {
-        event.preventDefault();
-        startTransition(() => {
-          pdsAction(new FormData(event.currentTarget));
-        });
+    <div
+      role="dialog"
+      aria-modal="true"
+      aria-labelledby="pds-dialog-title"
+      style={{
+        position: "fixed",
+        inset: 0,
+        background: "rgba(0,0,0,0.4)",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        zIndex: 50,
       }}
     >
-      <Input
-        name="pdsUrl"
-        placeholder="eg. bsky.social"
-        defaultValue={DEFAULT_PDS.host}
-        aria-label="Personal Data Server host"
-      />
-      <Button type="submit" className="w-full" disabled={isPdsPending}>
-        Continue to PDS sign up
-      </Button>
+      <div
+        style={{
+          background: "#d4d0c8",
+          border: "2px solid",
+          borderColor: "#ffffff #808080 #808080 #ffffff",
+          width: "320px",
+          boxShadow: "2px 2px 8px rgba(0,0,0,0.5)",
+          fontFamily: "Arial, sans-serif",
+        }}
+      >
+        {/* Dialog title bar */}
+        <div
+          style={{
+            background: "linear-gradient(to right, #000080, #1084d0)",
+            height: "22px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "space-between",
+            padding: "0 4px",
+          }}
+        >
+          <span id="pds-dialog-title" style={{ color: "#ffffff", fontSize: "11px", fontWeight: "bold" }}>
+            Login with PDS
+          </span>
+          <button
+            onClick={onClose}
+            aria-label="Close"
+            style={{
+              width: "16px",
+              height: "14px",
+              fontSize: "10px",
+              background: "#d4d0c8",
+              border: "1px solid",
+              borderColor: "#ffffff #808080 #808080 #ffffff",
+              cursor: "default",
+              fontFamily: "Arial, sans-serif",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontWeight: "bold",
+            }}
+          >
+            ✕
+          </button>
+        </div>
 
-      {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
-    </form>
+        {/* Dialog body */}
+        <div style={{ padding: "12px" }}>
+          <p style={{ fontSize: "11px", marginBottom: "8px", color: "#000000" }}>
+            Enter the URL of your PDS to login or sign up. By continuing, you
+            accept the Terms of Service of your chosen PDS.
+          </p>
+          <form
+            action={pdsAction}
+            onSubmit={(event) => {
+              event.preventDefault();
+              startTransition(() => {
+                pdsAction(new FormData(event.currentTarget));
+              });
+            }}
+            style={{ display: "flex", flexDirection: "column", gap: "8px" }}
+          >
+            <label htmlFor="pdsUrl" style={labelStyle}>
+              PDS host:
+            </label>
+            <input
+              id="pdsUrl"
+              name="pdsUrl"
+              placeholder="eg. bsky.social"
+              defaultValue={DEFAULT_PDS.host}
+              aria-label="Personal Data Server host"
+              style={win2kInput}
+            />
+            <div style={{ display: "flex", justifyContent: "flex-end", gap: "4px", marginTop: "4px" }}>
+              <button
+                type="button"
+                onClick={onClose}
+                style={win2kButton}
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={isPdsPending}
+                style={
+                  isPdsPending
+                    ? win2kButtonDisabled
+                    : active
+                    ? win2kButtonActive
+                    : win2kButton
+                }
+                onMouseDown={() => setActive(true)}
+                onMouseUp={() => setActive(false)}
+                onMouseLeave={() => setActive(false)}
+              >
+                {isPdsPending ? "Please wait..." : "Continue"}
+              </button>
+            </div>
+            {pdsState?.error ? <LoginError error={pdsState?.error} /> : null}
+          </form>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function HelpAccordion() {
+  const [open, setOpen] = useState<string | null>(null);
+
+  const items = [
+    {
+      id: "internet-handle-help",
+      question: "What is an internet handle?",
+      answer: (
+        <>
+          <p>
+            Some open social apps, such as Bluesky, set you up with a free
+            domain and open social hosting when you sign up. You might not have
+            realized that, but if you sign up on one of those services, the
+            username you get is a domain, such as you.bsky.social. That&apos;s
+            an internet handle.
+          </p>
+          <p>
+            If you don&apos;t have one, choose &quot;Continue with your
+            PDS&quot; and select a service to login or sign up.
+          </p>
+          <p>
+            Read more at{" "}
+            <a
+              href="https://internethandle.org"
+              target="_blank"
+              rel="noreferrer"
+              style={{ color: "#0000cc" }}
+            >
+              internethandle.org <OpenInNewWindowIcon className="inline" />
+            </a>
+            .
+          </p>
+        </>
+      ),
+    },
+    {
+      id: "pds-help",
+      question: "What is my PDS?",
+      answer: (
+        <>
+          <p>
+            Your Personal Data Server (PDS) is a service that stores your
+            social data and allows you to interact with open social apps on AT
+            Protocol.
+          </p>
+          <p>
+            If you don&apos;t have a specific PDS, it&apos;s best to continue
+            with Bluesky using the button above. You can always move to a
+            different PDS later.
+          </p>
+        </>
+      ),
+    },
+  ];
+
+  return (
+    <div style={{ marginTop: "4px" }}>
+      {items.map((item) => (
+        <div key={item.id} style={{ marginBottom: "2px" }}>
+          <button
+            type="button"
+            onClick={() => setOpen(open === item.id ? null : item.id)}
+            style={{
+              width: "100%",
+              textAlign: "left",
+              fontFamily: "Arial, sans-serif",
+              fontSize: "11px",
+              background: "#d4d0c8",
+              border: "1px solid",
+              borderColor: "#ffffff #808080 #808080 #ffffff",
+              padding: "2px 6px",
+              cursor: "default",
+              display: "flex",
+              alignItems: "center",
+              gap: "4px",
+              color: "#000000",
+            }}
+            aria-expanded={open === item.id}
+          >
+            <span style={{ fontSize: "9px", display: "inline-block", width: "8px" }}>
+              {open === item.id ? "▼" : "▶"}
+            </span>
+            {item.question}
+          </button>
+          {open === item.id && (
+            <div
+              style={{
+                border: "1px solid",
+                borderColor: "#808080 #ffffff #ffffff #808080",
+                borderTop: "none",
+                padding: "6px 8px",
+                background: "#ffffff",
+                fontFamily: "Arial, sans-serif",
+                fontSize: "11px",
+                color: "#000000",
+                lineHeight: "1.5",
+              }}
+            >
+              {item.answer}
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  );
+}
+
+export function LoginForm() {
+  const [pdsDialogOpen, setPdsDialogOpen] = useState(false);
+  const [signupActive, setSignupActive] = useState(false);
+
+  return (
+    <div style={{ display: "flex", flexDirection: "column", gap: "8px" }}>
+      <IdentifierForm />
+
+      {/* Horizontal rule */}
+      <div
+        style={{
+          borderTop: "1px solid #808080",
+          borderBottom: "1px solid #ffffff",
+          margin: "2px 0",
+        }}
+      />
+
+      <DefaultPdsSignupButton />
+
+      <button
+        type="button"
+        onClick={() => setPdsDialogOpen(true)}
+        style={
+          signupActive
+            ? win2kButtonActive
+            : win2kButton
+        }
+        onMouseDown={() => setSignupActive(true)}
+        onMouseUp={() => setSignupActive(false)}
+        onMouseLeave={() => setSignupActive(false)}
+      >
+        Sign up with a PDS
+      </button>
+
+      <HelpAccordion />
+
+      <PdsDialog open={pdsDialogOpen} onClose={() => setPdsDialogOpen(false)} />
+    </div>
   );
 }
