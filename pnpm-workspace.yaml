@@ -2,10 +2,10 @@ packages:
   - packages/*
 
 catalog:
-  next: ^16.1.7
-  eslint-config-next: ^16.1.7
-  '@next/eslint-plugin-next': ^16.1.7
-  '@next/env': ^16.1.7
+  next: ^16.2.0
+  eslint-config-next: ^16.2.0
+  '@next/eslint-plugin-next': ^16.2.0
+  '@next/env': ^16.2.0
   react: ^19.2.3
   react-dom: ^19.2.3
   '@types/react': ^19.2.13
