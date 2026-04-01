@@ -92,7 +92,7 @@ Feed generator system (issue #332). Key files:
 - **XRPC endpoints**: `app/xrpc/fyi.frontpage.feed.{getFeedSkeleton,describeFeedGenerator}/route.ts`, `app/.well-known/did.json/route.ts`
 - **Data layer**: `lib/data/db/feed-skeleton.ts` (skeleton queries), `lib/data/db/hydrate-posts.ts` (hydration), `lib/data/db/visibility.ts` (shared filters)
 - **Consumer**: `lib/data/feed-resolver.ts` (generic resolution), `lib/feed-action.tsx` (shared server action)
-- **Constants**: `lib/data/feed-constants.ts` (all feed-related DIDs, NSIDs, limits)
+- **Constants**: `lib/data/feed-constants.ts` (FEED_SERVICE_DID env var, cache durations)
 - **Security**: `lib/data/ssrf.ts` (shared SSRF protection)
 
 Two DIDs:
