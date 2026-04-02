@@ -19,7 +19,9 @@
         "CRON_SECRET",
         "PLC_DIRECTORY_URL",
         "FLAGS",
-        "FLAGS_SECRET"
+        "FLAGS_SECRET",
+        "FRONTPAGE_DID",
+        "FEED_SERVICE_DID"
       ]
     }
   }
