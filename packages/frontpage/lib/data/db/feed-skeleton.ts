@@ -25,7 +25,7 @@ const CURSOR_SEPARATOR = "::";
  * Returns null when no cursor is provided (first page).
  * Throws on malformed cursors.
  */
-export function parseCompoundCursor(
+function parseCompoundCursor(
   cursor: string | undefined,
 ): { value: string; id: number } | null {
   if (!cursor) return null;
@@ -44,10 +44,7 @@ export function parseCompoundCursor(
   return { value, id };
 }
 
-export function buildCompoundCursor(
-  value: string | number,
-  id: number,
-): string {
+function buildCompoundCursor(value: string | number, id: number): string {
   return `${value}${CURSOR_SEPARATOR}${id}`;
 }
 
@@ -82,7 +79,7 @@ function toSkeletonResult<
 // Public skeleton functions
 // ---------------------------------------------------------------------------
 
-export function getHotSkeleton(
+function getHotSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
@@ -115,7 +112,7 @@ export function getHotSkeleton(
     .then((rows) => toSkeletonResult(rows, (row) => String(row.rank)));
 }
 
-export function getNewSkeleton(
+function getNewSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
@@ -149,7 +146,7 @@ export function getNewSkeleton(
     );
 }
 
-export function getTopSkeleton(
+function getTopSkeleton(
   limit: number,
   cursor: string | undefined,
 ): Promise<SkeletonResult> {
