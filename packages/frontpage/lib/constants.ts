@@ -1,7 +1,8 @@
+import { z } from "zod";
 import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
-import { didSchema } from "@/lib/data/atproto/did";
+import type { DID } from "@/lib/data/atproto/did";
 
-export const FRONTPAGE_DID = didSchema.parse(process.env.FRONTPAGE_DID);
+export const FRONTPAGE_DID = z.string().min(1).parse(process.env.FRONTPAGE_DID) as DID;
 
 export const FRONTPAGE_ATPROTO_HANDLE = "frontpage.fyi";
 export const FRONTPAGE_APPVIEW_USER_AGENT =
