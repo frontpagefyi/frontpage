@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import {
-  FEED_SERVICE_DID,
+  NEXT_PUBLIC_FEED_SERVICE_DID,
   STATIC_CACHE_MAX_AGE_SECONDS,
 } from "@/lib/feed-constants";
 
@@ -9,7 +9,7 @@ import {
 // does not sign outbound ones, so no verificationMethod is needed.
 const DID_DOCUMENT = {
   "@context": ["https://www.w3.org/ns/did/v1"],
-  id: FEED_SERVICE_DID,
+  id: NEXT_PUBLIC_FEED_SERVICE_DID,
   service: [
     {
       id: "#frontpage_fg",
