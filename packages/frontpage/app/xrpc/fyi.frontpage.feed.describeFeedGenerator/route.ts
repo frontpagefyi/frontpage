@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
-import { FEED_REGISTRY, feedUri } from "@/lib/constants";
+import { FEED_REGISTRY } from "@/lib/feed-registry";
+import { feedUri } from "@/lib/constants";
 import {
   FEED_SERVICE_DID,
   STATIC_CACHE_MAX_AGE_SECONDS,

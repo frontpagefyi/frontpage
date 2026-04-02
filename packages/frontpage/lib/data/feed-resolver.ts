@@ -14,7 +14,8 @@ import {
   type FyiFrontpageFeedGetFeedSkeleton,
 } from "@repo/frontpage-atproto-client";
 import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
-import { isFeedSlug, FRONTPAGE_DID } from "@/lib/constants";
+import { isFeedSlug } from "@/lib/feed-registry";
+import { FRONTPAGE_DID } from "@/lib/constants";
 import { nsids } from "@/lib/data/atproto/repo";
 
 export type FeedError =

@@ -3,12 +3,8 @@ import { notFound, redirect } from "next/navigation";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
 import { FeedSwitcherLayout } from "../../_components/feed-switcher";
-import {
-  FEED_URIS,
-  FEED_REGISTRY,
-  DEFAULT_FEED_SLUG,
-  isFeedSlug,
-} from "@/lib/constants";
+import { FEED_REGISTRY, DEFAULT_FEED_SLUG, isFeedSlug } from "@/lib/feed-registry";
+import { FEED_URIS } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export async function generateMetadata(
