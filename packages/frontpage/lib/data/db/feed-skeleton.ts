@@ -188,7 +188,9 @@ function getTopSkeleton(
     .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
     .orderBy(desc(schema.PostAggregates.voteCount), desc(schema.Post.id))
     .limit(limit)
-    .then((rows) => toSkeletonResult(rows, limit, (row) => String(row.voteCount)));
+    .then((rows) =>
+      toSkeletonResult(rows, limit, (row) => String(row.voteCount)),
+    );
 }
 
 export function getSkeletonByAlgorithm(
