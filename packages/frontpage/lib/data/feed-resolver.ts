@@ -36,7 +36,7 @@ export type FeedResult =
 export async function getFeed(
   feedUri: string,
   cursor?: string,
-  limit = 50,
+  limit = 20,
 ): Promise<FeedResult> {
   const skeletonResult = await getFeedSkeleton(feedUri, cursor, limit);
   if (!skeletonResult.ok) return skeletonResult;
@@ -49,7 +49,7 @@ export async function getFeed(
 export async function getFeedSkeleton(
   feedUri: string,
   cursor?: string,
-  limit = 50,
+  limit = 20,
 ): Promise<FeedSkeletonResult> {
   let atUri: AtUri;
   try {

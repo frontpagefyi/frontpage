@@ -62,12 +62,17 @@ function toSkeletonResult<
     collection: string;
     rkey: string;
   },
->(rows: TRow[], serializeCursorValue: (row: TRow) => string): SkeletonResult {
+>(
+  rows: TRow[],
+  limit: number,
+  serializeCursorValue: (row: TRow) => string,
+): SkeletonResult {
   const feed: SkeletonResult["feed"] = rows.map((row) => ({
     post: buildAtUri(row.authorDid, row.collection, row.rkey),
   }));
 
-  const lastRow = rows[rows.length - 1];
+  // Only return a cursor if we got a full page — fewer rows means we're at the end.
+  const lastRow = rows.length === limit ? rows[rows.length - 1] : undefined;
   const cursor = lastRow
     ? buildCompoundCursor(serializeCursorValue(lastRow), lastRow.id)
     : undefined;
@@ -109,7 +114,7 @@ function getHotSkeleton(
     .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
     .orderBy(desc(schema.PostAggregates.rank), desc(schema.Post.id))
     .limit(limit)
-    .then((rows) => toSkeletonResult(rows, (row) => String(row.rank)));
+    .then((rows) => toSkeletonResult(rows, limit, (row) => String(row.rank)));
 }
 
 function getNewSkeleton(
@@ -142,7 +147,7 @@ function getNewSkeleton(
     .orderBy(desc(schema.Post.createdAt), desc(schema.Post.id))
     .limit(limit)
     .then((rows) =>
-      toSkeletonResult(rows, (row) => row.createdAt.toISOString()),
+      toSkeletonResult(rows, limit, (row) => row.createdAt.toISOString()),
     );
 }
 
@@ -179,7 +184,7 @@ function getTopSkeleton(
     .where(and(postVisibilityFilters(bannedUserSubQuery), cursorFilter))
     .orderBy(desc(schema.PostAggregates.voteCount), desc(schema.Post.id))
     .limit(limit)
-    .then((rows) => toSkeletonResult(rows, (row) => String(row.voteCount)));
+    .then((rows) => toSkeletonResult(rows, limit, (row) => String(row.voteCount)));
 }
 
 export function getSkeletonByAlgorithm(

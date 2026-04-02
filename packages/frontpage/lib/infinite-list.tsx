@@ -87,7 +87,7 @@ function InfiniteListInner<TCursor>({
     <div className="space-y-6">
       {pages.map((page, indx) => {
         return (
-          <Fragment key={String(pages[indx - 1]?.nextCursor ?? "initial")}>
+          <Fragment key={indx}>
             <InfiniteListContext.Provider
               value={{
                 revalidatePage: async () => {
