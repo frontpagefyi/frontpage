@@ -4,7 +4,7 @@ import { db } from "@/lib/db";
 import { eq, desc, and, or, lt, type SQL } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { bannedUserSubQuery, postVisibilityFilters } from "./visibility";
-import { type FeedSlug } from "@/lib/feed-registry";
+import { type FeedSlug } from "@/lib/feed-constants";
 import { exhaustiveCheck, invariant } from "@/lib/utils";
 import { type FyiFrontpageFeedGetFeedSkeleton } from "@repo/frontpage-atproto-client";
 

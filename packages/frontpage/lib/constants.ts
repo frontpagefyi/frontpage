@@ -1,7 +1,7 @@
 import { z } from "zod";
 import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
 import type { DID } from "@/lib/data/atproto/did";
-import type { FeedSlug } from "@/lib/feed-registry";
+import type { FeedSlug } from "@/lib/feed-constants";
 
 export const FRONTPAGE_DID = z
   .string()

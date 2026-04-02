@@ -7,7 +7,7 @@ import {
   FEED_REGISTRY,
   DEFAULT_FEED_SLUG,
   isFeedSlug,
-} from "@/lib/feed-registry";
+} from "@/lib/feed-constants";
 import { FEED_URIS } from "@/lib/constants";
 import type { Metadata } from "next";
 

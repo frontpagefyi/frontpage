@@ -4,7 +4,7 @@ import { after } from "next/server";
 import { getDidDoc, parseDid } from "@/lib/data/atproto/did";
 import { invariant } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
-import { FEED_SERVICE_DID } from "@/lib/data/feed-constants";
+import { FEED_SERVICE_DID } from "@/lib/feed-constants";
 import { getFeedSkeleton } from "@/lib/data/feed-resolver";
 
 const DEFAULT_SKELETON_LIMIT = 50;

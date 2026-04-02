@@ -17,7 +17,7 @@ import {
   FEED_REGISTRY,
   DEFAULT_FEED_SLUG,
   type FeedSlug,
-} from "@/lib/feed-registry";
+} from "@/lib/feed-constants";
 
 function feedHref(slug: FeedSlug) {
   return slug === DEFAULT_FEED_SLUG ? "/" : `/feed/${slug}`;
