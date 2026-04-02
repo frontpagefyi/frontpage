@@ -1,5 +1,6 @@
 import Link from "next/link";
-import { FRONTPAGE_DID, listBlogs, WHTWND_BLOG_COLLECTION } from "./blog-data";
+import { listBlogs, WHTWND_BLOG_COLLECTION } from "./blog-data";
+import { FRONTPAGE_DID } from "@/lib/constants";
 import { BackLink } from "./_components";
 import { Card, CardFooter, CardHeader } from "@/lib/components/ui/card";
 import { Badge } from "@/lib/components/ui/badge";

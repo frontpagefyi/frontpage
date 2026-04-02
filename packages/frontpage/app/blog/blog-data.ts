@@ -1,4 +1,5 @@
-import { type DID, didSchema } from "@/lib/data/atproto/did";
+import { didSchema } from "@/lib/data/atproto/did";
+import { FRONTPAGE_DID } from "@/lib/constants";
 import { AtUri } from "@atproto/syntax";
 import slugify from "slugify";
 import { z } from "zod";
@@ -16,7 +17,6 @@ const AtUriSchema = z.string().transform((value, ctx) => {
 });
 
 const FRONTPAGE_PDS_URL = "https://hydnum.us-west.host.bsky.network/xrpc";
-export const FRONTPAGE_DID = "did:plc:klmr76mpewpv7rtm3xgpzd7x" as DID;
 export const WHTWND_BLOG_COLLECTION = "com.whtwnd.blog.entry";
 
 const Blog = z.object({

@@ -56,7 +56,7 @@ const didResolver = new CompositeDidDocumentResolver({
           input instanceof URL
             ? input
             : new URL(typeof input === "string" ? input : input.url);
-        await assertPublicHostname(url.hostname);
+        assertPublicHostname(url.hostname);
 
         return fetch(input, {
           ...init,

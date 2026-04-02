@@ -189,7 +189,7 @@ async function resolveServiceEndpoint(did: DID): Promise<string> {
     "Feed generator endpoint must use HTTPS",
   );
 
-  await assertPublicHostname(url.hostname);
+  assertPublicHostname(url.hostname);
 
   return service.serviceEndpoint;
 }
