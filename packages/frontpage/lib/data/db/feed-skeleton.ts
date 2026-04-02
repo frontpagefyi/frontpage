@@ -72,6 +72,10 @@ function toSkeletonResult<
   }));
 
   // Only return a cursor if we got a full page — fewer rows means we're at the end.
+  // Note: if the total post count is an exact multiple of limit, the last full page
+  // will still emit a cursor and trigger one extra empty-page request. This is
+  // intentional and matches the Bluesky reference implementation — avoiding it
+  // would require a COUNT query.
   const lastRow = rows.length === limit ? rows[rows.length - 1] : undefined;
   const cursor = lastRow
     ? buildCompoundCursor(serializeCursorValue(lastRow), lastRow.id)

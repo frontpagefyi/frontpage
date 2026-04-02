@@ -33,6 +33,9 @@ export type FeedResult =
   | { ok: true; posts: HydratedPost[]; cursor?: string }
   | { ok: false; error: FeedError };
 
+// Internal page size for server action callers. The XRPC route uses its own
+// DEFAULT_SKELETON_LIMIT and always passes an explicit limit, so this default
+// only affects getFeed/getFeedSkeleton when called without a limit argument.
 export async function getFeed(
   feedUri: string,
   cursor?: string,
