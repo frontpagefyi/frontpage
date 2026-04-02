@@ -62,9 +62,9 @@ function InfiniteListInner<TCursor>({
   cacheKey,
   revalidateAll = false,
 }: Omit<Props<TCursor>, "fallback">) {
-  const { data, size, setSize, mutate, isValidating } = useSWRInfinite(
+  const { data, size, setSize, mutate } = useSWRInfinite(
     (_, previousPageData: Page<TCursor> | null) => {
-      if (previousPageData && previousPageData.nextCursor === null) return null;
+      if (previousPageData && !previousPageData.itemCount) return null; // reached the end
       return [cacheKey, previousPageData?.nextCursor ?? null];
     },
     ([_, cursor]) => {
@@ -74,7 +74,7 @@ function InfiniteListInner<TCursor>({
   );
   const { ref: inViewRef } = useInView({
     onChange: (inView) => {
-      if (inView && !isValidating) {
+      if (inView) {
         startTransition(() => void setSize(size + 1));
       }
     },
@@ -87,15 +87,16 @@ function InfiniteListInner<TCursor>({
     <div className="space-y-6">
       {pages.map((page, indx) => {
         return (
-          <Fragment key={indx}>
+          <Fragment key={String(page.nextCursor)}>
             <InfiniteListContext.Provider
               value={{
                 revalidatePage: async () => {
                   const currentCursor = pages[indx - 1]?.nextCursor;
                   await mutate(data, {
-                    revalidate: (_data, key) =>
+                    revalidate: (_data, args) =>
                       !currentCursor ||
-                      (Array.isArray(key) && key[1] === currentCursor),
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+                      (args as any)[1] === currentCursor,
                   });
                 },
               }}
