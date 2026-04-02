@@ -3,7 +3,7 @@ import { FRONTPAGE_ATPROTO_HANDLE } from "@/lib/constants";
 import {
   FEED_SERVICE_DID,
   STATIC_CACHE_MAX_AGE_SECONDS,
-} from "@/lib/data/feed-constants";
+} from "@/lib/feed-constants";
 
 // This is a receive-only identity — Frontpage verifies incoming JWTs but
 // does not sign outbound ones, so no verificationMethod is needed.
