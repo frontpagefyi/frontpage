@@ -86,6 +86,7 @@ jobs:
 
       - run: pnpm i
       - run: pnpm exec turbo run --affected lint -- --output-file eslint_report.json --format json
+        id: lint
         continue-on-error: true
 
       - name: Annotate Code Linting Results
@@ -93,6 +94,10 @@ jobs:
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           report-json: "packages/**/eslint_report.json"
+
+      - name: Print ESLint Report and Fail if Linting Failed
+        if: steps.lint.outcome == 'failure'
+        run: node ./packages/eslint-config/pretty-print-report.ts packages/**/eslint_report.json; exit 1
 
   typecheck:
     runs-on: ubuntu-latest
