@@ -73,14 +73,18 @@ const didResolver = new CompositeDidDocumentResolver({
   },
 });
 
-export const getDidDoc = cache(async (did: DID): Promise<DidDocument> => {
-  const doc = await didResolver.resolve(did);
-  invariant(
-    doc.id === did,
-    `DID document id mismatch: expected ${did}, got ${doc.id}`,
-  );
-  return doc;
-});
+export const getDidDoc = cache(
+  async (did: DID, noCache = false): Promise<DidDocument> => {
+    const doc = await didResolver.resolve(did, {
+      noCache,
+    });
+    invariant(
+      doc.id === did,
+      `DID document id mismatch: expected ${did}, got ${doc.id}`,
+    );
+    return doc;
+  },
+);
 
 export const getPdsUrl = cache(async (did: DID) => {
   const doc = await getDidDoc(did);

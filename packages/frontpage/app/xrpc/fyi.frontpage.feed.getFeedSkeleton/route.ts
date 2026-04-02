@@ -21,14 +21,14 @@ function xrpcError(name: string, message: string, status: number) {
 
 async function getSigningKey(
   iss: string,
-  _forceRefresh: boolean,
+  forceRefresh: boolean,
 ): Promise<string> {
   const issuerDid = parseDid(iss);
   invariant(issuerDid, `Invalid DID in JWT issuer: ${iss}`);
 
   // verifyJwt compares the cached vs fresh key to detect rotation.
   // React.cache dedupes within a request, so we must bypass it on retry.
-  const didDoc = await getDidDoc(issuerDid);
+  const didDoc = await getDidDoc(issuerDid, forceRefresh);
   const verificationMethod = didDoc.verificationMethod?.find(
     (method) => method.id === `${iss}#atproto`,
   );
