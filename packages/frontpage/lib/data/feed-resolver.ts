@@ -6,7 +6,7 @@ import {
   getSkeletonByAlgorithm,
   type SkeletonResult,
 } from "@/lib/data/db/feed-skeleton";
-import { hydratePosts, type HydratedPost } from "@/lib/data/db/hydrate-posts";
+import { hydratePosts, type HydratedPost } from "@/lib/data/db/post";
 import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
 import {
