@@ -1,8 +1,8 @@
 import { connection } from "next/server";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
-import { HOT_FEED_URI } from "@/lib/constants";
 import { FeedSwitcherLayout } from "./_components/feed-switcher";
+import { HOT_FEED_URI } from "@/lib/feed-constants";
 
 export default async function Home() {
   await connection();

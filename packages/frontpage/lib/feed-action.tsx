@@ -1,6 +1,6 @@
 import { getFeed } from "@/lib/data/feed-resolver";
 import { PostCard } from "@/app/(app)/_components/post-card";
-import { FEED_URIS } from "@/lib/constants";
+import { FEED_URIS } from "./feed-constants";
 
 const ALLOWED_FEED_URIS = new Set(Object.values(FEED_URIS));
 

@@ -7,8 +7,8 @@ import {
   FEED_REGISTRY,
   DEFAULT_FEED_SLUG,
   isFeedSlug,
+  FEED_URIS,
 } from "@/lib/feed-constants";
-import { FEED_URIS } from "@/lib/constants";
 import type { Metadata } from "next";
 
 export async function generateMetadata(

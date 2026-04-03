@@ -17,6 +17,7 @@ import {
   FEED_REGISTRY,
   DEFAULT_FEED_SLUG,
   type FeedSlug,
+  getFeedDefinitionFromSlug,
 } from "@/lib/feed-constants";
 
 function feedHref(slug: FeedSlug) {
@@ -34,8 +35,7 @@ export function FeedSwitcherLayout({
   const [isPending, startTransition] = useTransition();
   const [optimisticSlug, setOptimisticSlug] = useOptimistic(currentSlug);
 
-  const current =
-    FEED_REGISTRY.find((f) => f.slug === optimisticSlug) ?? FEED_REGISTRY[0];
+  const current = getFeedDefinitionFromSlug(optimisticSlug);
 
   return (
     <>
