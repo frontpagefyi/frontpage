@@ -1,5 +1,5 @@
+import { serverConfig } from "@/lib/config/server-config";
 import { didSchema } from "@/lib/data/atproto/did";
-import { FRONTPAGE_DID } from "@/lib/constants";
 import { AtUri } from "@atproto/syntax";
 import slugify from "slugify";
 import { z } from "zod";
@@ -51,7 +51,7 @@ const BlogArray = z.object({
 
 export async function listBlogs() {
   const blogListQueryParams = new URLSearchParams({
-    repo: FRONTPAGE_DID,
+    repo: serverConfig.FRONTPAGE_DID,
     collection: WHTWND_BLOG_COLLECTION,
   });
 
@@ -87,7 +87,7 @@ export async function listBlogs() {
 
 async function getMeta(rkey: string) {
   const queryParams = new URLSearchParams({
-    repo: FRONTPAGE_DID,
+    repo: serverConfig.FRONTPAGE_DID,
     collection: "fyi.frontpage.dev.blog.meta",
     rkey,
   });
@@ -110,7 +110,7 @@ async function getMeta(rkey: string) {
 export async function getBlog(rkey: string) {
   const metaPromise = getMeta(rkey).catch(() => null);
   const queryParams = new URLSearchParams({
-    repo: FRONTPAGE_DID,
+    repo: serverConfig.FRONTPAGE_DID,
     collection: WHTWND_BLOG_COLLECTION,
     rkey: rkey,
   });

@@ -1,8 +1,9 @@
 /* eslint-disable node/no-process-env */
 import z from "zod";
+import { isDid } from "../data/atproto/did";
 
 const ServerEnv = z.object({
-  NEXT_PUBLIC_FEED_SERVICE_DID: z.string(),
+  NEXT_PUBLIC_FEED_SERVICE_DID: z.string().refine((val) => isDid(val)),
   NEXT_PUBLIC_DEFAULT_PDS_HOST: z.string().optional(),
 });
 

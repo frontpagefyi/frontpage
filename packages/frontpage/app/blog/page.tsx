@@ -1,11 +1,11 @@
 import Link from "next/link";
 import { listBlogs, WHTWND_BLOG_COLLECTION } from "./blog-data";
-import { FRONTPAGE_DID } from "@/lib/constants";
 import { BackLink } from "./_components";
 import { Card, CardFooter, CardHeader } from "@/lib/components/ui/card";
 import { Badge } from "@/lib/components/ui/badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { TimeAgo } from "@/lib/components/time-ago";
+import { serverConfig } from "@/lib/config/server-config";
 
 export const revalidate = 120;
 
@@ -15,7 +15,7 @@ export default async function Blog() {
     <>
       <link
         rel="alternate"
-        href={`at://${FRONTPAGE_DID}/${WHTWND_BLOG_COLLECTION}`}
+        href={`at://${serverConfig.FRONTPAGE_DID}/${WHTWND_BLOG_COLLECTION}`}
       />
       <title>Frontpage Blog</title>
 
@@ -41,7 +41,10 @@ export default async function Blog() {
                 <div className="flex items-center gap-4">
                   <div className="flex gap-1">
                     {post.additionalAuthors.length === 0 ? (
-                      <UserAvatar did={FRONTPAGE_DID} size="small" />
+                      <UserAvatar
+                        did={serverConfig.FRONTPAGE_DID}
+                        size="small"
+                      />
                     ) : (
                       post.additionalAuthors.map((author) => (
                         <UserAvatar did={author} size="small" key={author} />

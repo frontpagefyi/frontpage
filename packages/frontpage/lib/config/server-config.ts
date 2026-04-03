@@ -1,6 +1,7 @@
 /* eslint-disable node/no-process-env */
 import "server-only";
 import z from "zod";
+import { isDid } from "../data/atproto/did";
 
 const ServerEnv = z.object({
   TURSO_CONNECTION_URL: z.string(),
@@ -9,7 +10,7 @@ const ServerEnv = z.object({
   CRON_SECRET: z.string(),
   PRIVATE_JWK: z.string(),
   PUBLIC_JWK: z.string(),
-  FRONTPAGE_DID: z.string(),
+  FRONTPAGE_DID: z.string().refine((val) => isDid(val)),
   DISCORD_WEBHOOK_URL: z.string().optional(),
   FLAGS: z.string().optional(),
   FLAGS_SECRET: z.string(),

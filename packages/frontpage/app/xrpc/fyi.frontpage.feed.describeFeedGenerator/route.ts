@@ -1,13 +1,11 @@
 import { NextResponse } from "next/server";
 import { FEED_REGISTRY } from "@/lib/feed-constants";
 import { feedUri } from "@/lib/constants";
-import {
-  NEXT_PUBLIC_FEED_SERVICE_DID,
-  STATIC_CACHE_MAX_AGE_SECONDS,
-} from "@/lib/feed-constants";
+import { STATIC_CACHE_MAX_AGE_SECONDS } from "@/lib/feed-constants";
+import { publicConfig } from "@/lib/config/public-config";
 
 const RESPONSE_BODY = {
-  did: NEXT_PUBLIC_FEED_SERVICE_DID,
+  did: publicConfig.NEXT_PUBLIC_FEED_SERVICE_DID,
   feeds: FEED_REGISTRY.map((f) => ({ uri: feedUri(f.slug) })),
 };
 
