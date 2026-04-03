@@ -6,6 +6,7 @@ import { invariant } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
 import { getFeedSkeleton } from "@/lib/data/feed-resolver";
 import { publicConfig } from "@/lib/config/public-config";
+import { AtUri } from "@atproto/syntax";
 
 const DEFAULT_SKELETON_LIMIT = 50;
 const MIN_SKELETON_LIMIT = 1;
@@ -42,13 +43,23 @@ async function getSigningKey(
 
 export async function GET(request: NextRequest): Promise<NextResponse> {
   const searchParams = request.nextUrl.searchParams;
-  const feed = searchParams.get("feed");
-  const limitParam = searchParams.get("limit");
-  const cursor = searchParams.get("cursor") ?? undefined;
-
-  if (!feed) {
+  const feedParam = searchParams.get("feed");
+  if (!feedParam) {
     return xrpcError("InvalidRequest", "Missing required parameter: feed", 400);
   }
+  let feed;
+  try {
+    feed = new AtUri(feedParam);
+  } catch (error) {
+    if (error instanceof Error) {
+      return xrpcError("InvalidRequest", error.message, 400);
+    } else {
+      throw error;
+    }
+  }
+
+  const limitParam = searchParams.get("limit");
+  const cursor = searchParams.get("cursor") ?? undefined;
 
   // Parse limit (default 50, clamp 1..100)
   let limit = DEFAULT_SKELETON_LIMIT;
@@ -103,8 +114,6 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   if (!result.ok) {
     const { error } = result;
     switch (error.code) {
-      case "InvalidUri":
-        return xrpcError("InvalidRequest", error.message, 400);
       case "InvalidCollection":
       case "UnknownFeed":
         return xrpcError("UnknownFeed", error.message, 400);
@@ -121,7 +130,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
   // Non-blocking logging
   after(() => {
     console.log(
-      `getFeedSkeleton: feed=${feed} limit=${limit} cursor=${cursor ?? "none"} results=${result.data.feed.length} requester=${requesterDid ?? "anonymous"}`,
+      `getFeedSkeleton: feed=${feed.toString()} limit=${limit} cursor=${cursor ?? "none"} results=${result.data.feed.length} requester=${requesterDid ?? "anonymous"}`,
     );
   });
 

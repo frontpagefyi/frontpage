@@ -40,7 +40,7 @@ export default async function FeedSlugPage(props: PageProps<"/feed/[slug]">) {
   return (
     <FeedSwitcherLayout currentSlug={slug}>
       <InfiniteList
-        cacheKey={`feed:${uri}`}
+        cacheKey={`feed:${uri.toString()}`}
         getMoreItemsAction={getMoreFeedPostsAction.bind(null, uri)}
         fallback={initialData}
         emptyMessage="No posts in this feed"

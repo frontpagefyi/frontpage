@@ -1,6 +1,6 @@
 import "server-only";
 
-import { AtUri } from "@atproto/syntax";
+import type { AtUri } from "@atproto/syntax";
 import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
   getSkeletonByAlgorithm,
@@ -19,7 +19,6 @@ import { nsids } from "@/lib/data/atproto/repo";
 import { publicConfig } from "../config/public-config";
 
 export type FeedError =
-  | { code: "InvalidUri"; message: string }
   | { code: "InvalidCollection"; message: string }
   | { code: "UnknownFeed"; message: string }
   | { code: "ExternalError"; message: string }
@@ -37,7 +36,7 @@ export type FeedResult =
 // DEFAULT_SKELETON_LIMIT and always passes an explicit limit, so this default
 // only affects getFeed/getFeedSkeleton when called without a limit argument.
 export async function getFeed(
-  feedUri: string,
+  feedUri: AtUri,
   cursor?: string,
   limit = 20,
 ): Promise<FeedResult> {
@@ -50,45 +49,38 @@ export async function getFeed(
 }
 
 export async function getFeedSkeleton(
-  feedUri: string,
+  feedUri: AtUri,
   cursor?: string,
   limit = 20,
 ): Promise<FeedSkeletonResult> {
-  let atUri: AtUri;
-  try {
-    atUri = new AtUri(feedUri);
-  } catch {
-    return {
-      ok: false,
-      error: { code: "InvalidUri", message: `Invalid feed URI: ${feedUri}` },
-    };
-  }
-
-  if (atUri.collection !== nsids.FyiFrontpageFeedGenerator) {
+  if (feedUri.collection !== nsids.FyiFrontpageFeedGenerator) {
     return {
       ok: false,
       error: {
         code: "InvalidCollection",
-        message: `Expected collection ${nsids.FyiFrontpageFeedGenerator}, got ${atUri.collection}`,
+        message: `Expected collection ${nsids.FyiFrontpageFeedGenerator}, got ${feedUri.collection}`,
       },
     };
   }
 
-  if (!isFeedSlug(atUri.rkey)) {
-    if (isLocalFeed(atUri)) {
+  if (!isFeedSlug(feedUri.rkey)) {
+    if (isLocalFeed(feedUri)) {
       return {
         ok: false,
-        error: { code: "UnknownFeed", message: `Unknown feed: ${atUri.rkey}` },
+        error: {
+          code: "UnknownFeed",
+          message: `Unknown feed: ${feedUri.rkey}`,
+        },
       };
     }
   }
 
-  if (isLocalFeed(atUri) && isFeedSlug(atUri.rkey)) {
-    const skeleton = await getSkeletonByAlgorithm(atUri.rkey, limit, cursor);
+  if (isLocalFeed(feedUri) && isFeedSlug(feedUri.rkey)) {
+    const skeleton = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
     return { ok: true, data: skeleton };
   }
 
-  return getExternalSkeleton(atUri, cursor, limit);
+  return getExternalSkeleton(feedUri, cursor, limit);
 }
 
 function isLocalFeed(feedUri: AtUri): boolean {

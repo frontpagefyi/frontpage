@@ -1,15 +1,16 @@
 import { getFeed } from "@/lib/data/feed-resolver";
 import { PostCard } from "@/app/(app)/_components/post-card";
 import { FEED_URIS } from "./feed-constants";
+import type { AtUri } from "@atproto/syntax";
 
-const ALLOWED_FEED_URIS = new Set(Object.values(FEED_URIS));
+const ALLOWED_FEED_URIS = Object.values(FEED_URIS);
 
 export async function getMoreFeedPostsAction(
-  feedUri: string,
+  feedUri: AtUri,
   cursor: string | null,
 ) {
   "use server";
-  if (!ALLOWED_FEED_URIS.has(feedUri)) {
+  if (!ALLOWED_FEED_URIS.some((uri) => uri.toString() === feedUri.toString())) {
     throw new Error("Unknown feed");
   }
 
