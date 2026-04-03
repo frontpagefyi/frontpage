@@ -18,6 +18,5 @@ console.log(
 PUBLIC_JWK='${JSON.stringify(publicKey)}'
 DRAINPIPE_CONSUMER_SECRET=secret
 TURSO_CONNECTION_URL=libsql://turso.dev.unravel.fyi
-PLC_DIRECTORY_URL=https://plc.dev.unravel.fyi
-FEED_SERVICE_DID=did:web:frontpage.fyi`,
+PLC_DIRECTORY_URL=https://plc.dev.unravel.fyi`,
 );

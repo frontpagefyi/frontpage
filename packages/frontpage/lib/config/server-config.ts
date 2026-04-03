@@ -1,16 +1,24 @@
 /* eslint-disable node/no-process-env */
 import "server-only";
 import z from "zod";
-import { isDid } from "../data/atproto/did";
+// Not using our own did function here to prevent circular dependencies
+import { isAtprotoDid } from "@atcute/identity";
+import type { DID } from "../data/atproto/did";
 
 const ServerEnv = z.object({
   TURSO_CONNECTION_URL: z.string(),
-  TURSO_AUTH_TOKEN: z.string(),
+  // Optional in dev (turso runs unauthenticated)
+  TURSO_AUTH_TOKEN: z.string().optional(),
   DRAINPIPE_CONSUMER_SECRET: z.string(),
-  CRON_SECRET: z.string(),
+  // Optional in dev (crons don't run there)
+  CRON_SECRET: z.string().optional(),
   PRIVATE_JWK: z.string(),
   PUBLIC_JWK: z.string(),
-  FRONTPAGE_DID: z.string().refine((val) => isDid(val)),
+  FRONTPAGE_DID: z
+    .string()
+    .refine((val) => (isAtprotoDid as (val: string) => val is DID)(val), {
+      message: "FRONTPAGE_DID must be a valid atproto DID",
+    }),
   DISCORD_WEBHOOK_URL: z.string().optional(),
   FLAGS: z.string().optional(),
   FLAGS_SECRET: z.string(),
