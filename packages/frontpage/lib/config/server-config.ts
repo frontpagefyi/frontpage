@@ -1,9 +1,6 @@
 /* eslint-disable node/no-process-env */
 import "server-only";
 import z from "zod";
-// Not using our own did function here to prevent circular dependencies
-import { isAtprotoDid } from "@atcute/identity";
-import type { DID } from "../data/atproto/did";
 
 const ServerEnv = z.object({
   TURSO_CONNECTION_URL: z.string(),
