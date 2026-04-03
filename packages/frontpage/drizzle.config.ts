@@ -4,7 +4,10 @@ import { defineConfig } from "drizzle-kit";
 // Load environment variables
 loadEnvConfig(process.cwd());
 
+// Allowing reading from env here so that this file can be used in scripts (eg. db migrations) without needing the full env vars defined in @/lib/config/server-config
+// eslint-disable-next-line node/no-process-env
 const URL = process.env.TURSO_CONNECTION_URL!;
+// eslint-disable-next-line node/no-process-env
 const AUTH_TOKEN = process.env.TURSO_AUTH_TOKEN;
 
 if (!URL) {

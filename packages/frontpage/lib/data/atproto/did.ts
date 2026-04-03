@@ -13,6 +13,7 @@ import {
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "@/lib/constants";
 import { invariant } from "@/lib/utils";
 import { assertPublicHostname } from "@/lib/data/ssrf";
+import { serverConfig } from "@/lib/config/server-config";
 
 type Brand<K, T> = K & { __brand: T };
 export type DID =
@@ -37,7 +38,7 @@ export function parseDid(s: string): DID | null {
 const didResolver = new CompositeDidDocumentResolver({
   methods: {
     plc: new PlcDidDocumentResolver({
-      apiUrl: process.env.PLC_DIRECTORY_URL ?? "https://plc.directory",
+      apiUrl: serverConfig.PLC_DIRECTORY_URL ?? "https://plc.directory",
       fetch: (request) =>
         fetch(request, {
           headers: { "User-Agent": FRONTPAGE_APPVIEW_USER_AGENT },

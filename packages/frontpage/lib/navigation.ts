@@ -2,6 +2,7 @@ import { headers } from "next/headers";
 import { type DID } from "./data/atproto/did";
 import { nsids } from "./data/atproto/repo";
 import { getPostFromComment } from "./data/db/post";
+import { serverConfig } from "./config/server-config";
 
 type PostInput = {
   handleOrDid: string | DID;
@@ -55,17 +56,17 @@ export async function getFrontPageLink({
 
 export async function getRootHost() {
   let host: string | null | undefined =
-    process.env.VERCEL_PROJECT_PRODUCTION_URL;
+    serverConfig.VERCEL_PROJECT_PRODUCTION_URL;
 
   if (process.env.NODE_ENV === "development") {
     host = (await headers()).get("host");
-  } else if (process.env.VERCEL_ENV === "preview") {
+  } else if (serverConfig.VERCEL_ENV === "preview") {
     const hostHeader = (await headers()).get("host");
 
-    if (hostHeader === process.env.VERCEL_URL) {
-      host = process.env.VERCEL_URL;
-    } else if (hostHeader === process.env.VERCEL_BRANCH_URL) {
-      host = process.env.VERCEL_BRANCH_URL;
+    if (hostHeader === serverConfig.VERCEL_URL) {
+      host = serverConfig.VERCEL_URL;
+    } else if (hostHeader === serverConfig.VERCEL_BRANCH_URL) {
+      host = serverConfig.VERCEL_BRANCH_URL;
     } else {
       throw new Error("Invalid host header");
     }

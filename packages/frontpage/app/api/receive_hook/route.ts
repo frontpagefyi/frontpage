@@ -6,6 +6,7 @@ import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
 import { nsids } from "@/lib/data/atproto/repo";
 import { timingSafeEqual } from "node:crypto";
+import { serverConfig } from "@/lib/config/server-config";
 
 const knownCollections = [
   nsids.FyiUnravelFrontpagePost,
@@ -16,13 +17,15 @@ const knownCollections = [
   nsids.FyiFrontpageFeedVote,
 ] as const;
 
-const EXPECTED_AUTH_HEADER = Buffer.from(
-  `Bearer ${process.env.DRAINPIPE_CONSUMER_SECRET}`,
-);
-
 export async function POST(request: Request) {
   const auth = request.headers.get("Authorization");
-  if (!auth || !timingSafeEqual(Buffer.from(auth), EXPECTED_AUTH_HEADER)) {
+  if (
+    !auth ||
+    !timingSafeEqual(
+      Buffer.from(auth),
+      Buffer.from(`Bearer ${serverConfig.DRAINPIPE_CONSUMER_SECRET}`),
+    )
+  ) {
     console.error("Unauthorized request");
     return new Response("Unauthorized", { status: 401 });
   }

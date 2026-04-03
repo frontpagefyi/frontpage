@@ -24,11 +24,12 @@ import {
   AccordionTrigger,
 } from "@/lib/components/ui/accordion";
 import { type ErrorReason } from "@/lib/auth-sign-in";
+import { publicConfig } from "@/lib/config/public-config";
 
-const DEFAULT_PDS = process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST
+const DEFAULT_PDS = publicConfig.NEXT_PUBLIC_DEFAULT_PDS_HOST
   ? {
-      host: process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST,
-      label: process.env.NEXT_PUBLIC_DEFAULT_PDS_HOST,
+      host: publicConfig.NEXT_PUBLIC_DEFAULT_PDS_HOST,
+      label: publicConfig.NEXT_PUBLIC_DEFAULT_PDS_HOST,
     }
   : {
       host: "bsky.social",

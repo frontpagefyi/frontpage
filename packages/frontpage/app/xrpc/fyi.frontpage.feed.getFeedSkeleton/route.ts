@@ -4,8 +4,8 @@ import { after } from "next/server";
 import { getDidDoc, parseDid } from "@/lib/data/atproto/did";
 import { invariant } from "@/lib/utils";
 import { nsids } from "@/lib/data/atproto/repo";
-import { NEXT_PUBLIC_FEED_SERVICE_DID } from "@/lib/feed-constants";
 import { getFeedSkeleton } from "@/lib/data/feed-resolver";
+import { publicConfig } from "@/lib/config/public-config";
 
 const DEFAULT_SKELETON_LIMIT = 50;
 const MIN_SKELETON_LIMIT = 1;
@@ -70,7 +70,7 @@ export async function GET(request: NextRequest): Promise<NextResponse> {
       const jwt = authHeader.slice(BEARER_PREFIX.length);
       const payload = await verifyJwt(
         jwt,
-        NEXT_PUBLIC_FEED_SERVICE_DID,
+        publicConfig.NEXT_PUBLIC_FEED_SERVICE_DID,
         nsids.FyiFrontpageFeedGetFeedSkeleton,
         getSigningKey,
       );

@@ -1,4 +1,5 @@
 import "server-only";
+import { serverConfig } from "./config/server-config";
 
 type DiscordMessageInput = {
   embeds: Array<{
@@ -19,8 +20,8 @@ type DiscordMessageInput = {
 };
 
 export async function sendDiscordMessage(message: DiscordMessageInput) {
-  if (process.env.DISCORD_WEBHOOK_URL) {
-    const webhookResponse = await fetch(process.env.DISCORD_WEBHOOK_URL, {
+  if (serverConfig.DISCORD_WEBHOOK_URL) {
+    const webhookResponse = await fetch(serverConfig.DISCORD_WEBHOOK_URL, {
       method: "POST",
       headers: {
         "Content-Type": "application/json",

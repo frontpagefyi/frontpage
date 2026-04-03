@@ -39,11 +39,12 @@ import {
 import { getRootHost } from "./navigation";
 import { invariant } from "./utils";
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "./constants";
+import { serverConfig } from "./config/server-config";
 
 export const getPrivateJwk = cache(() =>
   importJWK(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    JSON.parse(process.env.PRIVATE_JWK!),
+    JSON.parse(serverConfig.PRIVATE_JWK),
     USER_SESSION_JWT_ALG,
   ),
 );
@@ -51,7 +52,7 @@ export const getPrivateJwk = cache(() =>
 export const getPublicJwk = cache(async () => {
   const jwk = await importJWK(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    JSON.parse(process.env.PUBLIC_JWK!),
+    JSON.parse(serverConfig.PUBLIC_JWK),
     USER_SESSION_JWT_ALG,
   );
   if ("d" in jwk) {
@@ -68,7 +69,9 @@ export const getClientMetadata = cache(async () => {
 
   // In Vercel preview deployments we point to our preview oauth client so that we can bypass vercel auth for our login.
   const appUrl =
-    process.env.VERCEL_ENV === "preview" ? previewOauthClientUrl : frontpageUrl;
+    serverConfig.VERCEL_ENV === "preview"
+      ? previewOauthClientUrl
+      : frontpageUrl;
 
   return createClientMetadata({
     redirectUri: `${appUrl}/oauth/callback`,

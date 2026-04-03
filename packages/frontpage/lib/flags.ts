@@ -3,6 +3,7 @@ import { vercelAdapter } from "@flags-sdk/vercel";
 import type { DID } from "./data/atproto/did";
 import { getSession } from "./auth";
 import type { Adapter } from "flags";
+import { serverConfig } from "./config/server-config";
 
 // Defined here: https://vercel.com/frontpagefyi/frontpage/flags/entities
 type Entities = {
@@ -26,7 +27,7 @@ const identify = dedupe(async (): Promise<Entities> => {
 });
 
 function adapter(): Adapter<unknown, unknown> {
-  if (process.env.FLAGS && process.env.FLAGS_SECRET) {
+  if (serverConfig.FLAGS && serverConfig.FLAGS_SECRET) {
     return vercelAdapter();
   }
 
