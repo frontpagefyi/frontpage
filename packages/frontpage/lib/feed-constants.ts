@@ -1,5 +1,6 @@
 import { publicConfig } from "./config/public-config";
-import { nsids } from "./data/atproto/repo";
+// TODO: we should import this from @/lib/data/atproto/repo but can't because it currently imports server stuff, and this module needs to be available on the client as well.
+import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
 import { invariant } from "./utils";
 
 /** Cache duration for static XRPC endpoints (1 day in seconds) */
