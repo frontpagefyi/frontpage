@@ -20,8 +20,8 @@
         "PLC_DIRECTORY_URL",
         "FLAGS",
         "FLAGS_SECRET",
-        "FRONTPAGE_DID",
-        "FEED_SERVICE_DID"
+        "NEXT_PUBLIC_FRONTPAGE_DID",
+        "NEXT_PUBLIC_FEED_SERVICE_DID"
       ]
     }
   }

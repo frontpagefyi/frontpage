@@ -16,7 +16,7 @@ import {
 import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
 import { isFeedSlug } from "@/lib/feed-constants";
 import { nsids } from "@/lib/data/atproto/repo";
-import { serverConfig } from "../config/server-config";
+import { publicConfig } from "../config/public-config";
 
 export type FeedError =
   | { code: "InvalidUri"; message: string }
@@ -93,7 +93,7 @@ export async function getFeedSkeleton(
 
 function isLocalFeed(feedUri: AtUri): boolean {
   return (
-    feedUri.host === serverConfig.FRONTPAGE_DID &&
+    feedUri.host === publicConfig.NEXT_PUBLIC_FRONTPAGE_DID &&
     feedUri.collection === nsids.FyiFrontpageFeedGenerator
   );
 }

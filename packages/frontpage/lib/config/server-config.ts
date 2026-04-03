@@ -14,11 +14,6 @@ const ServerEnv = z.object({
   CRON_SECRET: z.string().optional(),
   PRIVATE_JWK: z.string(),
   PUBLIC_JWK: z.string(),
-  FRONTPAGE_DID: z
-    .string()
-    .refine((val) => (isAtprotoDid as (val: string) => val is DID)(val), {
-      message: "FRONTPAGE_DID must be a valid atproto DID",
-    }),
   DISCORD_WEBHOOK_URL: z.string().optional(),
   FLAGS: z.string().optional(),
   FLAGS_SECRET: z.string(),
@@ -37,7 +32,6 @@ export const serverConfig = ServerEnv.parse({
   CRON_SECRET: process.env.CRON_SECRET,
   PRIVATE_JWK: process.env.PRIVATE_JWK,
   PUBLIC_JWK: process.env.PUBLIC_JWK,
-  FRONTPAGE_DID: process.env.FRONTPAGE_DID,
   DISCORD_WEBHOOK_URL: process.env.DISCORD_WEBHOOK_URL,
   FLAGS: process.env.FLAGS,
   FLAGS_SECRET: process.env.FLAGS_SECRET,

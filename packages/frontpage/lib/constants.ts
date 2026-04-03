@@ -1,13 +1,13 @@
 import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
 import type { FeedSlug } from "@/lib/feed-constants";
-import { serverConfig } from "./config/server-config";
+import { publicConfig } from "./config/public-config";
 
 export const FRONTPAGE_ATPROTO_HANDLE = "frontpage.fyi";
 export const FRONTPAGE_APPVIEW_USER_AGENT =
   "appview/@frontpage.fyi (@frontpage.fyi, @tom.sherman.is)";
 
 export function feedUri(slug: FeedSlug): string {
-  return `at://${serverConfig.FRONTPAGE_DID}/${nsids.FyiFrontpageFeedGenerator}/${slug}`;
+  return `at://${publicConfig.NEXT_PUBLIC_FRONTPAGE_DID}/${nsids.FyiFrontpageFeedGenerator}/${slug}`;
 }
 
 /** Feed URIs derived from the registry */
