@@ -2,7 +2,7 @@
 import z from "zod";
 
 const ServerEnv = z.object({
-  TURSO_CONNECTION_URL: z.string(),
+  NEXT_PUBLIC_FEED_SERVICE_DID: z.string(),
   NEXT_PUBLIC_DEFAULT_PDS_HOST: z.string().optional(),
 });
 
