@@ -6,6 +6,9 @@ import { timingSafeEqual } from "node:crypto";
 import { serverConfig } from "@/lib/config/server-config";
 
 export async function GET(request: NextRequest) {
+  if (!serverConfig.CRON_SECRET) {
+    throw new Error("CRON_SECRET is not set");
+  }
   const authHeader = request.headers.get("authorization");
   if (
     !authHeader ||
