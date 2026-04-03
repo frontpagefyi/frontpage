@@ -8,8 +8,6 @@ import { type FeedSlug } from "@/lib/feed-constants";
 import { exhaustiveCheck, invariant } from "@/lib/utils";
 import { type FyiFrontpageFeedGetFeedSkeleton } from "@repo/frontpage-atproto-client";
 
-export type SkeletonResult = FyiFrontpageFeedGetFeedSkeleton.OutputSchema;
-
 function buildAtUri(
   authorDid: string,
   collection: string,
@@ -66,10 +64,12 @@ function toSkeletonResult<
   rows: TRow[],
   limit: number,
   serializeCursorValue: (row: TRow) => string,
-): SkeletonResult {
-  const feed: SkeletonResult["feed"] = rows.map((row) => ({
-    post: buildAtUri(row.authorDid, row.collection, row.rkey),
-  }));
+): FyiFrontpageFeedGetFeedSkeleton.OutputSchema {
+  const feed: FyiFrontpageFeedGetFeedSkeleton.OutputSchema["feed"] = rows.map(
+    (row) => ({
+      post: buildAtUri(row.authorDid, row.collection, row.rkey),
+    }),
+  );
 
   // Only return a cursor if we got a full page — fewer rows means we're at the end.
   // Note: if the total post count is an exact multiple of limit, the last full page
@@ -91,7 +91,7 @@ function toSkeletonResult<
 function getHotSkeleton(
   limit: number,
   cursor: string | undefined,
-): Promise<SkeletonResult> {
+): Promise<FyiFrontpageFeedGetFeedSkeleton.OutputSchema> {
   const parsed = parseCompoundCursor(cursor);
 
   let cursorFilter: SQL | undefined;
@@ -124,7 +124,7 @@ function getHotSkeleton(
 function getNewSkeleton(
   limit: number,
   cursor: string | undefined,
-): Promise<SkeletonResult> {
+): Promise<FyiFrontpageFeedGetFeedSkeleton.OutputSchema> {
   const parsed = parseCompoundCursor(cursor);
 
   let cursorFilter: SQL | undefined;
@@ -158,7 +158,7 @@ function getNewSkeleton(
 function getTopSkeleton(
   limit: number,
   cursor: string | undefined,
-): Promise<SkeletonResult> {
+): Promise<FyiFrontpageFeedGetFeedSkeleton.OutputSchema> {
   const parsed = parseCompoundCursor(cursor);
 
   let cursorFilter: SQL | undefined;
@@ -193,12 +193,12 @@ function getTopSkeleton(
     );
 }
 
-export function getSkeletonByAlgorithm(
-  algorithm: FeedSlug,
+export function getLocalFeedSkeleton(
+  slug: FeedSlug,
   limit: number,
   cursor: string | undefined,
-): Promise<SkeletonResult> {
-  switch (algorithm) {
+): Promise<FyiFrontpageFeedGetFeedSkeleton.OutputSchema> {
+  switch (slug) {
     case "hot":
       return getHotSkeleton(limit, cursor);
     case "new":
@@ -206,6 +206,6 @@ export function getSkeletonByAlgorithm(
     case "top":
       return getTopSkeleton(limit, cursor);
     default:
-      exhaustiveCheck(algorithm);
+      exhaustiveCheck(slug);
   }
 }

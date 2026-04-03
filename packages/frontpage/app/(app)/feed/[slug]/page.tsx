@@ -6,10 +6,10 @@ import { FeedSwitcherLayout } from "../../_components/feed-switcher";
 import {
   FEED_REGISTRY,
   DEFAULT_FEED_SLUG,
-  isFeedSlug,
   FEED_URIS,
 } from "@/lib/feed-constants";
 import type { Metadata } from "next";
+import { isFeedSlug } from "@/lib/data/feed-resolver";
 
 export async function generateMetadata(
   props: PageProps<"/feed/[slug]">,

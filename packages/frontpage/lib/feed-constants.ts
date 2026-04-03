@@ -39,10 +39,6 @@ export type FeedSlug = (typeof FEED_REGISTRY)[number]["slug"];
 
 export const DEFAULT_FEED_SLUG: FeedSlug = "hot";
 
-export function isFeedSlug(s: string): s is FeedSlug {
-  return FEED_REGISTRY.some((f) => f.slug === s);
-}
-
 function feedUri(slug: string) {
   return new AtUri(
     `at://${publicConfig.NEXT_PUBLIC_FRONTPAGE_DID}/${nsids.FyiFrontpageFeedGenerator}/${slug}`,

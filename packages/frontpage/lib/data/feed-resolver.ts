@@ -1,11 +1,13 @@
 import "server-only";
 
 import type { AtUri } from "@atproto/syntax";
-import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import {
-  getSkeletonByAlgorithm,
-  type SkeletonResult,
-} from "@/lib/data/db/feed-skeleton";
+  getDidDoc,
+  getPdsUrl,
+  parseDid,
+  type DID,
+} from "@/lib/data/atproto/did";
+import { getLocalFeedSkeleton } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/post";
 import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
@@ -14,9 +16,11 @@ import {
   type FyiFrontpageFeedGetFeedSkeleton,
 } from "@repo/frontpage-atproto-client";
 import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
-import { isFeedSlug } from "@/lib/feed-constants";
-import { nsids } from "@/lib/data/atproto/repo";
+import { FEED_REGISTRY, type FeedSlug } from "@/lib/feed-constants";
+import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import { publicConfig } from "../config/public-config";
+import { getDidFromHandleOrDid } from "./atproto/identity";
+import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
 
 export type FeedError =
   | { code: "InvalidCollection"; message: string }
@@ -25,7 +29,7 @@ export type FeedError =
   | { code: "InvalidResponse"; message: string };
 
 export type FeedSkeletonResult =
-  | { ok: true; data: SkeletonResult }
+  | { ok: true; data: FyiFrontpageFeedGetFeedSkeleton.OutputSchema }
   | { ok: false; error: FeedError };
 
 export type FeedResult =
@@ -48,7 +52,7 @@ export async function getFeed(
   return { ok: true, posts, cursor: skeletonResult.data.cursor };
 }
 
-export async function getFeedSkeleton(
+async function getFeedSkeleton(
   feedUri: AtUri,
   cursor?: string,
   limit = 20,
@@ -63,31 +67,43 @@ export async function getFeedSkeleton(
     };
   }
 
-  if (!isFeedSlug(feedUri.rkey)) {
-    if (isLocalFeed(feedUri)) {
-      return {
-        ok: false,
-        error: {
-          code: "UnknownFeed",
-          message: `Unknown feed: ${feedUri.rkey}`,
-        },
-      };
-    }
-  }
+  const localFeed = parseLocalFeed(feedUri);
 
-  if (isLocalFeed(feedUri) && isFeedSlug(feedUri.rkey)) {
-    const skeleton = await getSkeletonByAlgorithm(feedUri.rkey, limit, cursor);
+  if (localFeed) {
+    const skeleton = await getLocalFeedSkeleton(localFeed.slug, limit, cursor);
     return { ok: true, data: skeleton };
   }
 
   return getExternalSkeleton(feedUri, cursor, limit);
 }
 
-function isLocalFeed(feedUri: AtUri): boolean {
-  return (
-    feedUri.host === publicConfig.NEXT_PUBLIC_FRONTPAGE_DID &&
-    feedUri.collection === nsids.FyiFrontpageFeedGenerator
-  );
+export function parseLocalFeed(feedUri: AtUri): null | {
+  host: DID | string;
+  slug: FeedSlug;
+} {
+  if (
+    feedUri.host !== publicConfig.NEXT_PUBLIC_FRONTPAGE_DID &&
+    feedUri.host !== FRONTPAGE_ATPROTO_HANDLE
+  ) {
+    return null;
+  }
+
+  if (feedUri.collection !== nsids.FyiFrontpageFeedGenerator) {
+    return null;
+  }
+
+  if (!isFeedSlug(feedUri.rkey)) {
+    return null;
+  }
+
+  return {
+    host: feedUri.host,
+    slug: feedUri.rkey,
+  };
+}
+
+export function isFeedSlug(s: string): s is FeedSlug {
+  return FEED_REGISTRY.some((f) => f.slug === s);
 }
 
 async function getExternalSkeleton(
@@ -151,8 +167,14 @@ async function getExternalSkeleton(
 }
 
 async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
-  const { getAtprotoClient } = await import("@/lib/data/atproto/repo");
-  const client = getAtprotoClient();
+  const generatorDid = await getDidFromHandleOrDid(feedUri.host);
+  invariant(generatorDid, `Could not resolve DID for ${feedUri.host}`);
+  const generatorPdsUrl = await getPdsUrl(generatorDid);
+  invariant(
+    generatorPdsUrl,
+    `Could not resolve PDS URL for DID ${generatorDid}`,
+  );
+  const client = getAtprotoClient(generatorPdsUrl);
 
   const result = await client.com.atproto.repo.getRecord({
     repo: feedUri.host,
@@ -163,15 +185,13 @@ async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
   const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
   invariant(validated.success, "Invalid generator record");
 
-  return { did: validated.value.did };
+  return validated.value;
 }
 
 async function resolveServiceEndpoint(did: DID): Promise<string> {
   const didDoc = await getDidDoc(did);
   const service = didDoc.service?.find(
-    (serviceEntry) =>
-      serviceEntry.type === "FrontpageFeedGenerator" ||
-      serviceEntry.type === "BskyFeedGenerator",
+    (serviceEntry) => serviceEntry.type === "FrontpageFeedGenerator",
   );
 
   invariant(

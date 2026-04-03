@@ -25,7 +25,6 @@
     "@atproto/common-web": "^0.3.2",
     "@atproto/oauth-types": "^0.1.5",
     "@atproto/syntax": "catalog:",
-    "@atproto/xrpc-server": "catalog:",
     "@flags-sdk/vercel": "^1.2.1",
     "@libsql/client": "^0.15.10",
     "@markdoc/markdoc": "^0.4.0",
