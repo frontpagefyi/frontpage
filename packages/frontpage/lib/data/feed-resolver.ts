@@ -1,12 +1,7 @@
 import "server-only";
 
 import type { AtUri } from "@atproto/syntax";
-import {
-  getDidDoc,
-  getPdsUrl,
-  parseDid,
-  type DID,
-} from "@/lib/data/atproto/did";
+import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
 import { getLocalFeedSkeleton } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/post";
 import { assertPublicHostname } from "@/lib/data/ssrf";
@@ -19,7 +14,6 @@ import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
 import { FEED_REGISTRY, type FeedSlug } from "@/lib/feed-constants";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import { publicConfig } from "../config/public-config";
-import { getDidFromHandleOrDid } from "./atproto/identity";
 import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
 
 export type FeedError =
