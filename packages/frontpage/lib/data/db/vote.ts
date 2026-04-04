@@ -103,6 +103,7 @@ export const createPostVote = async ({
   rkey,
   cid,
   subject,
+  status,
   collection,
 }: CreateVoteInput) => {
   return await db.transaction(async (tx) => {
@@ -143,7 +144,10 @@ export const createPostVote = async ({
       throw new Error("Failed to insert vote");
     }
 
-    await newPostVoteAggregateTrigger(post.id, tx);
+    // Only update aggregates for live votes, not pending ones
+    if (status === "live") {
+      await newPostVoteAggregateTrigger(post.id, tx);
+    }
 
     return { id: insertedVote?.id };
   });
@@ -154,6 +158,7 @@ export async function createCommentVote({
   rkey,
   cid,
   subject,
+  status,
   collection,
 }: CreateVoteInput) {
   return await db.transaction(async (tx) => {
@@ -191,7 +196,10 @@ export async function createCommentVote({
       throw new Error("Failed to insert vote");
     }
 
-    await newCommentVoteAggregateTrigger(comment.postId, comment.id, tx);
+    // Only update aggregates for live votes, not pending ones
+    if (status === "live") {
+      await newCommentVoteAggregateTrigger(comment.postId, comment.id, tx);
+    }
 
     return { id: insertedVote?.id };
   });
@@ -207,15 +215,57 @@ type UpdatePostVoteInput = Partial<
 export const updatePostVote = async (input: UpdatePostVoteInput) => {
   const { rkey, authorDid, ...updateFields } = input;
 
-  return await db
-    .update(schema.PostVote)
-    .set(updateFields)
-    .where(
-      and(
-        eq(schema.PostVote.rkey, rkey),
-        eq(schema.PostVote.authorDid, authorDid),
-      ),
-    );
+  // If we're updating status to "live", we need to check if it was "pending"
+  // and trigger aggregates
+  if (updateFields.status === "live") {
+    await db.transaction(async (tx) => {
+      // Get the current vote to check its status and postId
+      const [currentVote] = await tx
+        .select({
+          postId: schema.PostVote.postId,
+          status: schema.PostVote.status,
+        })
+        .from(schema.PostVote)
+        .where(
+          and(
+            eq(schema.PostVote.rkey, rkey),
+            eq(schema.PostVote.authorDid, authorDid),
+          ),
+        )
+        .limit(1);
+
+      if (!currentVote) {
+        throw new Error("Post vote not found");
+      }
+
+      // Update the vote
+      await tx
+        .update(schema.PostVote)
+        .set(updateFields)
+        .where(
+          and(
+            eq(schema.PostVote.rkey, rkey),
+            eq(schema.PostVote.authorDid, authorDid),
+          ),
+        );
+
+      // If status is changing from "pending" to "live", trigger aggregates
+      if (currentVote.status === "pending") {
+        await newPostVoteAggregateTrigger(currentVote.postId, tx);
+      }
+    });
+  } else {
+    // No status change to "live", just update normally
+    return await db
+      .update(schema.PostVote)
+      .set(updateFields)
+      .where(
+        and(
+          eq(schema.PostVote.rkey, rkey),
+          eq(schema.PostVote.authorDid, authorDid),
+        ),
+      );
+  }
 };
 
 type UpdateCommentVoteInput = Partial<
@@ -228,15 +278,66 @@ type UpdateCommentVoteInput = Partial<
 export const updateCommentVote = async (input: UpdateCommentVoteInput) => {
   const { rkey, authorDid, ...updateFields } = input;
 
-  return await db
-    .update(schema.CommentVote)
-    .set(updateFields)
-    .where(
-      and(
-        eq(schema.CommentVote.rkey, rkey),
-        eq(schema.CommentVote.authorDid, authorDid),
-      ),
-    );
+  // If we're updating status to "live", we need to check if it was "pending"
+  // and trigger aggregates
+  if (updateFields.status === "live") {
+    await db.transaction(async (tx) => {
+      // Get the current vote to check its status, commentId, and postId
+      const [voteWithComment] = await tx
+        .select({
+          commentId: schema.CommentVote.commentId,
+          postId: schema.Comment.postId,
+          status: schema.CommentVote.status,
+        })
+        .from(schema.CommentVote)
+        .innerJoin(
+          schema.Comment,
+          eq(schema.CommentVote.commentId, schema.Comment.id),
+        )
+        .where(
+          and(
+            eq(schema.CommentVote.rkey, rkey),
+            eq(schema.CommentVote.authorDid, authorDid),
+          ),
+        )
+        .limit(1);
+
+      if (!voteWithComment) {
+        throw new Error("Comment vote not found");
+      }
+
+      // Update the vote
+      await tx
+        .update(schema.CommentVote)
+        .set(updateFields)
+        .where(
+          and(
+            eq(schema.CommentVote.rkey, rkey),
+            eq(schema.CommentVote.authorDid, authorDid),
+          ),
+        );
+
+      // If status is changing from "pending" to "live", trigger aggregates
+      if (voteWithComment.status === "pending") {
+        await newCommentVoteAggregateTrigger(
+          voteWithComment.postId,
+          voteWithComment.commentId,
+          tx,
+        );
+      }
+    });
+  } else {
+    // No status change to "live", just update normally
+    return await db
+      .update(schema.CommentVote)
+      .set(updateFields)
+      .where(
+        and(
+          eq(schema.CommentVote.rkey, rkey),
+          eq(schema.CommentVote.authorDid, authorDid),
+        ),
+      );
+  }
 };
 
 // Try deleting from both tables. In reality only one will have a record.
