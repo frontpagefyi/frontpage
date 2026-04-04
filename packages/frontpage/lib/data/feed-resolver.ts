@@ -167,14 +167,7 @@ async function getExternalSkeleton(
 }
 
 async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
-  const generatorDid = await getDidFromHandleOrDid(feedUri.host);
-  invariant(generatorDid, `Could not resolve DID for ${feedUri.host}`);
-  const generatorPdsUrl = await getPdsUrl(generatorDid);
-  invariant(
-    generatorPdsUrl,
-    `Could not resolve PDS URL for DID ${generatorDid}`,
-  );
-  const client = getAtprotoClient(generatorPdsUrl);
+  const client = getAtprotoClient();
 
   const result = await client.com.atproto.repo.getRecord({
     repo: feedUri.host,
@@ -185,13 +178,15 @@ async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
   const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
   invariant(validated.success, "Invalid generator record");
 
-  return validated.value;
+  return { did: validated.value.did };
 }
 
 async function resolveServiceEndpoint(did: DID): Promise<string> {
   const didDoc = await getDidDoc(did);
   const service = didDoc.service?.find(
-    (serviceEntry) => serviceEntry.type === "FrontpageFeedGenerator",
+    (serviceEntry) =>
+      serviceEntry.type === "FrontpageFeedGenerator" ||
+      serviceEntry.type === "BskyFeedGenerator",
   );
 
   invariant(
