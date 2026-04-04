@@ -23,7 +23,7 @@ export async function getMoreFeedPostsAction(
     throw new Error(result.error.message);
   }
 
-  const { posts, cursor: nextCursor } = result;
+  const { posts, cursor: nextCursor } = result.data;
 
   return {
     content: (

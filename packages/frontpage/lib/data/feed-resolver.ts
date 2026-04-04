@@ -1,11 +1,15 @@
 import "server-only";
 
 import type { AtUri } from "@atproto/syntax";
-import { getDidDoc, parseDid, type DID } from "@/lib/data/atproto/did";
+import {
+  getDidDoc,
+  getPdsUrl,
+  parseDid,
+  type DID,
+} from "@/lib/data/atproto/did";
 import { getLocalFeedSkeleton } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/post";
 import { assertPublicHostname } from "@/lib/data/ssrf";
-import { invariant } from "@/lib/utils";
 import {
   FyiFrontpageFeedGenerator,
   type FyiFrontpageFeedGetFeedSkeleton,
@@ -15,6 +19,7 @@ import { FEED_REGISTRY, type FeedSlug } from "@/lib/feed-constants";
 import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import { publicConfig } from "../config/public-config";
 import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
+import { getDidFromHandleOrDid } from "./atproto/identity";
 
 export type FeedError =
   | { code: "InvalidCollection"; message: string }
@@ -22,13 +27,17 @@ export type FeedError =
   | { code: "ExternalError"; message: string }
   | { code: "InvalidResponse"; message: string };
 
-export type FeedSkeletonResult =
-  | { ok: true; data: FyiFrontpageFeedGetFeedSkeleton.OutputSchema }
-  | { ok: false; error: FeedError };
+type Result<T, E> = { ok: true; data: T } | { ok: false; error: E };
 
-export type FeedResult =
-  | { ok: true; posts: HydratedPost[]; cursor?: string }
-  | { ok: false; error: FeedError };
+export type FeedSkeletonResult = Result<
+  FyiFrontpageFeedGetFeedSkeleton.OutputSchema,
+  FeedError
+>;
+
+export type FeedResult = Result<
+  { posts: HydratedPost[]; cursor?: string },
+  FeedError
+>;
 
 // Internal page size for server action callers. The XRPC route uses its own
 // DEFAULT_SKELETON_LIMIT and always passes an explicit limit, so this default
@@ -43,7 +52,7 @@ export async function getFeed(
 
   const posts = await hydratePosts(skeletonResult.data.feed.map((s) => s.post));
 
-  return { ok: true, posts, cursor: skeletonResult.data.cursor };
+  return { ok: true, data: { posts, cursor: skeletonResult.data.cursor } };
 }
 
 async function getFeedSkeleton(
@@ -105,18 +114,17 @@ async function getExternalSkeleton(
   cursor: string | undefined,
   limit: number,
 ): Promise<FeedSkeletonResult> {
-  const generatorRecord = await fetchGeneratorRecord(feedUri);
-  const serviceDid = parseDid(generatorRecord.did);
-  invariant(
-    serviceDid,
-    `Generator record contains invalid DID: ${generatorRecord.did}`,
-  );
-
-  const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
+  const generatorResult = await resolveFeed(feedUri);
+  if (!generatorResult.ok) {
+    return {
+      ok: false,
+      error: generatorResult.error,
+    };
+  }
 
   const url = new URL(
     `/xrpc/${nsids.FyiFrontpageFeedGetFeedSkeleton}`,
-    serviceEndpoint,
+    generatorResult.data.service,
   );
   url.searchParams.set("feed", feedUri.toString());
   url.searchParams.set("limit", String(limit));
@@ -160,8 +168,30 @@ async function getExternalSkeleton(
   };
 }
 
-async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
-  const client = getAtprotoClient();
+async function resolveFeed(
+  feedUri: AtUri,
+): Promise<Result<{ serviceDid: DID; service: string }, FeedError>> {
+  const generatorDid = await getDidFromHandleOrDid(feedUri.host);
+  if (!generatorDid) {
+    return {
+      ok: false,
+      error: {
+        code: "UnknownFeed",
+        message: `Could not resolve DID for feed generator ${feedUri.host}`,
+      },
+    };
+  }
+  const generatorPdsUrl = await getPdsUrl(generatorDid);
+  if (!generatorPdsUrl) {
+    return {
+      ok: false,
+      error: {
+        code: "UnknownFeed",
+        message: `Could not find PDS for feed generator DID ${generatorDid}`,
+      },
+    };
+  }
+  const client = getAtprotoClient(generatorPdsUrl);
 
   const result = await client.com.atproto.repo.getRecord({
     repo: feedUri.host,
@@ -170,31 +200,86 @@ async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
   });
 
   const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
-  invariant(validated.success, "Invalid generator record");
+  if (!validated.success) {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `Feed generator record failed validation: ${validated.error.message}`,
+      },
+    };
+  }
 
-  return { did: validated.value.did };
+  const serviceDid = parseDid(validated.value.did);
+  if (!serviceDid) {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `Feed generator record contains invalid DID: ${validated.value.did}`,
+      },
+    };
+  }
+  const serviceDidDoc = await getDidDoc(serviceDid);
+  const service = serviceDidDoc.service?.find(
+    (s) => s.type === "FrontpageFeedGenerator",
+  );
+  if (!service || typeof service.serviceEndpoint !== "string") {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `No FrontpageFeedGenerator service found in DID document for ${validated.value.did}`,
+      },
+    };
+  }
+
+  const serviceUrl = safeParseUrl(service.serviceEndpoint);
+  if (!serviceUrl) {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `Invalid serviceEndpoint URL in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
+      },
+    };
+  }
+
+  if (serviceUrl.protocol !== "https:") {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `Service endpoint must use HTTPS in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
+      },
+    };
+  }
+
+  try {
+    assertPublicHostname(serviceUrl.hostname);
+  } catch (_) {
+    return {
+      ok: false,
+      error: {
+        code: "InvalidResponse",
+        message: `Service endpoint hostname is not allowed in DID document for ${validated.value.did}: ${serviceUrl.hostname}`,
+      },
+    };
+  }
+
+  return {
+    ok: true,
+    data: {
+      serviceDid,
+      service: service.serviceEndpoint,
+    },
+  };
 }
 
-async function resolveServiceEndpoint(did: DID): Promise<string> {
-  const didDoc = await getDidDoc(did);
-  const service = didDoc.service?.find(
-    (serviceEntry) =>
-      serviceEntry.type === "FrontpageFeedGenerator" ||
-      serviceEntry.type === "BskyFeedGenerator",
-  );
-
-  invariant(
-    service && typeof service.serviceEndpoint === "string",
-    `No feed generator service found in DID document for ${did}`,
-  );
-
-  const url = new URL(service.serviceEndpoint);
-  invariant(
-    url.protocol === "https:",
-    "Feed generator endpoint must use HTTPS",
-  );
-
-  assertPublicHostname(url.hostname);
-
-  return service.serviceEndpoint;
+function safeParseUrl(input: string): URL | null {
+  try {
+    return new URL(input);
+  } catch {
+    return null;
+  }
 }
