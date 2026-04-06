@@ -20,6 +20,7 @@ import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
 import { publicConfig } from "../config/public-config";
 import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
 import { getDidFromHandleOrDid } from "./atproto/identity";
+import { cache } from "react";
 
 export type FeedError =
   | { code: "InvalidCollection"; message: string }
@@ -168,113 +169,124 @@ async function getExternalSkeleton(
   };
 }
 
-async function resolveFeed(
-  feedUri: AtUri,
-): Promise<Result<{ serviceDid: DID; service: string }, FeedError>> {
-  const generatorDid = await getDidFromHandleOrDid(feedUri.host);
-  if (!generatorDid) {
-    return {
-      ok: false,
-      error: {
-        code: "UnknownFeed",
-        message: `Could not resolve DID for feed generator ${feedUri.host}`,
-      },
-    };
-  }
-  const generatorPdsUrl = await getPdsUrl(generatorDid);
-  if (!generatorPdsUrl) {
-    return {
-      ok: false,
-      error: {
-        code: "UnknownFeed",
-        message: `Could not find PDS for feed generator DID ${generatorDid}`,
-      },
-    };
-  }
-  const client = getAtprotoClient(generatorPdsUrl);
+type FeedResolution = {
+  serviceDid: DID;
+  service: string;
+  displayName: string;
+  description?: string;
+};
 
-  const result = await client.com.atproto.repo.getRecord({
-    repo: feedUri.host,
-    collection: feedUri.collection,
-    rkey: feedUri.rkey,
-  });
+export const resolveFeed = cache(
+  async (feedUri: AtUri): Promise<Result<FeedResolution, FeedError>> => {
+    const generatorDid = await getDidFromHandleOrDid(feedUri.host);
+    if (!generatorDid) {
+      return {
+        ok: false,
+        error: {
+          code: "UnknownFeed",
+          message: `Could not resolve DID for feed generator ${feedUri.host}`,
+        },
+      };
+    }
+    const generatorPdsUrl = await getPdsUrl(generatorDid);
+    if (!generatorPdsUrl) {
+      return {
+        ok: false,
+        error: {
+          code: "UnknownFeed",
+          message: `Could not find PDS for feed generator DID ${generatorDid}`,
+        },
+      };
+    }
+    const client = getAtprotoClient(generatorPdsUrl);
 
-  const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
-  if (!validated.success) {
+    const result = await client.com.atproto.repo.getRecord({
+      repo: feedUri.host,
+      collection: feedUri.collection,
+      rkey: feedUri.rkey,
+    });
+
+    const validated = FyiFrontpageFeedGenerator.validateRecord(
+      result.data.value,
+    );
+    if (!validated.success) {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `Feed generator record failed validation: ${validated.error.message}`,
+        },
+      };
+    }
+
+    const serviceDid = parseDid(validated.value.did);
+    if (!serviceDid) {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `Feed generator record contains invalid DID: ${validated.value.did}`,
+        },
+      };
+    }
+    const serviceDidDoc = await getDidDoc(serviceDid);
+    const service = serviceDidDoc.service?.find(
+      (s) => s.type === "FrontpageFeedGenerator",
+    );
+    if (!service || typeof service.serviceEndpoint !== "string") {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `No FrontpageFeedGenerator service found in DID document for ${validated.value.did}`,
+        },
+      };
+    }
+
+    const serviceUrl = safeParseUrl(service.serviceEndpoint);
+    if (!serviceUrl) {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `Invalid serviceEndpoint URL in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
+        },
+      };
+    }
+
+    if (serviceUrl.protocol !== "https:") {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `Service endpoint must use HTTPS in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
+        },
+      };
+    }
+
+    try {
+      assertPublicHostname(serviceUrl.hostname);
+    } catch (_) {
+      return {
+        ok: false,
+        error: {
+          code: "InvalidResponse",
+          message: `Service endpoint hostname is not allowed in DID document for ${validated.value.did}: ${serviceUrl.hostname}`,
+        },
+      };
+    }
+
     return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `Feed generator record failed validation: ${validated.error.message}`,
+      ok: true,
+      data: {
+        serviceDid,
+        service: service.serviceEndpoint,
+        displayName: validated.value.displayName,
+        description: validated.value.description,
       },
     };
-  }
-
-  const serviceDid = parseDid(validated.value.did);
-  if (!serviceDid) {
-    return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `Feed generator record contains invalid DID: ${validated.value.did}`,
-      },
-    };
-  }
-  const serviceDidDoc = await getDidDoc(serviceDid);
-  const service = serviceDidDoc.service?.find(
-    (s) => s.type === "FrontpageFeedGenerator",
-  );
-  if (!service || typeof service.serviceEndpoint !== "string") {
-    return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `No FrontpageFeedGenerator service found in DID document for ${validated.value.did}`,
-      },
-    };
-  }
-
-  const serviceUrl = safeParseUrl(service.serviceEndpoint);
-  if (!serviceUrl) {
-    return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `Invalid serviceEndpoint URL in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
-      },
-    };
-  }
-
-  if (serviceUrl.protocol !== "https:") {
-    return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `Service endpoint must use HTTPS in DID document for ${validated.value.did}: ${service.serviceEndpoint}`,
-      },
-    };
-  }
-
-  try {
-    assertPublicHostname(serviceUrl.hostname);
-  } catch (_) {
-    return {
-      ok: false,
-      error: {
-        code: "InvalidResponse",
-        message: `Service endpoint hostname is not allowed in DID document for ${validated.value.did}: ${serviceUrl.hostname}`,
-      },
-    };
-  }
-
-  return {
-    ok: true,
-    data: {
-      serviceDid,
-      service: service.serviceEndpoint,
-    },
-  };
-}
+  },
+);
 
 function safeParseUrl(input: string): URL | null {
   try {
