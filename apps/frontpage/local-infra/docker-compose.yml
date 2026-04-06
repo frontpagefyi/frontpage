@@ -60,7 +60,7 @@ services:
   drainpipe:
     container_name: drainpipe
     build:
-      dockerfile: ./packages-rs/drainpipe/Dockerfile
+      dockerfile: ./apps/drainpipe/Dockerfile
       context: ../../../
     environment:
       FRONTPAGE_CONSUMER_URL: http://host.docker.internal:3000/api/receive_hook

@@ -12,7 +12,7 @@ This makes the data architecture and flow more complex.
 
 ### API Layer
 
-Code for this layer is in `packages/frontpage/lib/api`. This layer is responsible for handling incoming API requests, validating input, and orchestrating calls to the underlying data layers (DB and Atproto).
+Code for this layer is in `apps/frontpage/lib/api`. This layer is responsible for handling incoming API requests, validating input, and orchestrating calls to the underlying data layers (DB and Atproto).
 
 This layer is essentially the public API of the Frontpage app, although in reality we don't expose this API directly right now - we just call these functions from within our Next.js server-side code. In the future we will likely expose this API via [XRPC](https://atproto.com/specs/xrpc) so that other apps can interact with Frontpage programmatically.
 
@@ -22,17 +22,17 @@ As this layer is designed to speak XRPC, it uses AT protocol types and concepts 
 
 ### DB Layer
 
-Code for this layer is in `packages/frontpage/lib/data/db`. This layer is responsible for interacting with the Frontpage database. It's structured like a traditional database access layer, with functions for creating, reading, updating, and deleting records in the database.
+Code for this layer is in `apps/frontpage/lib/data/db`. This layer is responsible for interacting with the Frontpage database. It's structured like a traditional database access layer, with functions for creating, reading, updating, and deleting records in the database.
 
 ### Atproto Layer
 
-Code for this layer is in `packages/frontpage/lib/data/atproto`. This layer is responsible for interacting with the PDS directly (CRUD operations on AT protocol records). It uses the AT protocol client to perform these operations.
+Code for this layer is in `apps/frontpage/lib/data/atproto`. This layer is responsible for interacting with the PDS directly (CRUD operations on AT protocol records). It uses the AT protocol client to perform these operations.
 
 Implementation is handled almost entirely by the `@repo/frontpage-atproto-client` package (contained in this repo) which is a generated client based on the AT protocol schemas in `lexicons/`.
 
 ### Indexing Layer
 
-Code for this layer is in `packages/frontpage/app/api/receive_hook`. This layer is responsible for receiving and processing events from AT protocol PDSes when users create or update records. It processes these events and updates the Frontpage database accordingly.
+Code for this layer is in `apps/frontpage/app/api/receive_hook`. This layer is responsible for receiving and processing events from AT protocol PDSes when users create or update records. It processes these events and updates the Frontpage database accordingly.
 
 This layer is crucial for keeping the Frontpage app's data in sync with the AT protocol network as it's always possible for users to update their data directly on their PDS or via another app without going through Frontpage.
 

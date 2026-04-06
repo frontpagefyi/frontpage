@@ -12,7 +12,7 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 - ATProto [PLC server](https://github.com/did-method-plc/did-method-plc) (http://localhost:4000 & https://plc.dev.unravel.fyi)
 - ATProto [PDS](https://github.com/bluesky-social/pds) (http://localhost:4001 & https://pds.dev.unravel.fyi)
 - Jetstream (transforms the event stream from the PDS to JSON)
-- [Drainpipe](../../../packages-rs/drainpipe/README.md) (pushes data from the Jetstream to the Frontpage Next.js app)
+- [Drainpipe](../../../apps/drainpipe/README.md) (pushes data from the Jetstream to the Frontpage Next.js app)
 - Turso sqlite server (http://localhost:4002 && https://turso.dev.unravel.fyi)
 - [Caddy](https://caddyserver.com/) reverse proxy (it provides the above services over HTTPS)
 - [`cloudflared`](https://developers.cloudflare.com/cloudflare-one/connections/connect-networks/do-more-with-tunnels/trycloudflare/) (a public https tunnel to the local Frontpage Next.js app)
@@ -25,7 +25,7 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 - Install the Unravel CA root certificate in your system's trust store. You can find it in the `frontpage-local-infra_caddy_data` volume at `/pki/authorities/unravel/root.crt` in your docker container volumes section.
   - Depending on your browser you may have to import the certificate into your browser profiles too as some have their own certs do not use your system ones
 - Create a test account with `./scripts/create-test-account.sh <username>` (username=bob will create a user with handle bob.pds.unravel.dev.fyi)
-- Run `pnpm --filter=frontpage run generate-local-env` and update the `packages/frontpage/.env.local` file with the generated values.
+- Run `pnpm --filter=frontpage run generate-local-env` and update the `apps/frontpage/.env.local` file with the generated values.
 - Run `pnpm turbo dev` in the frontpage package folder
 - Run `pnpm run db:migrate` in the frontpage package folder
 - Grab the auto generated `cloudflared` tunnel URL from the logs of the `cloudflared` container, use this to access the Frontpage dev server
@@ -38,7 +38,7 @@ Docker compose file that runs the required peices of infrastructure for frontpag
 
 ### Using atproto-browser
 
-You can run a local instance of atproto-browser using this infrastructure. Create `packages/atproto-browser/local.env` and add the following:
+You can run a local instance of atproto-browser using this infrastructure. Create `apps/atproto-browser/local.env` and add the following:
 
 ```env
 PLC_URL=http://localhost:4000
@@ -49,7 +49,7 @@ Then when you `pnpm turbo dev --filter=atproto-browser` it will use the local PL
 
 ## Troubleshooting
 
-### `docker-compose up` fails with `failed to solve: error from sender: open ~/unravel/packages/frontpage/local-infra/plc/db: permission denied`
+### `docker-compose up` fails with `failed to solve: error from sender: open ~/unravel/apps/frontpage/local-infra/plc/db: permission denied`
 
 Delete the ./plc directory and try again.
 

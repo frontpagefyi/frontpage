@@ -93,11 +93,11 @@ jobs:
         uses: ataylorme/eslint-annotate-action@d57a1193d4c59cbfbf3f86c271f42612f9dbd9e9 # v3.0.0
         with:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          report-json: "packages/**/eslint_report.json"
+          report-json: "{apps,packages}/**/eslint_report.json"
 
       - name: Print ESLint Report and Fail if Linting Failed
         if: steps.lint.outcome == 'failure'
-        run: node ./packages/eslint-config/pretty-print-report.ts packages/**/eslint_report.json; exit 1
+        run: node ./packages/eslint-config/pretty-print-report.ts {apps,packages}/**/eslint_report.json; exit 1
 
   typecheck:
     runs-on: ubuntu-latest

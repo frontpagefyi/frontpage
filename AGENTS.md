@@ -4,10 +4,10 @@ Federated link aggregator built on AT Protocol (like Reddit/HN, but decentralize
 
 ## Monorepo Structure
 
-- **pnpm workspaces** (`packages/`) + **Cargo workspace** (`packages-rs/`)
+- **pnpm workspaces** (`apps/`, `packages/`) + **Cargo workspace** (`apps/`, `packages/`)
 - **Turbo** for task orchestration
-- Main app: `packages/frontpage` (Next.js, App Router)
-- Rust services: `packages-rs/` (drainpipe data pipeline, jetstream client)
+- Main app: `apps/frontpage` (Next.js, App Router)
+- Rust services: `apps/drainpipe`, `apps/drainpipe-cli` (data pipeline); shared crates in `packages/`
 
 ## Key Tech
 
@@ -37,7 +37,7 @@ pnpm turbo lint           # Lint
 pnpm turbo test           # Run tests
 pnpm turbo type-check     # Type check
 
-# In packages/frontpage:
+# In apps/frontpage:
 pnpm db:generate          # Generate Drizzle migrations
 pnpm db:generate --custom --name=<name>  # Create empty migration for custom SQL
 pnpm db:migrate           # Run migrations
@@ -50,7 +50,7 @@ Run these before committing — CI will catch failures but it's faster to catch 
 
 ```bash
 pnpm turbo lint type-check    # Lint + type errors
-pnpm prettier --check "packages/frontpage/**/*.{ts,tsx}"  # Formatting
+pnpm prettier --check .  # Formatting
 pnpm turbo build              # Full build (catches runtime config issues)
 ```
 
@@ -59,7 +59,7 @@ pnpm turbo build              # Full build (catches runtime config issues)
 - Vitest with jsdom environment
 - Test files colocated next to source: `foo.test.tsx`
 - Use `@testing-library/react` for component tests
-- Run single package tests: `cd packages/frontpage && pnpm test`
+- Run single package tests: `cd apps/frontpage && pnpm test`
 
 ## Next.js Conventions
 
@@ -78,7 +78,7 @@ pnpm turbo build              # Full build (catches runtime config issues)
 - `NODE_OPTIONS=--use-openssl-ca` is required for most commands (already baked into scripts). Set it manually if running Node commands outside package scripts.
 - `typescript.ignoreBuildErrors: true` in Next.js config — type errors won't fail builds
 - Secrets managed via 1Password (`dev-1pw` / `build-1pw` scripts)
-- Local dev infra setup: see `packages/frontpage/local-infra/README.md`
+- Local dev infra setup: see `apps/frontpage/local-infra/README.md`
 - Node v24+ runs TypeScript natively — use `node script.ts` not `npx tsx`
 - `next.config.mjs` has `cacheComponents: false` (implicit) — `dynamic = "force-static"` in existing routes is incompatible with `cacheComponents: true`. Enable only after migrating those routes.
 - If `pnpm install` fails with `ENOTFOUND npm.jsr.io`, it's a DNS issue — confirm network can reach `npm.jsr.io`

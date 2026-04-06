@@ -1,20 +1,22 @@
 atproto-browser:
   - changed-files:
-      - any-glob-to-any-file: packages/atproto-browser/**
+      - any-glob-to-any-file: apps/atproto-browser/**
 
 frontpage:
   - changed-files:
-      - any-glob-to-any-file: packages/frontpage/**
+      - any-glob-to-any-file: apps/frontpage/**
 
 drainpipe:
   - changed-files:
-      - any-glob-to-any-file: packages-rs/**
+      - any-glob-to-any-file:
+          - "{apps,packages}/drainpipe*/**"
+          - packages/jetstream/**
 
 infra:
   - changed-files:
       - any-glob-to-any-file:
           - .github/**
-          - packages/frontpage/local-infra/**
+          - apps/frontpage/local-infra/**
 
 documentation:
   - changed-files:

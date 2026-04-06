@@ -8,10 +8,10 @@ anyhow = "1.0.93"
 atrium-api = "0.24.7"
 chrono = "0.4.38"
 dotenv-flow = "0.16.2"
-drainpipe-store = { path = "../drainpipe-store" }
+drainpipe-store = { path = "../../packages/drainpipe-store" }
 env_logger = "0.11.5"
 futures-util = "0.3"
-jetstream = { path = "../jetstream" }
+jetstream = { path = "../../packages/jetstream" }
 log = "0.4.22"
 metrics-exporter-prometheus = { version = "0.17.2", features = [
   "http-listener",

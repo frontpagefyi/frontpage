@@ -1,8 +1,8 @@
 [workspace]
 members = [
-  "packages-rs/drainpipe",
-  "packages-rs/drainpipe-cli",
-  "packages-rs/drainpipe-store",
-  "packages-rs/jetstream",
+  "apps/drainpipe",
+  "apps/drainpipe-cli",
+  "packages/drainpipe-store",
+  "packages/jetstream",
 ]
 resolver = "2"

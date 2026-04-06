@@ -9,13 +9,13 @@ Drainpipe is a atproto [firehose](https://docs.bsky.app/docs/advanced-guides/fir
 From the root of the monorepo
 
 ```
-docker build -f ./packages-rs/drainpipe/Dockerfile .
+docker build -f ./apps/drainpipe/Dockerfile .
 ```
 
 ## Deploying to fly.io
 
 ```
-fly deploy . -c ./packages-rs/drainpipe/fly.toml --dockerfile ./packages-rs/drainpipe/Dockerfile
+fly deploy . -c ./apps/drainpipe/fly.toml --dockerfile ./apps/drainpipe/Dockerfile
 ```
 
 ## Fiddling and debugging with the cursor locally

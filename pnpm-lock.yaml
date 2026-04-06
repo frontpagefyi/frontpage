@@ -90,7 +90,7 @@ importers:
         specifier: 'catalog:'
         version: 5.9.3
 
-  packages/atproto-browser:
+  apps/atproto-browser:
     dependencies:
       '@atproto/api':
         specifier: 'catalog:'
@@ -155,10 +155,10 @@ importers:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../../packages/eslint-config
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../typescript-config
+        version: link:../../packages/typescript-config
       '@types/http-link-header':
         specifier: ^1.0.7
         version: 1.0.7
@@ -184,61 +184,7 @@ importers:
         specifier: 'catalog:'
         version: 4.0.8(@types/node@24.10.4)(jiti@2.6.1)(jsdom@24.1.3(bufferutil@4.0.8)(utf-8-validate@6.0.3))(lightningcss@1.30.2)(terser@5.34.1)(yaml@2.8.0)
 
-  packages/eslint-config:
-    devDependencies:
-      '@eslint/eslintrc':
-        specifier: ^3.3.1
-        version: 3.3.1
-      '@eslint/js':
-        specifier: ^9.31.0
-        version: 9.39.2
-      '@next/eslint-plugin-next':
-        specifier: 'catalog:'
-        version: 16.2.2
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/eslint-plugin-jsx-a11y':
-        specifier: ^6.10.0
-        version: 6.10.0
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.4
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.13
-      '@typescript-eslint/utils':
-        specifier: ^8.37.0
-        version: 8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
-      eslint-config-next:
-        specifier: 'catalog:'
-        version: 16.2.2(@typescript-eslint/parser@8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-      eslint-config-turbo:
-        specifier: ^2.5.4
-        version: 2.5.4(eslint@9.39.2(jiti@2.6.1))(turbo@2.7.2)
-      eslint-plugin-jsx-a11y:
-        specifier: ^6.10.2
-        version: 6.10.2(eslint@9.39.2(jiti@2.6.1))
-      eslint-plugin-react:
-        specifier: ^7.37.5
-        version: 7.37.5(eslint@9.39.2(jiti@2.6.1))
-      eslint-plugin-react-hooks:
-        specifier: ^6.0.0
-        version: 6.1.1(eslint@9.39.2(jiti@2.6.1))
-      react:
-        specifier: 'catalog:'
-        version: 19.2.3
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-      typescript-eslint:
-        specifier: ^8.37.0
-        version: 8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
-
-  packages/frontpage:
+  apps/frontpage:
     dependencies:
       '@atcute/identity':
         specifier: 'catalog:'
@@ -272,10 +218,10 @@ importers:
         version: 1.3.2(react@19.2.3)
       '@repo/frontpage-atproto-client':
         specifier: workspace:*
-        version: link:../frontpage-atproto-client
+        version: link:../../packages/frontpage-atproto-client
       '@repo/frontpage-oauth':
         specifier: workspace:*
-        version: link:../frontpage-oauth
+        version: link:../../packages/frontpage-oauth
       '@vercel/analytics':
         specifier: ^1.5.0
         version: 1.5.0(next@16.2.2(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3))(react@19.2.3)
@@ -348,10 +294,10 @@ importers:
     devDependencies:
       '@repo/eslint-config':
         specifier: workspace:*
-        version: link:../eslint-config
+        version: link:../../packages/eslint-config
       '@repo/typescript-config':
         specifier: workspace:*
-        version: link:../typescript-config
+        version: link:../../packages/typescript-config
       '@tailwindcss/postcss':
         specifier: ^4.1.18
         version: 4.1.18
@@ -407,6 +353,100 @@ importers:
         specifier: 'catalog:'
         version: 4.0.8(@types/node@24.10.4)(jiti@2.6.1)(jsdom@24.1.3(bufferutil@4.0.8)(utf-8-validate@6.0.3))(lightningcss@1.30.2)(terser@5.34.1)(yaml@2.8.0)
 
+  apps/frontpage-oauth-preview-client:
+    dependencies:
+      '@repo/frontpage-oauth':
+        specifier: workspace:*
+        version: link:../../packages/frontpage-oauth
+      '@vercel/sdk':
+        specifier: ^1.10.0
+        version: 1.10.0(zod@3.25.76)
+      next:
+        specifier: 'catalog:'
+        version: 16.2.2(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
+      react:
+        specifier: 'catalog:'
+        version: 19.2.3
+      react-dom:
+        specifier: 'catalog:'
+        version: 19.2.3(react@19.2.3)
+    devDependencies:
+      '@repo/eslint-config':
+        specifier: workspace:*
+        version: link:../../packages/eslint-config
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../../packages/typescript-config
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.13
+      '@types/react-dom':
+        specifier: 'catalog:'
+        version: 19.2.3(@types/react@19.2.13)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+
+  packages/eslint-config:
+    devDependencies:
+      '@eslint/eslintrc':
+        specifier: ^3.3.1
+        version: 3.3.1
+      '@eslint/js':
+        specifier: ^9.31.0
+        version: 9.39.2
+      '@next/eslint-plugin-next':
+        specifier: 'catalog:'
+        version: 16.2.2
+      '@repo/typescript-config':
+        specifier: workspace:*
+        version: link:../typescript-config
+      '@types/eslint-plugin-jsx-a11y':
+        specifier: ^6.10.0
+        version: 6.10.0
+      '@types/node':
+        specifier: 'catalog:'
+        version: 24.10.4
+      '@types/react':
+        specifier: 'catalog:'
+        version: 19.2.13
+      '@typescript-eslint/utils':
+        specifier: ^8.37.0
+        version: 8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint:
+        specifier: 'catalog:'
+        version: 9.39.2(jiti@2.6.1)
+      eslint-config-next:
+        specifier: 'catalog:'
+        version: 16.2.2(@typescript-eslint/parser@8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3))(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+      eslint-config-turbo:
+        specifier: ^2.5.4
+        version: 2.5.4(eslint@9.39.2(jiti@2.6.1))(turbo@2.7.2)
+      eslint-plugin-jsx-a11y:
+        specifier: ^6.10.2
+        version: 6.10.2(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-react:
+        specifier: ^7.37.5
+        version: 7.37.5(eslint@9.39.2(jiti@2.6.1))
+      eslint-plugin-react-hooks:
+        specifier: ^6.0.0
+        version: 6.1.1(eslint@9.39.2(jiti@2.6.1))
+      react:
+        specifier: 'catalog:'
+        version: 19.2.3
+      typescript:
+        specifier: 'catalog:'
+        version: 5.9.3
+      typescript-eslint:
+        specifier: ^8.37.0
+        version: 8.46.2(eslint@9.39.2(jiti@2.6.1))(typescript@5.9.3)
+
   packages/frontpage-atproto-client:
     dependencies:
       '@atproto/lexicon':
@@ -450,46 +490,6 @@ importers:
       '@repo/typescript-config':
         specifier: workspace:*
         version: link:../typescript-config
-      eslint:
-        specifier: 'catalog:'
-        version: 9.39.2(jiti@2.6.1)
-      typescript:
-        specifier: 'catalog:'
-        version: 5.9.3
-
-  packages/frontpage-oauth-preview-client:
-    dependencies:
-      '@repo/frontpage-oauth':
-        specifier: workspace:*
-        version: link:../frontpage-oauth
-      '@vercel/sdk':
-        specifier: ^1.10.0
-        version: 1.10.0(zod@3.25.76)
-      next:
-        specifier: 'catalog:'
-        version: 16.2.2(@babel/core@7.28.4)(@opentelemetry/api@1.9.0)(babel-plugin-react-compiler@1.0.0)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
-      react:
-        specifier: 'catalog:'
-        version: 19.2.3
-      react-dom:
-        specifier: 'catalog:'
-        version: 19.2.3(react@19.2.3)
-    devDependencies:
-      '@repo/eslint-config':
-        specifier: workspace:*
-        version: link:../eslint-config
-      '@repo/typescript-config':
-        specifier: workspace:*
-        version: link:../typescript-config
-      '@types/node':
-        specifier: 'catalog:'
-        version: 24.10.4
-      '@types/react':
-        specifier: 'catalog:'
-        version: 19.2.13
-      '@types/react-dom':
-        specifier: 'catalog:'
-        version: 19.2.3(@types/react@19.2.13)
       eslint:
         specifier: 'catalog:'
         version: 9.39.2(jiti@2.6.1)

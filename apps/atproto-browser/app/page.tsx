@@ -66,7 +66,7 @@ export default function Home() {
             @tom.frontpage.team
           </Link>
           .{" "}
-          <a href="https://github.com/likeandscribe/frontpage/tree/main/packages/atproto-browser">
+          <a href="https://github.com/likeandscribe/frontpage/tree/main/apps/atproto-browser">
             Source code
           </a>
         </p>
