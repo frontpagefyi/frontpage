@@ -1,0 +1,2418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Frontpage — Design Explorations</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Sans+3:wght@400;500;600;700&family=Source+Serif+4:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="tokens.css">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <style>
+    body {
+      background: var(--bg-base);
+    }
+
+    /* Style tabs */
+    .style-tabs {
+      display: flex;
+      gap: 0;
+      justify-content: center;
+      padding: 24px 24px 0;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      background: var(--bg-base);
+      flex-wrap: wrap;
+    }
+    .style-tab {
+      padding: 10px 20px;
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-bottom: 2px solid transparent;
+      transition: all 0.15s ease;
+      font-family: var(--font-sans);
+      background: none;
+      border-top: none;
+      border-left: none;
+      border-right: none;
+    }
+    .style-tab:hover { color: var(--text-secondary); }
+    .style-tab.active {
+      color: var(--accent-secondary);
+      border-bottom-color: var(--accent-secondary);
+    }
+
+    .style-view { display: none; }
+    .style-view.active { display: block; }
+
+    /* Style description */
+    .style-header {
+      max-width: 800px;
+      margin: 32px auto 24px;
+      padding: 0 24px;
+    }
+    .style-name {
+      font-size: 32px;
+      font-weight: 700;
+      margin-bottom: 8px;
+    }
+    .style-desc {
+      font-size: 15px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+    .style-inspo {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 8px;
+    }
+
+    /* Mockup frame */
+    .explore-frame {
+      max-width: 1200px;
+      margin: 0 auto 48px;
+      border-radius: 12px;
+      overflow: hidden;
+      box-shadow: 0 8px 48px oklch(0% 0 0 / 0.4);
+      border: 1px solid var(--bg-elevated);
+    }
+
+    /* Badge reuse */
+    .badge {
+      display: inline-flex;
+      align-items: center;
+      gap: 3px;
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 0.3px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      text-transform: uppercase;
+      white-space: nowrap;
+    }
+    .badge-artist {
+      background: linear-gradient(135deg, oklch(75% 0.18 75), oklch(70% 0.2 55));
+      color: #1a1000;
+    }
+    .badge-og {
+      background: linear-gradient(135deg, var(--indigo-500), var(--indigo-600));
+      color: white;
+    }
+
+    /* ===========================
+       STYLE 1: MASONRY / WATERFALL
+       =========================== */
+    .masonry-wrap {
+      background: var(--bg-base);
+      padding: 16px;
+    }
+    .masonry-nav {
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      padding: 16px 20px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--bg-elevated);
+    }
+    .masonry-nav-logo {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 18px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .masonry-filters {
+      display: flex;
+      gap: 8px;
+      margin-left: auto;
+    }
+    .masonry-filter {
+      padding: 6px 14px;
+      font-size: 12px;
+      font-weight: 600;
+      border-radius: var(--radius-full);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+      border: none;
+      cursor: pointer;
+    }
+    .masonry-filter.active { background: var(--accent-secondary); color: white; }
+    .masonry-grid {
+      columns: 3;
+      column-gap: 16px;
+      padding: 20px;
+    }
+    .masonry-card {
+      break-inside: avoid;
+      background: var(--bg-surface);
+      border-radius: var(--radius-lg);
+      margin-bottom: 16px;
+      overflow: hidden;
+      border: 1px solid var(--bg-elevated);
+      transition: transform 0.15s ease, box-shadow 0.15s ease;
+    }
+    .masonry-card:hover {
+      transform: translateY(-3px);
+      box-shadow: 0 8px 24px oklch(0% 0 0 / 0.3);
+    }
+    .masonry-card img { width: 100%; display: block; }
+    .masonry-card-body { padding: 14px; }
+    .masonry-card-title {
+      font-family: var(--font-serif);
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 6px;
+    }
+    .masonry-card-meta {
+      font-size: 12px;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .masonry-card-tags {
+      display: flex;
+      gap: 4px;
+      flex-wrap: wrap;
+      margin-top: 8px;
+    }
+    .masonry-tag {
+      font-size: 10px;
+      padding: 2px 8px;
+      border-radius: var(--radius-full);
+      background: var(--bg-elevated);
+      color: var(--text-muted);
+    }
+    .masonry-card-actions {
+      display: flex;
+      gap: 12px;
+      padding: 10px 14px;
+      border-top: 1px solid var(--bg-elevated);
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+    .masonry-card-actions span {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      cursor: pointer;
+    }
+    .masonry-card-actions span:hover { color: var(--text-secondary); }
+
+    /* ===========================
+       STYLE 2: THREADED FORUM
+       =========================== */
+    .forum-wrap {
+      background: oklch(12% 0.02 259);
+    }
+    .forum-header {
+      background: var(--bg-surface);
+      padding: 20px 24px;
+      border-bottom: 2px solid var(--indigo-600);
+    }
+    .forum-header h2 {
+      font-size: 20px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .forum-breadcrumb {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 4px;
+    }
+    .forum-breadcrumb a { color: var(--accent-secondary); text-decoration: none; }
+    .forum-table-head {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px 140px;
+      padding: 8px 20px;
+      font-size: 11px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--text-muted);
+      background: var(--bg-elevated);
+      border-bottom: 1px solid oklch(26% 0.025 259.2);
+    }
+    .forum-thread {
+      display: grid;
+      grid-template-columns: 1fr 100px 100px 140px;
+      padding: 14px 20px;
+      border-bottom: 1px solid var(--bg-elevated);
+      align-items: center;
+      transition: background 0.1s ease;
+    }
+    .forum-thread:hover { background: oklch(16% 0.025 259.2); }
+    .forum-thread-title {
+      font-size: 15px;
+      font-weight: 600;
+      line-height: 1.3;
+      color: var(--text-primary);
+    }
+    .forum-thread-title:hover { color: var(--accent-secondary); cursor: pointer; }
+    .forum-thread-author {
+      font-size: 12px;
+      color: var(--text-muted);
+      margin-top: 3px;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .forum-thread-stat {
+      font-size: 14px;
+      color: var(--text-secondary);
+      text-align: center;
+    }
+    .forum-thread-last {
+      font-size: 12px;
+      color: var(--text-muted);
+      text-align: right;
+    }
+    .forum-sticky {
+      border-left: 3px solid var(--accent-primary);
+      background: oklch(15% 0.025 259.2);
+    }
+    .forum-sticky .forum-thread-title::before {
+      content: '📌 ';
+      font-size: 13px;
+    }
+    .forum-pagination {
+      display: flex;
+      gap: 4px;
+      justify-content: center;
+      padding: 16px;
+    }
+    .forum-pagination span {
+      padding: 6px 12px;
+      font-size: 13px;
+      border-radius: var(--radius-sm);
+      background: var(--bg-surface);
+      color: var(--text-muted);
+      cursor: pointer;
+    }
+    .forum-pagination span.active {
+      background: var(--accent-secondary);
+      color: white;
+    }
+
+    /* ===========================
+       STYLE 3: MAGAZINE / EDITORIAL
+       =========================== */
+    .mag-wrap {
+      background: oklch(11% 0.015 259);
+    }
+    .mag-nav {
+      display: flex;
+      align-items: center;
+      padding: 16px 32px;
+      background: var(--bg-surface);
+      border-bottom: 1px solid var(--bg-elevated);
+    }
+    .mag-nav-logo {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 24px;
+      letter-spacing: -0.5px;
+    }
+    .mag-nav-links {
+      display: flex;
+      gap: 24px;
+      margin-left: 48px;
+      font-size: 14px;
+      color: var(--text-muted);
+      font-weight: 500;
+    }
+    .mag-nav-links span:hover { color: var(--text-primary); cursor: pointer; }
+    .mag-hero {
+      display: grid;
+      grid-template-columns: 1.5fr 1fr;
+      gap: 2px;
+      margin: 2px 32px;
+    }
+    .mag-hero-main {
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      min-height: 380px;
+      cursor: pointer;
+    }
+    .mag-hero-main img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .mag-hero-main:hover img { transform: scale(1.03); }
+    .mag-hero-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent 30%, oklch(0% 0 0 / 0.8));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 32px;
+    }
+    .mag-hero-category {
+      font-size: 11px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: var(--accent-primary);
+      margin-bottom: 8px;
+    }
+    .mag-hero-title {
+      font-family: var(--font-serif);
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+    }
+    .mag-hero-byline {
+      font-size: 13px;
+      color: oklch(75% 0.02 259);
+    }
+    .mag-hero-side {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+    .mag-side-card {
+      flex: 1;
+      position: relative;
+      overflow: hidden;
+      border-radius: var(--radius-lg);
+      cursor: pointer;
+    }
+    .mag-side-card img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.3s ease;
+    }
+    .mag-side-card:hover img { transform: scale(1.03); }
+    .mag-side-overlay {
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(transparent 20%, oklch(0% 0 0 / 0.85));
+      display: flex;
+      flex-direction: column;
+      justify-content: flex-end;
+      padding: 20px;
+    }
+    .mag-side-title {
+      font-family: var(--font-serif);
+      font-size: 17px;
+      font-weight: 600;
+      line-height: 1.25;
+    }
+    .mag-side-meta {
+      font-size: 11px;
+      color: oklch(70% 0.02 259);
+      margin-top: 4px;
+    }
+    .mag-articles {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 24px;
+      padding: 32px;
+    }
+    .mag-article {
+      cursor: pointer;
+    }
+    .mag-article:hover .mag-article-title { color: var(--accent-secondary); }
+    .mag-article-img {
+      border-radius: var(--radius-md);
+      overflow: hidden;
+      margin-bottom: 12px;
+      aspect-ratio: 16/9;
+    }
+    .mag-article-img img {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      display: block;
+      transition: transform 0.2s ease;
+    }
+    .mag-article:hover .mag-article-img img { transform: scale(1.04); }
+    .mag-article-category {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: var(--accent-secondary);
+      margin-bottom: 6px;
+    }
+    .mag-article-title {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.3;
+      margin-bottom: 6px;
+      transition: color 0.15s ease;
+    }
+    .mag-article-excerpt {
+      font-size: 14px;
+      color: var(--text-secondary);
+      line-height: 1.5;
+      margin-bottom: 8px;
+    }
+    .mag-article-byline {
+      font-size: 12px;
+      color: var(--text-muted);
+    }
+
+    /* ===========================
+       STYLE 4: TERMINAL / BBS
+       =========================== */
+    .term-wrap {
+      background: oklch(8% 0.01 140);
+      font-family: var(--font-mono);
+      color: oklch(75% 0.12 140);
+    }
+    .term-header {
+      padding: 12px 20px;
+      border-bottom: 1px solid oklch(20% 0.04 140);
+      display: flex;
+      align-items: center;
+      gap: 16px;
+      font-size: 13px;
+    }
+    .term-logo {
+      color: oklch(80% 0.15 140);
+      font-weight: 700;
+    }
+    .term-nav {
+      display: flex;
+      gap: 4px;
+    }
+    .term-nav span {
+      padding: 2px 10px;
+      color: oklch(60% 0.08 140);
+      cursor: pointer;
+    }
+    .term-nav span:hover { color: oklch(80% 0.15 140); }
+    .term-nav span.active {
+      background: oklch(80% 0.15 140);
+      color: oklch(8% 0.01 140);
+    }
+    .term-user {
+      margin-left: auto;
+      color: oklch(55% 0.06 140);
+      font-size: 12px;
+    }
+    .term-body {
+      display: grid;
+      grid-template-columns: 180px 1fr 200px;
+      min-height: 500px;
+    }
+    .term-sidebar {
+      border-right: 1px solid oklch(20% 0.04 140);
+      padding: 12px 0;
+    }
+    .term-sidebar-label {
+      padding: 4px 12px;
+      font-size: 10px;
+      color: oklch(50% 0.06 140);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .term-sidebar-item {
+      padding: 3px 12px;
+      font-size: 13px;
+      cursor: pointer;
+      color: oklch(65% 0.08 140);
+    }
+    .term-sidebar-item:hover { background: oklch(12% 0.02 140); color: oklch(80% 0.15 140); }
+    .term-sidebar-item.active {
+      color: oklch(80% 0.15 140);
+      background: oklch(15% 0.03 140);
+    }
+    .term-sidebar-item.active::before { content: '> '; color: oklch(80% 0.15 140); }
+    .term-center {
+      padding: 12px 16px;
+    }
+    .term-sort {
+      display: flex;
+      gap: 12px;
+      font-size: 12px;
+      color: oklch(50% 0.06 140);
+      padding-bottom: 8px;
+      border-bottom: 1px solid oklch(15% 0.03 140);
+      margin-bottom: 4px;
+    }
+    .term-sort span { cursor: pointer; }
+    .term-sort span:hover { color: oklch(75% 0.12 140); }
+    .term-sort span.active { color: oklch(80% 0.15 140); font-weight: 700; }
+    .term-post {
+      display: grid;
+      grid-template-columns: 50px 1fr;
+      padding: 6px 0;
+      border-bottom: 1px dashed oklch(15% 0.02 140);
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .term-post:hover { background: oklch(10% 0.015 140); }
+    .term-score {
+      text-align: right;
+      padding-right: 12px;
+      color: oklch(80% 0.15 140);
+      font-weight: 700;
+    }
+    .term-post-title {
+      color: oklch(85% 0.06 140);
+      cursor: pointer;
+    }
+    .term-post-title:hover { color: oklch(80% 0.18 140); }
+    .term-post-meta {
+      font-size: 11px;
+      color: oklch(45% 0.05 140);
+      margin-top: 1px;
+    }
+    .term-post-meta a { color: oklch(60% 0.1 140); text-decoration: none; }
+    .term-right {
+      border-left: 1px solid oklch(20% 0.04 140);
+      padding: 12px;
+      font-size: 12px;
+    }
+    .term-right-label {
+      font-size: 10px;
+      color: oklch(50% 0.06 140);
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 8px;
+    }
+    .term-right-item {
+      padding: 2px 0;
+      color: oklch(60% 0.08 140);
+    }
+
+    /* ===========================
+       STYLE 5: COZY / SOFT
+       =========================== */
+    .cozy-wrap {
+      background: oklch(16% 0.03 310);
+    }
+    .cozy-nav {
+      padding: 14px 24px;
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      background: oklch(20% 0.035 310);
+      border-bottom: 1px solid oklch(25% 0.03 310);
+    }
+    .cozy-logo {
+      font-family: var(--font-serif);
+      font-weight: 700;
+      font-size: 20px;
+      color: oklch(90% 0.06 310);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .cozy-nav-links {
+      display: flex;
+      gap: 6px;
+    }
+    .cozy-nav-link {
+      padding: 6px 14px;
+      font-size: 13px;
+      color: oklch(70% 0.04 310);
+      border-radius: 20px;
+      transition: all 0.15s ease;
+      cursor: pointer;
+    }
+    .cozy-nav-link:hover { background: oklch(25% 0.03 310); }
+    .cozy-nav-link.active { background: oklch(60% 0.18 310); color: white; }
+    .cozy-body {
+      max-width: 640px;
+      margin: 0 auto;
+      padding: 24px;
+    }
+    .cozy-community-header {
+      background: oklch(22% 0.04 310);
+      border-radius: 24px;
+      padding: 24px;
+      margin-bottom: 20px;
+      text-align: center;
+    }
+    .cozy-community-icon {
+      width: 64px;
+      height: 64px;
+      border-radius: 20px;
+      margin: 0 auto 12px;
+      overflow: hidden;
+    }
+    .cozy-community-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .cozy-community-name {
+      font-family: var(--font-serif);
+      font-size: 22px;
+      font-weight: 700;
+      color: oklch(92% 0.04 310);
+    }
+    .cozy-community-stats {
+      font-size: 13px;
+      color: oklch(60% 0.04 310);
+      margin-top: 4px;
+    }
+    .cozy-post {
+      background: oklch(20% 0.035 310);
+      border-radius: 20px;
+      padding: 20px;
+      margin-bottom: 14px;
+      border: 1px solid oklch(25% 0.03 310);
+      transition: border-color 0.2s ease;
+    }
+    .cozy-post:hover { border-color: oklch(60% 0.18 310 / 0.3); }
+    .cozy-post-header {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .cozy-avatar {
+      width: 36px;
+      height: 36px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 13px;
+      font-weight: 700;
+      color: white;
+    }
+    .cozy-post-author {
+      font-size: 14px;
+      font-weight: 600;
+      color: oklch(90% 0.04 310);
+    }
+    .cozy-post-time {
+      font-size: 12px;
+      color: oklch(55% 0.04 310);
+    }
+    .cozy-post-title {
+      font-family: var(--font-serif);
+      font-size: 18px;
+      font-weight: 600;
+      line-height: 1.35;
+      margin-bottom: 8px;
+      color: oklch(93% 0.03 310);
+    }
+    .cozy-post-body {
+      font-size: 15px;
+      line-height: 1.6;
+      color: oklch(75% 0.03 310);
+      margin-bottom: 12px;
+    }
+    .cozy-post-image {
+      border-radius: 16px;
+      overflow: hidden;
+      margin-bottom: 12px;
+    }
+    .cozy-post-image img { width: 100%; display: block; }
+    .cozy-reactions {
+      display: flex;
+      gap: 6px;
+      align-items: center;
+    }
+    .cozy-reaction {
+      display: flex;
+      align-items: center;
+      gap: 4px;
+      padding: 5px 12px;
+      border-radius: 20px;
+      background: oklch(25% 0.03 310);
+      font-size: 13px;
+      color: oklch(70% 0.04 310);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      border: 1px solid transparent;
+    }
+    .cozy-reaction:hover {
+      background: oklch(28% 0.035 310);
+      border-color: oklch(60% 0.18 310 / 0.2);
+    }
+    .cozy-reaction.selected {
+      background: oklch(60% 0.18 310 / 0.15);
+      border-color: oklch(60% 0.18 310 / 0.3);
+      color: oklch(85% 0.06 310);
+    }
+    .cozy-reaction-emoji { font-size: 15px; }
+    .cozy-bookmark {
+      margin-left: auto;
+      padding: 6px 10px;
+      border-radius: 12px;
+      background: oklch(25% 0.03 310);
+      color: oklch(65% 0.04 310);
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: center;
+    }
+    .cozy-bookmark:hover { background: oklch(28% 0.035 310); color: oklch(80% 0.06 310); }
+
+    /* ===========================
+       STYLE 6: TUI / ncurses
+       =========================== */
+    .tui-wrap {
+      background: #1e1e2e;
+      font-family: var(--font-mono);
+      color: #cdd6f4;
+      font-size: 13px;
+      line-height: 1.4;
+    }
+    .tui-titlebar {
+      background: #585b70;
+      color: #cdd6f4;
+      padding: 2px 8px;
+      display: flex;
+      align-items: center;
+      font-size: 12px;
+    }
+    .tui-titlebar-title { flex: 1; text-align: center; font-weight: 700; }
+    .tui-titlebar-btn { color: #a6adc8; cursor: pointer; }
+    .tui-main {
+      display: grid;
+      grid-template-columns: 200px 1fr 240px;
+      min-height: 520px;
+    }
+    /* Box-drawing borders */
+    .tui-panel {
+      border-right: 1px solid #585b70;
+      position: relative;
+    }
+    .tui-panel:last-child { border-right: none; }
+    .tui-panel-title {
+      padding: 2px 8px;
+      background: #313244;
+      color: #89b4fa;
+      font-weight: 700;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+      border-bottom: 1px solid #585b70;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .tui-panel-title::before { content: ''; }
+    .tui-panel-title .tui-count {
+      margin-left: auto;
+      color: #6c7086;
+      font-weight: 400;
+    }
+    .tui-item {
+      padding: 2px 8px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .tui-item:hover { background: #313244; }
+    .tui-item.selected {
+      background: #89b4fa;
+      color: #1e1e2e;
+    }
+    .tui-item.selected .tui-item-dim { color: #1e1e2e; }
+    .tui-item-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+    .tui-item-dim { color: #6c7086; }
+    .tui-item-badge {
+      font-size: 10px;
+      padding: 0 4px;
+      border-radius: 2px;
+      margin-left: auto;
+      flex-shrink: 0;
+    }
+    .tui-divider {
+      border-bottom: 1px solid #45475a;
+      margin: 4px 0;
+      position: relative;
+    }
+    .tui-divider-label {
+      font-size: 10px;
+      color: #6c7086;
+      padding: 2px 8px;
+      letter-spacing: 0.5px;
+    }
+    /* Feed panel */
+    .tui-feed-item {
+      padding: 4px 8px;
+      border-bottom: 1px solid #313244;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 40px 1fr auto;
+      gap: 8px;
+      align-items: start;
+    }
+    .tui-feed-item:hover { background: #313244; }
+    .tui-feed-item.selected {
+      background: #45475a;
+      border-left: 2px solid #89b4fa;
+      padding-left: 6px;
+    }
+    .tui-feed-score {
+      text-align: right;
+      color: #a6e3a1;
+      font-weight: 700;
+      padding-top: 2px;
+    }
+    .tui-feed-title {
+      color: #cdd6f4;
+      font-weight: 600;
+    }
+    .tui-feed-title .tui-tag {
+      color: #fab387;
+      font-weight: 400;
+    }
+    .tui-feed-meta {
+      color: #6c7086;
+      font-size: 11px;
+      margin-top: 1px;
+    }
+    .tui-feed-meta a { color: #89b4fa; text-decoration: none; }
+    .tui-feed-comments {
+      color: #6c7086;
+      font-size: 11px;
+      padding-top: 2px;
+      white-space: nowrap;
+    }
+    /* Preview panel */
+    .tui-preview-header {
+      padding: 8px;
+      border-bottom: 1px solid #585b70;
+    }
+    .tui-preview-title {
+      color: #cdd6f4;
+      font-weight: 700;
+      font-size: 14px;
+      line-height: 1.3;
+      margin-bottom: 4px;
+    }
+    .tui-preview-byline {
+      color: #6c7086;
+      font-size: 11px;
+    }
+    .tui-preview-byline span { color: #89b4fa; }
+    .tui-preview-body {
+      padding: 8px;
+      color: #a6adc8;
+      line-height: 1.6;
+    }
+    .tui-preview-body p { margin-bottom: 8px; }
+    .tui-preview-img {
+      margin: 8px;
+      border: 1px solid #585b70;
+      overflow: hidden;
+    }
+    .tui-preview-img img { width: 100%; display: block; }
+    .tui-preview-actions {
+      padding: 6px 8px;
+      display: flex;
+      gap: 12px;
+      color: #6c7086;
+      font-size: 11px;
+      border-top: 1px solid #313244;
+    }
+    .tui-preview-actions span { cursor: pointer; }
+    .tui-preview-actions span:hover { color: #cdd6f4; }
+    /* Status bar */
+    .tui-statusbar {
+      background: #89b4fa;
+      color: #1e1e2e;
+      padding: 2px 8px;
+      display: flex;
+      font-size: 11px;
+      font-weight: 600;
+    }
+    .tui-statusbar-section {
+      padding: 0 8px;
+    }
+    .tui-statusbar-mode {
+      background: #1e1e2e;
+      color: #89b4fa;
+      padding: 0 6px;
+    }
+    .tui-statusbar-right { margin-left: auto; display: flex; gap: 12px; }
+    .tui-statusbar-keys {
+      background: #313244;
+      color: #a6adc8;
+      padding: 2px 8px;
+      display: flex;
+      gap: 16px;
+      font-size: 11px;
+      font-weight: 400;
+    }
+    .tui-statusbar-keys kbd {
+      color: #f9e2af;
+      font-family: var(--font-mono);
+      font-weight: 700;
+    }
+    .tui-scrollbar {
+      position: absolute;
+      right: 0;
+      top: 0;
+      bottom: 0;
+      width: 8px;
+    }
+    .tui-scrollbar-track {
+      position: absolute;
+      right: 2px;
+      top: 28px;
+      width: 4px;
+      height: 60px;
+      background: #45475a;
+      border-radius: 2px;
+    }
+
+    /* ===========================
+       STYLE 7: NEWSPAPER
+       =========================== */
+    .news-wrap {
+      background: #f5f0e8;
+      color: #1a1a1a;
+      font-family: 'Source Serif 4', Georgia, serif;
+    }
+    .news-masthead {
+      text-align: center;
+      padding: 24px 32px 16px;
+      border-bottom: 3px double #1a1a1a;
+    }
+    .news-masthead-date {
+      font-size: 11px;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      color: #666;
+      font-family: var(--font-sans);
+    }
+    .news-masthead-title {
+      font-size: 48px;
+      font-weight: 700;
+      letter-spacing: -1px;
+      line-height: 1;
+      margin: 8px 0;
+      font-family: 'Source Serif 4', Georgia, serif;
+    }
+    .news-masthead-subtitle {
+      font-size: 12px;
+      color: #888;
+      letter-spacing: 3px;
+      text-transform: uppercase;
+      font-family: var(--font-sans);
+    }
+    .news-masthead-nav {
+      display: flex;
+      justify-content: center;
+      gap: 24px;
+      margin-top: 12px;
+      padding-top: 10px;
+      border-top: 1px solid #ccc;
+      font-family: var(--font-sans);
+      font-size: 12px;
+      font-weight: 600;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+      color: #444;
+    }
+    .news-masthead-nav span { cursor: pointer; }
+    .news-masthead-nav span:hover { color: #1a1a1a; }
+    .news-masthead-nav span.active { color: #1a1a1a; border-bottom: 2px solid #1a1a1a; padding-bottom: 4px; }
+    .news-body {
+      padding: 24px 32px;
+    }
+    .news-headline-row {
+      display: grid;
+      grid-template-columns: 1fr 1px 1.6fr 1px 1fr;
+      gap: 0;
+      margin-bottom: 24px;
+    }
+    .news-divider-v {
+      background: #ccc;
+      width: 1px;
+    }
+    .news-col { padding: 0 20px; }
+    .news-col:first-child { padding-left: 0; }
+    .news-col:last-child { padding-right: 0; }
+    .news-lead-title {
+      font-size: 32px;
+      font-weight: 700;
+      line-height: 1.15;
+      margin-bottom: 10px;
+      letter-spacing: -0.5px;
+    }
+    .news-lead-img {
+      margin-bottom: 12px;
+    }
+    .news-lead-img img { width: 100%; display: block; }
+    .news-lead-excerpt {
+      font-size: 15px;
+      line-height: 1.6;
+      color: #333;
+    }
+    .news-lead-excerpt::first-letter {
+      font-size: 48px;
+      font-weight: 700;
+      float: left;
+      line-height: 0.85;
+      margin-right: 6px;
+      margin-top: 4px;
+      color: #1a1a1a;
+    }
+    .news-byline {
+      font-size: 11px;
+      color: #888;
+      font-family: var(--font-sans);
+      margin-bottom: 10px;
+    }
+    .news-byline strong { color: #444; }
+    .news-side-story {
+      margin-bottom: 20px;
+      padding-bottom: 16px;
+      border-bottom: 1px solid #ddd;
+    }
+    .news-side-story:last-child { border-bottom: none; }
+    .news-side-category {
+      font-size: 10px;
+      font-weight: 700;
+      letter-spacing: 1.5px;
+      text-transform: uppercase;
+      color: #8b4513;
+      font-family: var(--font-sans);
+      margin-bottom: 4px;
+    }
+    .news-side-title {
+      font-size: 18px;
+      font-weight: 700;
+      line-height: 1.25;
+      margin-bottom: 6px;
+      cursor: pointer;
+    }
+    .news-side-title:hover { color: #444; }
+    .news-side-excerpt {
+      font-size: 14px;
+      line-height: 1.5;
+      color: #555;
+    }
+    .news-side-img {
+      margin-bottom: 8px;
+    }
+    .news-side-img img { width: 100%; display: block; }
+    .news-divider-h {
+      border: none;
+      border-top: 1px solid #ccc;
+      margin: 0 0 20px 0;
+    }
+    .news-bottom-row {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 20px;
+      padding-top: 20px;
+      border-top: 2px solid #1a1a1a;
+    }
+    .news-bottom-title {
+      font-size: 15px;
+      font-weight: 700;
+      line-height: 1.3;
+      margin-bottom: 4px;
+      cursor: pointer;
+    }
+    .news-bottom-title:hover { color: #444; }
+    .news-bottom-meta {
+      font-size: 11px;
+      color: #888;
+      font-family: var(--font-sans);
+    }
+
+    /* ===========================
+       STYLE 8: BRUTALIST
+       =========================== */
+    .brut-wrap {
+      background: #fff;
+      color: #000;
+      font-family: 'Courier New', monospace;
+    }
+    .brut-banner {
+      background: #000;
+      color: #fff;
+      padding: 6px 16px;
+      font-size: 11px;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      letter-spacing: 1px;
+      text-transform: uppercase;
+    }
+    .brut-banner-marquee {
+      overflow: hidden;
+      flex: 1;
+      white-space: nowrap;
+      color: #ff0;
+    }
+    .brut-header {
+      border-bottom: 4px solid #000;
+      padding: 12px 16px;
+      display: flex;
+      align-items: flex-end;
+      gap: 24px;
+    }
+    .brut-logo {
+      font-size: 40px;
+      font-weight: 900;
+      line-height: 0.9;
+      letter-spacing: -2px;
+      font-family: 'Courier New', monospace;
+      text-transform: uppercase;
+    }
+    .brut-nav {
+      display: flex;
+      gap: 0;
+      margin-left: auto;
+    }
+    .brut-nav-item {
+      padding: 6px 12px;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      border: 2px solid #000;
+      cursor: pointer;
+      margin-left: -2px;
+    }
+    .brut-nav-item:hover { background: #000; color: #fff; }
+    .brut-nav-item.active { background: #000; color: #fff; }
+    .brut-body {
+      display: grid;
+      grid-template-columns: 1fr 340px;
+    }
+    .brut-feed {
+      border-right: 4px solid #000;
+    }
+    .brut-sort {
+      display: flex;
+      background: #f0f0f0;
+      border-bottom: 2px solid #000;
+      font-size: 12px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    .brut-sort span {
+      padding: 8px 16px;
+      cursor: pointer;
+      border-right: 2px solid #000;
+    }
+    .brut-sort span:hover { background: #ddd; }
+    .brut-sort span.active { background: #000; color: #fff; }
+    .brut-post {
+      border-bottom: 2px solid #000;
+      display: grid;
+      grid-template-columns: 60px 1fr;
+    }
+    .brut-post:hover { background: #f8f8f8; }
+    .brut-post-score {
+      background: #f0f0f0;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      font-weight: 900;
+      font-size: 18px;
+      border-right: 2px solid #000;
+      padding: 12px 0;
+    }
+    .brut-post-score small {
+      font-size: 9px;
+      font-weight: 400;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #666;
+    }
+    .brut-post-content {
+      padding: 12px 16px;
+    }
+    .brut-post-tag {
+      display: inline-block;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      padding: 2px 6px;
+      border: 1px solid #000;
+      margin-bottom: 4px;
+    }
+    .brut-post-tag.img { background: #ff0; }
+    .brut-post-tag.vid { background: #0ff; }
+    .brut-post-tag.link { background: #f0f; color: #fff; }
+    .brut-post-tag.ask { background: #0f0; }
+    .brut-post-title {
+      font-size: 16px;
+      font-weight: 900;
+      line-height: 1.25;
+      margin-bottom: 4px;
+      cursor: pointer;
+      text-transform: uppercase;
+    }
+    .brut-post-title:hover { text-decoration: underline; text-decoration-thickness: 3px; }
+    .brut-post-meta {
+      font-size: 11px;
+      color: #666;
+    }
+    .brut-post-meta a { color: #000; text-decoration: underline; }
+    .brut-post-actions {
+      display: flex;
+      gap: 12px;
+      margin-top: 6px;
+      font-size: 10px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 700;
+    }
+    .brut-post-actions span { cursor: pointer; border-bottom: 1px solid transparent; }
+    .brut-post-actions span:hover { border-bottom-color: #000; }
+    .brut-post-img {
+      margin-top: 8px;
+      border: 2px solid #000;
+      overflow: hidden;
+    }
+    .brut-post-img img { width: 100%; display: block; }
+    .brut-sidebar {
+      padding: 0;
+    }
+    .brut-sidebar-section {
+      border-bottom: 2px solid #000;
+    }
+    .brut-sidebar-title {
+      background: #000;
+      color: #fff;
+      padding: 6px 12px;
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+    }
+    .brut-sidebar-body {
+      padding: 12px;
+    }
+    .brut-sidebar-stat {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      font-size: 12px;
+    }
+    .brut-sidebar-stat strong { font-size: 14px; }
+    .brut-sidebar-link {
+      display: block;
+      padding: 4px 0;
+      font-size: 12px;
+      color: #000;
+      text-decoration: none;
+      border-bottom: 1px dashed #ccc;
+    }
+    .brut-sidebar-link:hover { text-decoration: underline; text-decoration-thickness: 2px; }
+    .brut-sidebar-link .brut-sidebar-link-score {
+      color: #666;
+      margin-right: 6px;
+    }
+    .brut-post-body {
+      font-size: 13px;
+      line-height: 1.4;
+      color: #444;
+      margin-top: 4px;
+    }
+  </style>
+</head>
+<body>
+
+<nav class="page-nav">
+  <span class="page-nav-logo">
+    <svg width="20" height="20" viewBox="0 0 334 334" fill="none"><path d="M95 225.903V101L162 62.0968V32L69 86V241L95 225.903Z" fill="url(#nv0)"/><path d="M147 256.903V132L214 93.0968V63L121 117V272L147 256.903Z" fill="url(#nv1)"/><path d="M266 93V129L204 165V198L266 162V198L204 234V284L173 302V147L266 93Z" fill="url(#nv2)"/><defs><linearGradient id="nv0" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="nv1" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="nv2" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></svg>
+    Design System
+  </span>
+  <div class="page-nav-links">
+    <a href="foundations.html">Foundations</a>
+    <a href="mockups.html">Mockups</a>
+    <a href="explorations.html" class="active" aria-current="page">Explorations</a>
+  </div>
+</nav>
+
+<div class="style-tabs">
+  <button class="style-tab active" onclick="showStyle('masonry')">Masonry</button>
+  <button class="style-tab" onclick="showStyle('forum')">Threaded Forum</button>
+  <button class="style-tab" onclick="showStyle('magazine')">Magazine</button>
+  <button class="style-tab" onclick="showStyle('terminal')">Terminal</button>
+  <button class="style-tab" onclick="showStyle('cozy')">Cozy</button>
+  <button class="style-tab" onclick="showStyle('tui')">TUI</button>
+  <button class="style-tab" onclick="showStyle('newspaper')">Newspaper</button>
+  <button class="style-tab" onclick="showStyle('brutalist')">Brutalist</button>
+</div>
+
+<!-- ===== STYLE 1: MASONRY / WATERFALL ===== -->
+<div id="style-masonry" class="style-view active">
+  <div class="style-header">
+    <div class="style-name">Masonry / Waterfall</div>
+    <div class="style-desc">Pinterest/Tumblr-style discovery feed. Content cards flow into columns, varying heights based on content. No rigid sidebar structure &mdash; the whole page is the feed. Great for visual communities, browsing, and serendipitous discovery.</div>
+    <div class="style-inspo">Inspired by: Pinterest, Are.na, Tumblr, Dribbble</div>
+  </div>
+  <div class="explore-frame">
+    <div class="masonry-nav">
+      <div class="masonry-nav-logo">
+        <svg width="22" height="22" viewBox="0 0 334 334" fill="none"><path d="M95 225.903V101L162 62.0968V32L69 86V241L95 225.903Z" fill="url(#ms0)"/><path d="M147 256.903V132L214 93.0968V63L121 117V272L147 256.903Z" fill="url(#ms1)"/><path d="M266 93V129L204 165V198L266 162V198L204 234V284L173 302V147L266 93Z" fill="url(#ms2)"/><defs><linearGradient id="ms0" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="ms1" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="ms2" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></svg>
+        frontpage
+      </div>
+      <div class="masonry-filters">
+        <button class="masonry-filter active">All</button>
+        <button class="masonry-filter">Images</button>
+        <button class="masonry-filter">Articles</button>
+        <button class="masonry-filter">Videos</button>
+        <button class="masonry-filter">Links</button>
+      </div>
+    </div>
+    <div class="masonry-wrap">
+      <div class="masonry-grid">
+        <!-- Card 1: tall image -->
+        <div class="masonry-card">
+          <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=400&h=500&q=80" alt="">
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">Isometric city &mdash; 6 months of pixel work</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 287</span>
+              pixelweaver &middot; 3h
+            </div>
+            <div class="masonry-card-tags">
+              <span class="masonry-tag">pixel-art</span>
+              <span class="masonry-tag">isometric</span>
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 94</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+            <span><i data-lucide="share" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 2: text only, short -->
+        <div class="masonry-card">
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">What&rsquo;s everyone using for pixel art these days? Aseprite vs Pixelorama?</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin: 8px 0; line-height: 1.5;">I&rsquo;ve been using Aseprite forever but Pixelorama is looking really good lately. Anyone made the switch?</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 34</span>
+              pixel_nova &middot; 1d
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 89</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 3: medium image -->
+        <div class="masonry-card">
+          <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&h=300&q=80" alt="">
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">My first ray marcher in 200 lines of GLSL</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 64</span>
+              pixel_nova &middot; 6h
+            </div>
+            <div class="masonry-card-tags">
+              <span class="masonry-tag">glsl</span>
+              <span class="masonry-tag">ray-marching</span>
+              <span class="masonry-tag">shaders</span>
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 31</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 4: link with thumbnail -->
+        <div class="masonry-card">
+          <div class="masonry-card-body">
+            <div style="font-size: 10px; font-weight: 700; text-transform: uppercase; letter-spacing: 1px; color: var(--accent-secondary); margin-bottom: 4px;">&#128279; Article</div>
+            <div class="masonry-card-title">A History of Algorithmic Art &mdash; from Vera Moln&aacute;r to Processing</div>
+            <div style="font-size: 12px; color: var(--text-muted); margin-top: 6px;">generativeart.org</div>
+            <div class="masonry-card-meta" style="margin-top: 8px;">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 76</span>
+              genart_weaver &middot; 8h
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 23</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 5: wide image -->
+        <div class="masonry-card">
+          <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&h=250&q=80" alt="">
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">GLSL Tutorial: Recreating The Matrix Code effect</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 142</span>
+              shader_wizard &middot; 5h
+            </div>
+            <div class="masonry-card-tags">
+              <span class="masonry-tag">tutorial</span>
+              <span class="masonry-tag">glsl</span>
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 47</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 6: video card -->
+        <div class="masonry-card">
+          <div style="position: relative;">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=400&h=280&q=80" alt="">
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: oklch(0% 0 0 / 0.3);">
+              <div style="width: 44px; height: 44px; background: oklch(100% 0 0 / 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="play" style="width:18px;height:18px;color:var(--bg-base);margin-left:2px;"></i>
+              </div>
+            </div>
+          </div>
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">Live coding: particle system from scratch</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 203</span>
+              synthwave &middot; 12h
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 67</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+        <!-- Card 7: text discussion -->
+        <div class="masonry-card">
+          <div class="masonry-card-body">
+            <div class="masonry-card-title">New p5.js feature: WebGL2 integration changes everything</div>
+            <div style="font-size: 13px; color: var(--text-secondary); margin: 8px 0; line-height: 1.5;">The latest update to p5.js brings full WebGL2 support with compute shaders, transform feedback, and instanced rendering. This is a game changer for creative coding on the web.</div>
+            <div class="masonry-card-meta">
+              <span style="color: var(--accent-primary); font-weight: 700; display: inline-flex; align-items: center; gap: 3px;"><svg width="12" height="12" viewBox="0 0 16 16" fill="currentColor"><path d="M8 14s-5.5-4-5.5-7.5C2.5 4 4 2.5 5.5 2.5c1 0 1.9.6 2.5 1.5.6-.9 1.5-1.5 2.5-1.5C12 2.5 13.5 4 13.5 6.5 13.5 10 8 14 8 14z"/></svg> 98</span>
+              shader_wizard &middot; 3h
+            </div>
+            <div class="masonry-card-tags">
+              <span class="masonry-tag">p5js</span>
+              <span class="masonry-tag">webgl</span>
+              <span class="masonry-tag">news</span>
+            </div>
+          </div>
+          <div class="masonry-card-actions">
+            <span><i data-lucide="message-circle" style="width:13px;height:13px;"></i> 56</span>
+            <span><i data-lucide="bookmark" style="width:13px;height:13px;"></i></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 2: THREADED FORUM ===== -->
+<div id="style-forum" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Threaded Forum</div>
+    <div class="style-desc">Classic forum thread list. Dense, scannable, information-first. Threads show reply counts, views, and last activity. Sticky threads, pagination, category breadcrumbs. Familiar to anyone who&rsquo;s used phpBB, Discourse, or old-school message boards.</div>
+    <div class="style-inspo">Inspired by: phpBB, Discourse, Something Awful, HackerNews</div>
+  </div>
+  <div class="explore-frame">
+    <div class="forum-wrap">
+      <div class="forum-header">
+        <h2>
+          <svg width="20" height="20" viewBox="0 0 334 334" fill="none"><path d="M95 225.903V101L162 62.0968V32L69 86V241L95 225.903Z" fill="url(#fm0)"/><path d="M147 256.903V132L214 93.0968V63L121 117V272L147 256.903Z" fill="url(#fm1)"/><path d="M266 93V129L204 165V198L266 162V198L204 234V284L173 302V147L266 93Z" fill="url(#fm2)"/><defs><linearGradient id="fm0" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="fm1" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="fm2" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></svg>
+          Creative Coding &amp; Pixel Art
+        </h2>
+        <div class="forum-breadcrumb">
+          <a href="#">frontpage</a> &rsaquo; <a href="#">communities</a> &rsaquo; Creative Coding &amp; Pixel Art
+        </div>
+      </div>
+      <div class="forum-table-head">
+        <span>Thread</span>
+        <span style="text-align: center;">Replies</span>
+        <span style="text-align: center;">Views</span>
+        <span style="text-align: right;">Last Post</span>
+      </div>
+      <div class="forum-thread forum-sticky">
+        <div>
+          <div class="forum-thread-title">Getting Started with Creative Coding &mdash; Resources & Tools</div>
+          <div class="forum-thread-author">
+            glitch_garden <span class="badge badge-og" style="font-size: 9px; padding: 1px 6px;"><i data-lucide="crown" style="width:8px;height:8px;"></i> OG</span>
+          </div>
+        </div>
+        <div class="forum-thread-stat">234</div>
+        <div class="forum-thread-stat">12.4k</div>
+        <div class="forum-thread-last">shader_wizard<br>2h ago</div>
+      </div>
+      <div class="forum-thread forum-sticky">
+        <div>
+          <div class="forum-thread-title">Community Rules &amp; Guidelines</div>
+          <div class="forum-thread-author">mod_team</div>
+        </div>
+        <div class="forum-thread-stat">12</div>
+        <div class="forum-thread-stat">8.9k</div>
+        <div class="forum-thread-last">mod_team<br>1w ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">Just finished this isometric city &mdash; 6 months of pixel work</div>
+          <div class="forum-thread-author">
+            pixelweaver <span class="badge badge-artist" style="font-size: 9px; padding: 1px 6px;"><i data-lucide="palette" style="width:8px;height:8px;"></i> Artist</span>
+          </div>
+        </div>
+        <div class="forum-thread-stat" style="color: var(--accent-primary); font-weight: 600;">94</div>
+        <div class="forum-thread-stat">2.1k</div>
+        <div class="forum-thread-last">synthwave<br>15m ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">GLSL Tutorial: Recreating The Matrix Code effect</div>
+          <div class="forum-thread-author">shader_wizard</div>
+        </div>
+        <div class="forum-thread-stat">47</div>
+        <div class="forum-thread-stat">1.8k</div>
+        <div class="forum-thread-last">pixel_nova<br>1h ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">A History of Algorithmic Art &mdash; deep dive into generative origins</div>
+          <div class="forum-thread-author">genart_weaver</div>
+        </div>
+        <div class="forum-thread-stat">23</div>
+        <div class="forum-thread-stat">890</div>
+        <div class="forum-thread-last">genart_weaver<br>3h ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">Live coding session: building a particle system from scratch</div>
+          <div class="forum-thread-author">synthwave <span class="badge badge-og" style="font-size: 9px; padding: 1px 6px;"><i data-lucide="crown" style="width:8px;height:8px;"></i> OG</span></div>
+        </div>
+        <div class="forum-thread-stat">67</div>
+        <div class="forum-thread-stat">3.4k</div>
+        <div class="forum-thread-last">pixelweaver<br>4h ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">Aseprite vs Pixelorama &mdash; what are you using?</div>
+          <div class="forum-thread-author">pixel_nova <span class="badge badge-artist" style="font-size: 9px; padding: 1px 6px;"><i data-lucide="palette" style="width:8px;height:8px;"></i> Artist</span></div>
+        </div>
+        <div class="forum-thread-stat" style="color: var(--accent-primary); font-weight: 600;">89</div>
+        <div class="forum-thread-stat">1.2k</div>
+        <div class="forum-thread-last">glitch_garden<br>6h ago</div>
+      </div>
+      <div class="forum-thread">
+        <div>
+          <div class="forum-thread-title">New p5.js WebGL2 integration &mdash; compute shaders on the web!</div>
+          <div class="forum-thread-author">shader_wizard</div>
+        </div>
+        <div class="forum-thread-stat">56</div>
+        <div class="forum-thread-stat">2.3k</div>
+        <div class="forum-thread-last">synthwave<br>8h ago</div>
+      </div>
+      <div class="forum-pagination">
+        <span class="active">1</span>
+        <span>2</span>
+        <span>3</span>
+        <span>&hellip;</span>
+        <span>47</span>
+        <span>&raquo;</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 3: MAGAZINE / EDITORIAL ===== -->
+<div id="style-magazine" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Magazine / Editorial</div>
+    <div class="style-desc">Content-first editorial layout. A hero article dominates the top, supporting stories fill the grid. Rich typography, large images, bylines. Turns the community into a publication. Great for communities that produce long-form content, tutorials, and visual essays.</div>
+    <div class="style-inspo">Inspired by: The Verge, Ars Technica, Medium, Substack</div>
+  </div>
+  <div class="explore-frame">
+    <div class="mag-wrap">
+      <div class="mag-nav">
+        <div class="mag-nav-logo">
+          <svg width="22" height="22" viewBox="0 0 334 334" fill="none" style="margin-right: 6px;"><path d="M95 225.903V101L162 62.0968V32L69 86V241L95 225.903Z" fill="url(#mg0)"/><path d="M147 256.903V132L214 93.0968V63L121 117V272L147 256.903Z" fill="url(#mg1)"/><path d="M266 93V129L204 165V198L266 162V198L204 234V284L173 302V147L266 93Z" fill="url(#mg2)"/><defs><linearGradient id="mg0" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="mg1" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="mg2" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></svg>
+          Creative Coding
+        </div>
+        <div class="mag-nav-links">
+          <span style="color: var(--text-primary);">Latest</span>
+          <span>Tutorials</span>
+          <span>Showcases</span>
+          <span>Events</span>
+          <span>Wiki</span>
+        </div>
+      </div>
+
+      <div class="mag-hero">
+        <div class="mag-hero-main">
+          <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=900&h=600&q=80" alt="">
+          <div class="mag-hero-overlay">
+            <div class="mag-hero-category">Showcase</div>
+            <div class="mag-hero-title">Isometric city &mdash; 6 months of pixel work</div>
+            <div class="mag-hero-byline">by <strong>pixelweaver</strong> &middot; 3h ago &middot; 94 comments &middot; 8 min read</div>
+          </div>
+        </div>
+        <div class="mag-hero-side">
+          <div class="mag-side-card">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=500&h=300&q=80" alt="">
+            <div class="mag-side-overlay">
+              <div class="mag-side-title">GLSL Tutorial: The Matrix Code effect</div>
+              <div class="mag-side-meta">shader_wizard &middot; 47 comments</div>
+            </div>
+          </div>
+          <div class="mag-side-card">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=500&h=300&q=80" alt="">
+            <div class="mag-side-overlay">
+              <div class="mag-side-title">Live coding: particle systems from scratch</div>
+              <div class="mag-side-meta">synthwave &middot; 67 comments</div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="mag-articles">
+        <div class="mag-article">
+          <div class="mag-article-img">
+            <img src="https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=400&h=225&q=80" alt="">
+          </div>
+          <div class="mag-article-category">Deep Dive</div>
+          <div class="mag-article-title">A History of Algorithmic Art</div>
+          <div class="mag-article-excerpt">From Vera Moln&aacute;r&rsquo;s plotters to Processing&rsquo;s sketches &mdash; how algorithms became a medium for artistic expression.</div>
+          <div class="mag-article-byline">genart_weaver &middot; 12 min read</div>
+        </div>
+        <div class="mag-article">
+          <div class="mag-article-img">
+            <img src="https://images.unsplash.com/photo-1618005182384-a83a8bd57fbe?auto=format&fit=crop&w=400&h=225&q=80" alt="">
+          </div>
+          <div class="mag-article-category">Tutorial</div>
+          <div class="mag-article-title">Ray marching in 200 lines</div>
+          <div class="mag-article-excerpt">A beginner-friendly guide to building your first ray marcher with GLSL fragment shaders.</div>
+          <div class="mag-article-byline">pixel_nova &middot; 6 min read</div>
+        </div>
+        <div class="mag-article">
+          <div class="mag-article-img" style="background: oklch(18% 0.03 259); display: flex; align-items: center; justify-content: center;">
+            <div style="text-align: center; padding: 20px;">
+              <div style="font-size: 11px; font-weight: 700; letter-spacing: 1px; text-transform: uppercase; color: var(--accent-primary); margin-bottom: 8px;">&#128172; Discussion</div>
+              <div style="font-family: var(--font-serif); font-size: 16px; font-weight: 600; color: var(--text-primary);">Aseprite vs Pixelorama?</div>
+            </div>
+          </div>
+          <div class="mag-article-category">Community</div>
+          <div class="mag-article-title">The great pixel editor debate</div>
+          <div class="mag-article-excerpt">89 community members weigh in on the best tools for pixel art in 2025.</div>
+          <div class="mag-article-byline">pixel_nova &middot; 89 replies</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 4: TERMINAL / BBS ===== -->
+<div id="style-terminal" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Terminal / BBS</div>
+    <div class="style-desc">Monospace everything. Dense, fast, no-nonsense. Posts are just titles and scores &mdash; no thumbnails, no fluff. Green-on-dark palette nods to old BBS systems and IRC. Maximum information density for people who read fast and want signal over presentation.</div>
+    <div class="style-inspo">Inspired by: HackerNews, Lobsters, old BBS, IRC clients</div>
+  </div>
+  <div class="explore-frame">
+    <div class="term-wrap">
+      <div class="term-header">
+        <span class="term-logo">[fp]</span>
+        <div class="term-nav">
+          <span class="active">hot</span>
+          <span>new</span>
+          <span>top</span>
+          <span>ask</span>
+          <span>show</span>
+        </div>
+        <span class="term-user">wc@frontpage ~</span>
+      </div>
+      <div class="term-body">
+        <div class="term-sidebar">
+          <div class="term-sidebar-label">channels</div>
+          <div class="term-sidebar-item active">creative-coding</div>
+          <div class="term-sidebar-item">home-gardening</div>
+          <div class="term-sidebar-item">photography</div>
+          <div class="term-sidebar-item">gaming</div>
+          <div class="term-sidebar-item">music-prod</div>
+          <div style="height: 16px;"></div>
+          <div class="term-sidebar-label">rooms</div>
+          <div class="term-sidebar-item">#general</div>
+          <div class="term-sidebar-item">#show-tell</div>
+          <div class="term-sidebar-item">#help</div>
+          <div class="term-sidebar-item" style="color: oklch(70% 0.15 140);">#voice [4]</div>
+        </div>
+        <div class="term-center">
+          <div class="term-sort">
+            <span class="active">[hot]</span>
+            <span>[new]</span>
+            <span>[top]</span>
+            <span>[rising]</span>
+            <span style="margin-left: auto;">[post]</span>
+          </div>
+          <div class="term-post">
+            <div class="term-score">287</div>
+            <div>
+              <div class="term-post-title">Just finished this isometric city &mdash; 6 months of pixel work [img]</div>
+              <div class="term-post-meta"><a href="#">pixelweaver</a> | 3h | 94 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">203</div>
+            <div>
+              <div class="term-post-title">Live coding session: building a particle system from scratch [vid]</div>
+              <div class="term-post-meta"><a href="#">synthwave</a> | 12h | 67 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">142</div>
+            <div>
+              <div class="term-post-title">GLSL Tutorial: Recreating The Matrix Code effect</div>
+              <div class="term-post-meta"><a href="#">shader_wizard</a> | 5h | 47 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">98</div>
+            <div>
+              <div class="term-post-title">New p5.js feature: WebGL2 integration changes everything</div>
+              <div class="term-post-meta"><a href="#">shader_wizard</a> | 3h | 56 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">76</div>
+            <div>
+              <div class="term-post-title">A History of Algorithmic Art &mdash; deep dive (generativeart.org)</div>
+              <div class="term-post-meta"><a href="#">genart_weaver</a> | 8h | 23 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">64</div>
+            <div>
+              <div class="term-post-title">Show: My first ray marcher in 200 lines of GLSL [img]</div>
+              <div class="term-post-meta"><a href="#">pixel_nova</a> | 6h | 31 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div class="term-post">
+            <div class="term-score">34</div>
+            <div>
+              <div class="term-post-title">Ask: Aseprite vs Pixelorama &mdash; what are you using?</div>
+              <div class="term-post-meta"><a href="#">pixel_nova</a> | 1d | 89 comments | <a href="#">save</a></div>
+            </div>
+          </div>
+          <div style="padding: 12px 0; font-size: 12px; color: oklch(50% 0.06 140);">
+            --- page 1 of 47 --- [next &raquo;]
+          </div>
+        </div>
+        <div class="term-right">
+          <div class="term-right-label">atmo feed</div>
+          <div class="term-right-item">@genart.bsky &mdash; bioluminescent shaders [bsky]</div>
+          <div class="term-right-item">@mattdes.ai &mdash; Pixel Art in the Age of AI [ww]</div>
+          <div class="term-right-item" style="color: oklch(70% 0.15 140);">@synthfm.live &mdash; Coding & Chill [live]</div>
+          <div style="height: 16px;"></div>
+          <div class="term-right-label">online (134)</div>
+          <div class="term-right-item">pixelweaver</div>
+          <div class="term-right-item">shader_wizard [chat]</div>
+          <div class="term-right-item">glitch_garden</div>
+          <div class="term-right-item" style="color: oklch(45% 0.05 140);">+131 more</div>
+          <div style="height: 16px;"></div>
+          <div class="term-right-label">trending</div>
+          <div class="term-right-item">#atproto #shaders #pixel-art #webgl #p5js</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 5: COZY / SOFT ===== -->
+<div id="style-cozy" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Cozy / Soft</div>
+    <div class="style-desc">Everything is rounded, warm, and gentle. Single-column feed with emoji reactions instead of upvote counts. Soft purple palette, generous spacing, friendly micro-interactions. Less &ldquo;platform&rdquo;, more &ldquo;living room&rdquo;. Anti-corporate without being chaotic.</div>
+    <div class="style-inspo">Inspired by: Mastodon (Elk client), Cohost, indie web, Lo-fi interfaces</div>
+  </div>
+  <div class="explore-frame">
+    <div class="cozy-wrap">
+      <div class="cozy-nav">
+        <div class="cozy-logo">
+          <svg width="22" height="22" viewBox="0 0 334 334" fill="none"><path d="M95 225.903V101L162 62.0968V32L69 86V241L95 225.903Z" fill="url(#cz0)"/><path d="M147 256.903V132L214 93.0968V63L121 117V272L147 256.903Z" fill="url(#cz1)"/><path d="M266 93V129L204 165V198L266 162V198L204 234V284L173 302V147L266 93Z" fill="url(#cz2)"/><defs><linearGradient id="cz0" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="cz1" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient><linearGradient id="cz2" x1="69" y1="84.5" x2="205.5" y2="167" gradientUnits="userSpaceOnUse"><stop stop-color="#2E05FF"/><stop offset="1" stop-color="#fff"/></linearGradient></defs></svg>
+          frontpage
+        </div>
+        <div class="cozy-nav-links">
+          <div class="cozy-nav-link active">Home</div>
+          <div class="cozy-nav-link">Communities</div>
+          <div class="cozy-nav-link">Chat</div>
+          <div class="cozy-nav-link">Explore</div>
+        </div>
+      </div>
+      <div class="cozy-body">
+        <div class="cozy-community-header">
+          <div class="cozy-community-icon">
+            <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=128&h=128&q=80" alt="">
+          </div>
+          <div class="cozy-community-name">Creative Coding & Pixel Art</div>
+          <div class="cozy-community-stats">2,847 members &middot; 134 here now</div>
+        </div>
+
+        <!-- Cozy post 1: image -->
+        <div class="cozy-post">
+          <div class="cozy-post-header">
+            <div class="cozy-avatar" style="background: linear-gradient(135deg, oklch(55% 0.15 280), oklch(45% 0.12 310));">pw</div>
+            <div>
+              <div class="cozy-post-author">pixelweaver</div>
+              <div class="cozy-post-time">3 hours ago</div>
+            </div>
+          </div>
+          <div class="cozy-post-title">Just finished this isometric city &mdash; 6 months of pixel work</div>
+          <div class="cozy-post-image">
+            <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=600&h=340&q=80" alt="">
+          </div>
+          <div class="cozy-reactions">
+            <div class="cozy-reaction selected"><span class="cozy-reaction-emoji">&#10084;&#65039;</span> 142</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128293;</span> 89</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128588;</span> 56</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128172;</span> 94</div>
+            <div class="cozy-bookmark"><i data-lucide="bookmark" style="width:16px;height:16px;"></i></div>
+          </div>
+        </div>
+
+        <!-- Cozy post 2: text -->
+        <div class="cozy-post">
+          <div class="cozy-post-header">
+            <div class="cozy-avatar" style="background: linear-gradient(135deg, oklch(50% 0.15 180), oklch(40% 0.12 200));">sw</div>
+            <div>
+              <div class="cozy-post-author">shader_wizard</div>
+              <div class="cozy-post-time">5 hours ago</div>
+            </div>
+          </div>
+          <div class="cozy-post-title">New GLSL tutorial: Recreating The Matrix Code effect</div>
+          <div class="cozy-post-body">Step-by-step breakdown of how to create the iconic falling characters effect using fragment shaders. Covers the column setup, randomized character selection, and that signature green phosphor glow.</div>
+          <div class="cozy-reactions">
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#10084;&#65039;</span> 67</div>
+            <div class="cozy-reaction selected"><span class="cozy-reaction-emoji">&#128161;</span> 45</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128172;</span> 47</div>
+            <div class="cozy-bookmark"><i data-lucide="bookmark" style="width:16px;height:16px;"></i></div>
+          </div>
+        </div>
+
+        <!-- Cozy post 3: question -->
+        <div class="cozy-post">
+          <div class="cozy-post-header">
+            <div class="cozy-avatar" style="background: linear-gradient(135deg, oklch(55% 0.18 310), oklch(45% 0.15 330));">pn</div>
+            <div>
+              <div class="cozy-post-author">pixel_nova</div>
+              <div class="cozy-post-time">1 day ago</div>
+            </div>
+          </div>
+          <div class="cozy-post-title">What&rsquo;s everyone using for pixel art these days?</div>
+          <div class="cozy-post-body">I&rsquo;ve been using Aseprite forever but Pixelorama is looking really good lately. It&rsquo;s open source and the animation timeline has gotten way better. Anyone made the switch?</div>
+          <div class="cozy-reactions">
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#129300;</span> 23</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128172;</span> 89</div>
+            <div class="cozy-bookmark"><i data-lucide="bookmark" style="width:16px;height:16px;"></i></div>
+          </div>
+        </div>
+
+        <!-- Cozy post 4: video -->
+        <div class="cozy-post">
+          <div class="cozy-post-header">
+            <div class="cozy-avatar" style="background: linear-gradient(135deg, oklch(60% 0.2 30), oklch(50% 0.18 50));">sy</div>
+            <div>
+              <div class="cozy-post-author">synthwave</div>
+              <div class="cozy-post-time">12 hours ago</div>
+            </div>
+          </div>
+          <div class="cozy-post-title">Live coding: particle systems from scratch</div>
+          <div class="cozy-post-image" style="position: relative; cursor: pointer;">
+            <img src="https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=600&h=340&q=80" alt="">
+            <div style="position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: oklch(0% 0 0 / 0.3); border-radius: 16px;">
+              <div style="width: 56px; height: 56px; background: oklch(100% 0 0 / 0.9); border-radius: 50%; display: flex; align-items: center; justify-content: center;">
+                <i data-lucide="play" style="width:24px;height:24px;color:oklch(16% 0.03 310);margin-left:3px;"></i>
+              </div>
+            </div>
+          </div>
+          <div class="cozy-reactions">
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#10084;&#65039;</span> 98</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128293;</span> 71</div>
+            <div class="cozy-reaction"><span class="cozy-reaction-emoji">&#128172;</span> 67</div>
+            <div class="cozy-bookmark" style="color: oklch(80% 0.1 310);"><i data-lucide="bookmark" style="width:16px;height:16px;fill:currentColor;"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 6: TUI / ncurses ===== -->
+<div id="style-tui" class="style-view">
+  <div class="style-header">
+    <div class="style-name">TUI / ncurses</div>
+    <div class="style-desc">A full text-user-interface &mdash; box-drawing borders, split panes, status bar, keyboard shortcuts. Feels like ssh-ing into a BBS running on a Raspberry Pi. Catppuccin color palette. Every pixel earns its place. For people who think mice are optional.</div>
+    <div class="style-inspo">Inspired by: lazygit, k9s, htop, midnight commander, blessed.js, Catppuccin</div>
+  </div>
+  <div class="explore-frame">
+    <div class="tui-wrap">
+      <!-- Title bar -->
+      <div class="tui-titlebar">
+        <span class="tui-titlebar-btn">[&times;]</span>
+        <span class="tui-titlebar-title">frontpage &mdash; creative-coding &mdash; [hot]</span>
+        <span class="tui-titlebar-btn">[?]</span>
+      </div>
+      <!-- Main 3-pane layout -->
+      <div class="tui-main">
+        <!-- Left: Communities panel -->
+        <div class="tui-panel" style="position: relative;">
+          <div class="tui-panel-title">&#9776; Communities <span class="tui-count">5/12</span></div>
+          <div class="tui-divider-label">&#9733; Favorites</div>
+          <div class="tui-item selected">
+            <span class="tui-item-dot" style="background: #a6e3a1;"></span>
+            creative-coding
+            <span class="tui-item-badge" style="background: #f38ba8; color: #1e1e2e;">12</span>
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #89b4fa;"></span>
+            home-gardening
+            <span class="tui-item-badge" style="background: #45475a; color: #a6adc8;">3</span>
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #f9e2af;"></span>
+            photography
+          </div>
+          <div class="tui-divider"></div>
+          <div class="tui-divider-label">All</div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #f38ba8;"></span>
+            gaming
+            <span class="tui-item-badge" style="background: #45475a; color: #a6adc8;">7</span>
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #cba6f7;"></span>
+            music-production
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #94e2d5;"></span>
+            indie-dev
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #fab387;"></span>
+            atproto
+            <span class="tui-item-badge" style="background: #f38ba8; color: #1e1e2e;">!</span>
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dot" style="background: #74c7ec;"></span>
+            mechanical-keyboards
+          </div>
+          <div class="tui-divider"></div>
+          <div class="tui-divider-label">Rooms</div>
+          <div class="tui-item">
+            <span class="tui-item-dim">#</span>general <span class="tui-item-dim" style="margin-left: auto;">23</span>
+          </div>
+          <div class="tui-item">
+            <span class="tui-item-dim">#</span>show-tell <span class="tui-item-dim" style="margin-left: auto;">8</span>
+          </div>
+          <div class="tui-item">
+            <span style="color: #a6e3a1;">&#9679;</span> voice <span style="color: #a6e3a1; margin-left: auto;">[4]</span>
+          </div>
+          <div class="tui-scrollbar"><div class="tui-scrollbar-track"></div></div>
+        </div>
+
+        <!-- Center: Feed panel -->
+        <div class="tui-panel" style="position: relative;">
+          <div class="tui-panel-title">&#9650; Posts &mdash; creative-coding <span class="tui-count">hot &middot; 7/234</span></div>
+          <div class="tui-feed-item selected">
+            <div class="tui-feed-score">287</div>
+            <div>
+              <div class="tui-feed-title">Just finished this isometric city &mdash; 6 months of pixel work <span class="tui-tag">[img]</span></div>
+              <div class="tui-feed-meta"><a>pixelweaver</a> &middot; 3h &middot; &#9733; Artist</div>
+            </div>
+            <div class="tui-feed-comments">94 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score">203</div>
+            <div>
+              <div class="tui-feed-title">Live coding session: particle system from scratch <span class="tui-tag">[vid]</span></div>
+              <div class="tui-feed-meta"><a>synthwave</a> &middot; 12h &middot; &#9733; OG</div>
+            </div>
+            <div class="tui-feed-comments">67 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score">142</div>
+            <div>
+              <div class="tui-feed-title">GLSL Tutorial: Recreating The Matrix Code effect</div>
+              <div class="tui-feed-meta"><a>shader_wizard</a> &middot; 5h</div>
+            </div>
+            <div class="tui-feed-comments">47 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score">98</div>
+            <div>
+              <div class="tui-feed-title">New p5.js feature: WebGL2 integration changes everything</div>
+              <div class="tui-feed-meta"><a>shader_wizard</a> &middot; 3h</div>
+            </div>
+            <div class="tui-feed-comments">56 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score">76</div>
+            <div>
+              <div class="tui-feed-title">A History of Algorithmic Art (generativeart.org) <span class="tui-tag">[link]</span></div>
+              <div class="tui-feed-meta"><a>genart_weaver</a> &middot; 8h</div>
+            </div>
+            <div class="tui-feed-comments">23 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score">64</div>
+            <div>
+              <div class="tui-feed-title">Show: My first ray marcher in 200 lines of GLSL <span class="tui-tag">[img]</span></div>
+              <div class="tui-feed-meta"><a>pixel_nova</a> &middot; 6h</div>
+            </div>
+            <div class="tui-feed-comments">31 &#128172;</div>
+          </div>
+          <div class="tui-feed-item">
+            <div class="tui-feed-score" style="color: #f9e2af;">34</div>
+            <div>
+              <div class="tui-feed-title">Ask: Aseprite vs Pixelorama &mdash; what are you using?</div>
+              <div class="tui-feed-meta"><a>pixel_nova</a> &middot; 1d &middot; &#9733; Artist</div>
+            </div>
+            <div class="tui-feed-comments" style="color: #f38ba8;">89 &#128172;</div>
+          </div>
+          <div class="tui-scrollbar"><div class="tui-scrollbar-track" style="top: 28px; height: 90px;"></div></div>
+        </div>
+
+        <!-- Right: Preview panel -->
+        <div class="tui-panel">
+          <div class="tui-panel-title">&#9998; Preview</div>
+          <div class="tui-preview-header">
+            <div class="tui-preview-title">Just finished this isometric city &mdash; 6 months of pixel work</div>
+            <div class="tui-preview-byline"><span>pixelweaver</span> &middot; 3h ago &middot; &#9733; Artist &middot; 287 pts</div>
+          </div>
+          <div class="tui-preview-img">
+            <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=480&h=270&q=80" alt="">
+          </div>
+          <div class="tui-preview-body">
+            <p>Finally done! Started this as a weekend project and it turned into a 6-month obsession. Every building is hand-placed, every window has its own light cycle.</p>
+            <p>Tools: Aseprite for sprites, Tiled for placement, custom Python script for the day/night lighting system.</p>
+          </div>
+          <div class="tui-preview-actions">
+            <span>[o]pen</span>
+            <span>[c]omments</span>
+            <span>[s]ave</span>
+            <span>[r]eply</span>
+            <span>[u]pvote</span>
+          </div>
+        </div>
+      </div>
+      <!-- Status bar -->
+      <div class="tui-statusbar">
+        <span class="tui-statusbar-mode">NORMAL</span>
+        <span class="tui-statusbar-section">creative-coding</span>
+        <span class="tui-statusbar-section">hot</span>
+        <span class="tui-statusbar-right">
+          <span>134 online</span>
+          <span>wc@frontpage.fyi</span>
+        </span>
+      </div>
+      <div class="tui-statusbar-keys">
+        <span><kbd>j/k</kbd> navigate</span>
+        <span><kbd>Enter</kbd> open</span>
+        <span><kbd>u</kbd> upvote</span>
+        <span><kbd>s</kbd> save</span>
+        <span><kbd>c</kbd> comments</span>
+        <span><kbd>/</kbd> search</span>
+        <span><kbd>?</kbd> help</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 7: NEWSPAPER ===== -->
+<div id="style-newspaper" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Newspaper / Broadsheet</div>
+    <div class="style-desc">Content as editorial. Multi-column layout with real typographic hierarchy &mdash; dropcaps, rules, bylines, datelines. Community posts feel like published articles. Makes user-generated content feel important and permanent. Light mode, warm paper texture.</div>
+    <div class="style-inspo">Inspired by: The New York Times, The Guardian, old broadsheet newspapers, literary magazines</div>
+  </div>
+  <div class="explore-frame">
+    <div class="news-wrap">
+      <div class="news-masthead">
+        <div class="news-masthead-date">Wednesday, April 2, 2026</div>
+        <div class="news-masthead-title">The Creative Coding Times</div>
+        <div class="news-masthead-subtitle">A Frontpage Community &middot; Est. 2024 &middot; 2,847 Members</div>
+        <div class="news-masthead-nav">
+          <span class="active">Latest</span>
+          <span>Showcases</span>
+          <span>Tutorials</span>
+          <span>Discussion</span>
+          <span>Events</span>
+        </div>
+      </div>
+      <div class="news-body">
+        <!-- Three-column lead -->
+        <div class="news-headline-row">
+          <!-- Left column -->
+          <div class="news-col">
+            <div class="news-side-story">
+              <div class="news-side-category">Tutorial</div>
+              <div class="news-side-title">Recreating The Matrix Code Effect In Pure GLSL</div>
+              <div class="news-byline">By <strong>shader_wizard</strong> &middot; 47 replies</div>
+              <div class="news-side-img">
+                <img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=400&h=200&q=80" alt="">
+              </div>
+              <div class="news-side-excerpt">A step-by-step guide to the iconic falling characters, from column setup to phosphor glow simulation.</div>
+            </div>
+            <div class="news-side-story">
+              <div class="news-side-category">Community Poll</div>
+              <div class="news-side-title">Aseprite or Pixelorama? The Community Weighs In</div>
+              <div class="news-byline">By <strong>pixel_nova</strong> &middot; 89 replies</div>
+              <div class="news-side-excerpt">&ldquo;I&rsquo;ve been using Aseprite forever but Pixelorama is looking really good lately.&rdquo; The debate rages on across 89 passionate responses.</div>
+            </div>
+          </div>
+
+          <div class="news-divider-v"></div>
+
+          <!-- Center column: lead story -->
+          <div class="news-col">
+            <div class="news-lead-img">
+              <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=600&h=340&q=80" alt="">
+            </div>
+            <div class="news-lead-title">An Isometric City, Six Months in the Making</div>
+            <div class="news-byline">By <strong>pixelweaver</strong> &middot; 94 replies &middot; 287 upvotes</div>
+            <div class="news-lead-excerpt">It began as a weekend project. A few isometric tiles, a handful of buildings, a simple road grid. Six months later, pixelweaver has produced what many in the community are calling the most ambitious pixel art cityscape of the year. Every building hand-placed. Every window running its own light cycle through a custom Python script. The day-night system alone took three weeks to perfect.</div>
+          </div>
+
+          <div class="news-divider-v"></div>
+
+          <!-- Right column -->
+          <div class="news-col">
+            <div class="news-side-story">
+              <div class="news-side-category">Live Event</div>
+              <div class="news-side-title">Particle Systems From Scratch: A Live Coding Session</div>
+              <div class="news-byline">By <strong>synthwave</strong> &middot; 67 replies</div>
+              <div class="news-side-excerpt">Three hours, one microphone, zero preparation. Synthwave&rsquo;s latest live stream drew 400 viewers as they built a complete particle engine in real time.</div>
+            </div>
+            <div class="news-side-story">
+              <div class="news-side-category">Deep Dive</div>
+              <div class="news-side-title">From Vera Moln&aacute;r to Processing: A History of Algorithmic Art</div>
+              <div class="news-byline">By <strong>genart_weaver</strong> &middot; 23 replies</div>
+              <div class="news-side-excerpt">How algorithms became a medium for artistic expression, from the earliest plotters to today&rsquo;s generative renaissance.</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Bottom row -->
+        <div class="news-bottom-row">
+          <div>
+            <div class="news-bottom-title">WebGL2 Comes to p5.js: What It Means for Creative Coders</div>
+            <div class="news-bottom-meta">shader_wizard &middot; 56 replies</div>
+          </div>
+          <div>
+            <div class="news-bottom-title">Show &amp; Tell: My First Ray Marcher in 200 Lines</div>
+            <div class="news-bottom-meta">pixel_nova &middot; 31 replies</div>
+          </div>
+          <div>
+            <div class="news-bottom-title">Weekly Challenge #42: Generative Landscapes &mdash; Results</div>
+            <div class="news-bottom-meta">glitch_garden &middot; 18 replies</div>
+          </div>
+          <div>
+            <div class="news-bottom-title">New Member Introductions &mdash; March Thread</div>
+            <div class="news-bottom-meta">mod_team &middot; 67 replies</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ===== STYLE 8: BRUTALIST ===== -->
+<div id="style-brutalist" class="style-view">
+  <div class="style-header">
+    <div class="style-name">Brutalist</div>
+    <div class="style-desc">Raw, loud, unapologetic. Zero border-radius. Heavy borders. Monospace everything. Black and white with occasional screaming highlights. System font energy. Craigslist meets Bloomberg Terminal. Every element has hard edges and an opinion. Anti-design as a design choice.</div>
+    <div class="style-inspo">Inspired by: Craigslist, Bloomberg Terminal, brutalistwebsites.com, early web, Drudge Report</div>
+  </div>
+  <div class="explore-frame">
+    <div class="brut-wrap">
+      <!-- Marquee banner -->
+      <div class="brut-banner">
+        <span>*** LIVE ***</span>
+        <span class="brut-banner-marquee">CREATIVE CODING &amp; PIXEL ART &mdash; 134 ONLINE &mdash; 2,847 MEMBERS &mdash; HOT POSTS LOADING &mdash; FRONTPAGE.FYI</span>
+      </div>
+      <!-- Header -->
+      <div class="brut-header">
+        <div class="brut-logo">Front<br>page</div>
+        <div style="margin-bottom: 4px;">
+          <div style="font-size: 14px; font-weight: 900; text-transform: uppercase; letter-spacing: 2px;">Creative Coding &amp; Pixel Art</div>
+          <div style="font-size: 11px; color: #666;">2,847 members &bull; 134 online &bull; est. 2024</div>
+        </div>
+        <div class="brut-nav">
+          <div class="brut-nav-item active">Hot</div>
+          <div class="brut-nav-item">New</div>
+          <div class="brut-nav-item">Top</div>
+          <div class="brut-nav-item">Rising</div>
+        </div>
+      </div>
+      <div class="brut-body">
+        <!-- Feed -->
+        <div class="brut-feed">
+          <div class="brut-sort">
+            <span class="active">HOT</span>
+            <span>NEW</span>
+            <span>TOP</span>
+            <span>RISING</span>
+            <span style="margin-left: auto; border-right: none; border-left: 2px solid #000; background: #ff0; color: #000;">[+ POST]</span>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">287<small>pts</small></div>
+            <div class="brut-post-content">
+              <span class="brut-post-tag img">IMG</span>
+              <div class="brut-post-title">Just Finished This Isometric City &mdash; 6 Months Of Pixel Work</div>
+              <div class="brut-post-meta">by <a>pixelweaver</a> &bull; 3h ago</div>
+              <div class="brut-post-img">
+                <img src="https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=560&h=200&q=80" alt="">
+              </div>
+              <div class="brut-post-actions">
+                <span>94 COMMENTS</span>
+                <span>SAVE</span>
+                <span>SHARE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">203<small>pts</small></div>
+            <div class="brut-post-content">
+              <span class="brut-post-tag vid">VID</span>
+              <div class="brut-post-title">Live Coding Session: Building A Particle System From Scratch</div>
+              <div class="brut-post-meta">by <a>synthwave</a> &bull; 12h ago</div>
+              <div class="brut-post-actions">
+                <span>67 COMMENTS</span>
+                <span>SAVE</span>
+                <span>SHARE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">142<small>pts</small></div>
+            <div class="brut-post-content">
+              <div class="brut-post-title">GLSL Tutorial: Recreating The Matrix Code Effect</div>
+              <div class="brut-post-meta">by <a>shader_wizard</a> &bull; 5h ago</div>
+              <div class="brut-post-body">Step-by-step breakdown of the iconic falling characters using fragment shaders. Covers column setup, randomized selection, and phosphor glow.</div>
+              <div class="brut-post-actions">
+                <span>47 COMMENTS</span>
+                <span>SAVE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">98<small>pts</small></div>
+            <div class="brut-post-content">
+              <div class="brut-post-title">New P5.js Feature: WebGL2 Integration Changes Everything</div>
+              <div class="brut-post-meta">by <a>shader_wizard</a> &bull; 3h ago</div>
+              <div class="brut-post-actions">
+                <span>56 COMMENTS</span>
+                <span>SAVE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">76<small>pts</small></div>
+            <div class="brut-post-content">
+              <span class="brut-post-tag link">LINK</span>
+              <div class="brut-post-title">A History Of Algorithmic Art (generativeart.org)</div>
+              <div class="brut-post-meta">by <a>genart_weaver</a> &bull; 8h ago</div>
+              <div class="brut-post-actions">
+                <span>23 COMMENTS</span>
+                <span>SAVE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score">64<small>pts</small></div>
+            <div class="brut-post-content">
+              <span class="brut-post-tag img">IMG</span>
+              <div class="brut-post-title">Show: My First Ray Marcher In 200 Lines Of GLSL</div>
+              <div class="brut-post-meta">by <a>pixel_nova</a> &bull; 6h ago</div>
+              <div class="brut-post-actions">
+                <span>31 COMMENTS</span>
+                <span>SAVE</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-post">
+            <div class="brut-post-score" style="color: #f00;">34<small>pts</small></div>
+            <div class="brut-post-content">
+              <span class="brut-post-tag ask">ASK</span>
+              <div class="brut-post-title">Aseprite vs Pixelorama &mdash; What Are You Using?</div>
+              <div class="brut-post-meta">by <a>pixel_nova</a> &bull; 1d ago</div>
+              <div class="brut-post-actions">
+                <span style="color: #f00; font-weight: 900;">89 COMMENTS</span>
+                <span>SAVE</span>
+              </div>
+            </div>
+          </div>
+        </div>
+        <!-- Sidebar -->
+        <div class="brut-sidebar">
+          <div class="brut-sidebar-section">
+            <div class="brut-sidebar-title">&#9608; Community Stats</div>
+            <div class="brut-sidebar-body">
+              <div class="brut-sidebar-stat"><span>MEMBERS</span> <strong>2,847</strong></div>
+              <div class="brut-sidebar-stat"><span>ONLINE</span> <strong style="color: #0a0;">134</strong></div>
+              <div class="brut-sidebar-stat"><span>POSTS/DAY</span> <strong>47</strong></div>
+              <div class="brut-sidebar-stat"><span>EST.</span> <strong>2024</strong></div>
+            </div>
+          </div>
+          <div class="brut-sidebar-section">
+            <div class="brut-sidebar-title">&#9608; Trending Tags</div>
+            <div class="brut-sidebar-body">
+              <div style="font-size: 12px; line-height: 2;">
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block;">#shaders</span>
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block;">#pixel-art</span>
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block; background: #ff0;">#webgl</span>
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block;">#p5js</span>
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block;">#glsl</span>
+                <span style="border: 1px solid #000; padding: 2px 6px; margin: 2px; display: inline-block;">#generative</span>
+              </div>
+            </div>
+          </div>
+          <div class="brut-sidebar-section">
+            <div class="brut-sidebar-title">&#9608; Top This Week</div>
+            <div class="brut-sidebar-body">
+              <a class="brut-sidebar-link"><span class="brut-sidebar-link-score">287</span> Isometric city pixel art</a>
+              <a class="brut-sidebar-link"><span class="brut-sidebar-link-score">203</span> Live coding: particles</a>
+              <a class="brut-sidebar-link"><span class="brut-sidebar-link-score">142</span> Matrix GLSL tutorial</a>
+              <a class="brut-sidebar-link"><span class="brut-sidebar-link-score">098</span> p5.js WebGL2 news</a>
+            </div>
+          </div>
+          <div class="brut-sidebar-section">
+            <div class="brut-sidebar-title">&#9608; Atmo Feed</div>
+            <div class="brut-sidebar-body" style="font-size: 11px;">
+              <div style="padding: 3px 0; border-bottom: 1px dashed #ccc;">@genart.bsky &mdash; bioluminescent shaders [BSK]</div>
+              <div style="padding: 3px 0; border-bottom: 1px dashed #ccc;">@mattdes.ai &mdash; Pixel Art in the Age of AI [WW]</div>
+              <div style="padding: 3px 0; color: #f00; font-weight: 700;">@synthfm.live &mdash; Coding &amp; Chill [LIVE]</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  lucide.createIcons();
+
+  function showStyle(id) {
+    document.querySelectorAll('.style-view').forEach(v => v.classList.remove('active'));
+    document.querySelectorAll('.style-tab').forEach(t => t.classList.remove('active'));
+    document.getElementById('style-' + id).classList.add('active');
+    event.target.classList.add('active');
+    lucide.createIcons();
+  }
+</script>
+</body>
+</html>
