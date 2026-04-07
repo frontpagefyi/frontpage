@@ -24,4 +24,3 @@ fly deploy . -c ./apps/drainpipe/fly.toml --dockerfile ./apps/drainpipe/Dockerfi
 cargo drainpipe set-cursor 123 # set the cursor to 123 microseconds since epoch
 cargo drainpipe get-cursor # get the current cursor
 ```
-

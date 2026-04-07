@@ -21,4 +21,3 @@ Run Next.js pointing at this env file with `pnpm run dev-1pw`.
 You may need to run `op signin` beforehand, although on most systems the CLI should be integrated with your shell and pop up a sign-in window automatically when running `dev-1pw`.
 
 </details>
-
