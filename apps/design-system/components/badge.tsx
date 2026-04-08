@@ -1,4 +1,4 @@
-import { type LucideIcon } from "lucide-react";
+import { icons } from "lucide-react";
 
 type BadgeVariant = "artist" | "og" | "live" | "mod";
 
@@ -12,10 +12,14 @@ const variantStyles: Record<BadgeVariant, string> = {
 interface BadgeProps {
   variant: BadgeVariant;
   label: string;
-  icon?: LucideIcon;
+  icon?: string;
 }
 
-export function Badge({ variant, label, icon: IconComponent }: BadgeProps) {
+export function Badge({ variant, label, icon }: BadgeProps) {
+  const IconComponent = icon
+    ? icons[icon as keyof typeof icons]
+    : undefined;
+
   return (
     <span className={`inline-flex items-center gap-1 text-[10px] font-bold tracking-wide px-2 py-0.5 rounded-full uppercase whitespace-nowrap ${variantStyles[variant]}`}>
       {IconComponent && <IconComponent size={9} />}

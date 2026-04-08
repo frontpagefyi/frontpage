@@ -1,9 +1,7 @@
-import { type LucideIcon } from "lucide-react";
-
 export interface PostBadge {
   variant: "artist" | "og" | "live" | "mod";
   label: string;
-  icon?: LucideIcon;
+  icon?: string; // lucide icon name, e.g. "palette", "crown"
 }
 
 export interface LinkPreview {

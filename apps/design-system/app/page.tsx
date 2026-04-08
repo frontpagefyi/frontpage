@@ -1,6 +1,5 @@
 "use client";
 
-import { Palette, Star } from "lucide-react";
 import { Avatar } from "@/components/avatar";
 import { Badge } from "@/components/badge";
 import { FeedPost } from "@/components/feed-post";
@@ -12,7 +11,7 @@ const samplePost: Post = {
   initials: "AD",
   avatarBg: "linear-gradient(135deg, oklch(64.78% 0.1472 259), oklch(75% 0.18 75))",
   time: "3h ago",
-  badges: [{ variant: "artist", label: "Artist", icon: Palette }],
+  badges: [{ variant: "artist", label: "Artist", icon: "Palette" }],
   title: "Exploring OKLCH color spaces for design systems",
   body: "OKLCH provides perceptually uniform color manipulation, making it ideal for generating accessible and harmonious palettes across light and dark themes.",
   votes: 128,
@@ -56,8 +55,8 @@ export default function Home() {
       <section className="space-y-3">
         <h2 className="text-lg font-semibold">Badges</h2>
         <div className="flex items-center gap-2">
-          <Badge variant="artist" label="Artist" icon={Palette} />
-          <Badge variant="og" label="OG" icon={Star} />
+          <Badge variant="artist" label="Artist" icon="Palette" />
+          <Badge variant="og" label="OG" icon="Star" />
           <Badge variant="live" label="Live" />
           <Badge variant="mod" label="Mod" />
         </div>
