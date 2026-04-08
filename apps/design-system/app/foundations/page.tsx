@@ -1,8 +1,11 @@
+"use client";
+
+import { useState } from "react";
 import { ColorSwatch } from "@/components/color-swatch";
 import { TypeSpecimen } from "@/components/type-specimen";
+import { WeightSpecimen } from "@/components/weight-specimen";
 import { SpacingScale } from "@/components/spacing-scale";
 import { RadiusScale } from "@/components/radius-scale";
-import { WeightSpecimen } from "@/components/weight-specimen";
 import { ElevationScale } from "@/components/elevation-scale";
 import { ThemePreview } from "@/components/theme-preview";
 import { ComponentShowcase } from "@/components/component-showcase";
@@ -45,131 +48,171 @@ const indigoScale = [
   { name: "950", value: "oklch(23.78% 0.054 259)", cssVar: "--color-indigo-950" },
 ];
 
-export default function FoundationsPage() {
-  return (
-    <main className="p-8 max-w-4xl mx-auto space-y-12">
-      <div>
-        <h1 className="text-3xl font-bold">Foundations</h1>
-        <p className="text-text-muted mt-2">
-          Design tokens powering the Frontpage design system. Colors use OKLCH
-          for perceptual uniformity.
-        </p>
-      </div>
+const tabs = [
+  { id: "colors", label: "Colors", description: "Surface, text, and accent color tokens using OKLCH for perceptual uniformity." },
+  { id: "indigo", label: "Indigo Scale", description: "The 11-shade brand indigo scale from 50 to 950." },
+  { id: "themes", label: "Themes", description: "Community theme previews showing CSS custom property overrides." },
+  { id: "typography", label: "Typography", description: "Font specimens and weight showcase for all three typefaces." },
+  { id: "spacing", label: "Spacing", description: "Spacing tokens based on a 4px grid." },
+  { id: "radius", label: "Radius", description: "Border radius tokens for consistent rounding." },
+  { id: "elevation", label: "Elevation", description: "Shadow levels for layering and depth." },
+  { id: "components", label: "Components", description: "Core components built with the design tokens." },
+] as const;
 
-      {/* Surface Colors */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Surface Colors</h2>
-        <div className="grid grid-cols-5 gap-4">
-          {surfaceColors.map((color) => (
-            <ColorSwatch key={color.name} {...color} />
-          ))}
+type TabId = (typeof tabs)[number]["id"];
+
+function TabPanel({ id }: { id: TabId }) {
+  switch (id) {
+    case "colors":
+      return (
+        <div className="space-y-8">
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-text-secondary">Surface Colors</h3>
+            <div className="grid grid-cols-5 gap-4">
+              {surfaceColors.map((color) => (
+                <ColorSwatch key={color.name} {...color} />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-text-secondary">Text Colors</h3>
+            <div className="grid grid-cols-4 gap-4">
+              {textColors.map((color) => (
+                <ColorSwatch key={color.name} {...color} />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-lg font-semibold text-text-secondary">Accent Colors</h3>
+            <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
+              {accentColors.map((color) => (
+                <ColorSwatch key={color.name} {...color} />
+              ))}
+            </div>
+          </div>
         </div>
-      </section>
+      );
 
-      {/* Text Colors */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Text Colors</h2>
-        <div className="grid grid-cols-4 gap-4">
-          {textColors.map((color) => (
-            <ColorSwatch key={color.name} {...color} />
-          ))}
-        </div>
-      </section>
-
-      {/* Accent Colors */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Accent Colors</h2>
-        <div className="grid grid-cols-6 gap-4">
-          {accentColors.map((color) => (
-            <ColorSwatch key={color.name} {...color} />
-          ))}
-        </div>
-      </section>
-
-      {/* Indigo Scale */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Indigo Scale</h2>
+    case "indigo":
+      return (
         <div className="grid grid-cols-11 gap-2">
           {indigoScale.map((color) => (
             <ColorSwatch key={color.name} {...color} />
           ))}
         </div>
-      </section>
+      );
 
-      {/* Community Themes */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Community Themes</h2>
-        <p className="text-sm text-text-muted">
-          Communities can override CSS custom properties to create distinct
-          visual identities while sharing the same component library.
+    case "themes":
+      return <ThemePreview />;
+
+    case "typography":
+      return (
+        <div className="space-y-8">
+          <div className="space-y-8">
+            <TypeSpecimen
+              family="Source Sans 3"
+              cssClass="font-sans"
+              description="Primary body typeface. Used for all UI text, paragraphs, and labels."
+            />
+            <TypeSpecimen
+              family="Source Serif 4"
+              cssClass="font-serif"
+              description="Heading typeface. Used for titles, post headings, and display text."
+            />
+            <TypeSpecimen
+              family="JetBrains Mono"
+              cssClass="font-mono"
+              description="Monospace typeface. Used for code snippets, token values, and technical content."
+            />
+          </div>
+          <div className="space-y-8">
+            <h3 className="text-lg font-semibold text-text-secondary">Weights</h3>
+            <WeightSpecimen family="Source Sans 3" cssClass="font-sans" />
+            <WeightSpecimen family="Source Serif 4" cssClass="font-serif" />
+            <WeightSpecimen family="JetBrains Mono" cssClass="font-mono" />
+          </div>
+        </div>
+      );
+
+    case "spacing":
+      return <SpacingScale />;
+
+    case "radius":
+      return <RadiusScale />;
+
+    case "elevation":
+      return <ElevationScale />;
+
+    case "components":
+      return <ComponentShowcase />;
+  }
+}
+
+export default function FoundationsPage() {
+  const [activeTab, setActiveTab] = useState<TabId>("colors");
+  const activeTabMeta = tabs.find((t) => t.id === activeTab)!;
+
+  return (
+    <main className="p-4 lg:p-8">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold">Foundations</h1>
+        <p className="text-text-muted mt-2">
+          Design tokens powering the Frontpage design system.
         </p>
-        <ThemePreview />
-      </section>
+      </div>
 
-      {/* Typography */}
-      <section className="space-y-8">
-        <h2 className="text-xl font-semibold">Typography</h2>
-        <TypeSpecimen
-          family="Source Sans 3"
-          cssClass="font-sans"
-          description="Primary body typeface. Used for all UI text, paragraphs, and labels."
-        />
-        <TypeSpecimen
-          family="Source Serif 4"
-          cssClass="font-serif"
-          description="Heading typeface. Used for titles, post headings, and display text."
-        />
-        <TypeSpecimen
-          family="JetBrains Mono"
-          cssClass="font-mono"
-          description="Monospace typeface. Used for code snippets, token values, and technical content."
-        />
-      </section>
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* Mobile: horizontal scrollable pills */}
+        <nav className="flex lg:hidden gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              onClick={() => setActiveTab(tab.id)}
+              className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-medium transition-colors ${
+                activeTab === tab.id
+                  ? "bg-bg-elevated text-text-primary"
+                  : "text-text-muted hover:text-text-secondary hover:bg-bg-elevated/50"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </nav>
 
-      {/* Font Weights */}
-      <section className="space-y-8">
-        <h2 className="text-xl font-semibold">Font Weights</h2>
-        <WeightSpecimen family="Source Sans 3" cssClass="font-sans" />
-        <WeightSpecimen family="Source Serif 4" cssClass="font-serif" />
-        <WeightSpecimen family="JetBrains Mono" cssClass="font-mono" />
-      </section>
+        {/* Desktop: vertical sidebar tabs */}
+        <nav className="hidden lg:block w-[200px] shrink-0 sticky top-8 self-start">
+          <ul className="space-y-0.5">
+            {tabs.map((tab) => (
+              <li key={tab.id}>
+                <button
+                  onClick={() => setActiveTab(tab.id)}
+                  className={`w-full text-left px-3 py-2 text-[13px] rounded-md transition-colors ${
+                    activeTab === tab.id
+                      ? "bg-bg-elevated text-text-primary font-medium border-l-2 border-accent-secondary"
+                      : "text-text-muted hover:text-text-secondary hover:bg-bg-elevated/50"
+                  }`}
+                >
+                  {tab.label}
+                </button>
+              </li>
+            ))}
+          </ul>
+        </nav>
 
-      {/* Spacing */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Spacing Scale</h2>
-        <p className="text-sm text-text-muted">
-          Based on a 4px grid. All spacing tokens are multiples of the base unit.
-        </p>
-        <SpacingScale />
-      </section>
-
-      {/* Radius */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Radius Scale</h2>
-        <p className="text-sm text-text-muted">
-          Border radius tokens for consistent rounding across components.
-        </p>
-        <RadiusScale />
-      </section>
-
-      {/* Elevation */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Elevation Scale</h2>
-        <p className="text-sm text-text-muted">
-          Shadow levels for layering and depth. Higher levels indicate elements
-          closer to the user.
-        </p>
-        <ElevationScale />
-      </section>
-
-      {/* Component Preview */}
-      <section className="space-y-4">
-        <h2 className="text-xl font-semibold">Component Preview</h2>
-        <p className="text-sm text-text-muted">
-          Core components built with the design tokens above.
-        </p>
-        <ComponentShowcase />
-      </section>
+        {/* Content area */}
+        <div className="flex-1 min-w-0">
+          <div
+            key={activeTab}
+            className="animate-fade-in"
+          >
+            <div className="mb-6">
+              <h2 className="text-xl font-semibold">{activeTabMeta.label}</h2>
+              <p className="text-sm text-text-muted mt-1">{activeTabMeta.description}</p>
+            </div>
+            <TabPanel id={activeTab} />
+          </div>
+        </div>
+      </div>
     </main>
   );
 }
