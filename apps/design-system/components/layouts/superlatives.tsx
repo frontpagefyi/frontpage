@@ -37,7 +37,7 @@ const awards = [
   },
 ];
 
-export function Superlatives() {
+export function SuperlativesLayout() {
   return (
     <div className="p-5">
       <div className="mx-auto grid max-w-[600px] grid-cols-2 gap-3">

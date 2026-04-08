@@ -9,7 +9,7 @@ const openDoors = [
 
 const closedDoors = [8, 9, 10, 11, 12, 13, 14, 15];
 
-export function Advent() {
+export function AdventLayout() {
   return (
     <div className="p-5">
       <div className="mx-auto grid max-w-[500px] grid-cols-5 gap-2">

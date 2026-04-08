@@ -4,7 +4,7 @@ const reels = [
   { label: "Mood", value: "\uD83D\uDD25 Hot" },
 ];
 
-export function SlotMachine() {
+export function SlotMachineLayout() {
   return (
     <div className="p-6">
       <div

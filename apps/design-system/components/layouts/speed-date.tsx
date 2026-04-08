@@ -1,4 +1,4 @@
-export function SpeedDate() {
+export function SpeedDateLayout() {
   return (
     <div className="mx-auto max-w-[480px] p-5 text-center">
       {/* Main card */}

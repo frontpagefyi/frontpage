@@ -45,7 +45,7 @@ const forecast = [
   { day: "Fri", icon: "\uD83D\uDD25", temp: "HOT" },
 ];
 
-export function Weather() {
+export function WeatherLayout() {
   return (
     <div className="p-5">
       <div

@@ -22,7 +22,7 @@ const pieces = [
   },
 ];
 
-export function Museum() {
+export function MuseumLayout() {
   return (
     <div
       className="min-h-[340px] p-8"

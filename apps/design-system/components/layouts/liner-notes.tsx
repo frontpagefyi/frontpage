@@ -8,7 +8,7 @@ const tracks = [
   { title: "7. Perlin Noise", dur: "2:00" },
 ];
 
-export function LinerNotes() {
+export function LinerNotesLayout() {
   return (
     <div className="p-5">
       <div

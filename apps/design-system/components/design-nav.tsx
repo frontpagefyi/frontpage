@@ -8,6 +8,7 @@ const navLinks = [
   { href: "/foundations", label: "Foundations" },
   { href: "/demo", label: "Demo" },
   { href: "/catalog", label: "Catalog" },
+  { href: "/explorations", label: "Explorations" },
 ];
 
 export function DesignNav() {

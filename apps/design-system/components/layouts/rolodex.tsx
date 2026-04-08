@@ -1,4 +1,4 @@
-export function Rolodex() {
+export function RolodexLayout() {
   return (
     <div className="flex justify-center p-6">
       <div className="relative h-[200px] w-[320px]" style={{ perspective: "600px" }}>

@@ -22,7 +22,7 @@ const entries = [
   },
 ];
 
-export function Obituaries() {
+export function ObituariesLayout() {
   return (
     <div className="mx-auto max-w-[560px] p-5">
       {/* Header */}

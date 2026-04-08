@@ -1,4 +1,4 @@
-export function Evidence() {
+export function EvidenceLayout() {
   return (
     <div
       className="relative p-5"
