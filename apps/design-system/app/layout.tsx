@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { sourceSans, sourceSerif, jetbrainsMono } from "./fonts";
+import { DesignNav } from "@/components/design-nav";
 import "./globals.css";
 
 export const metadata: Metadata = {
@@ -17,7 +18,10 @@ export default function RootLayout({
       lang="en"
       className={`${sourceSans.variable} ${sourceSerif.variable} ${jetbrainsMono.variable}`}
     >
-      <body>{children}</body>
+      <body>
+        <DesignNav />
+        {children}
+      </body>
     </html>
   );
 }
