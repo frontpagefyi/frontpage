@@ -13,6 +13,11 @@ const navLinks = [
 export function DesignNav() {
   const pathname = usePathname();
 
+  // Hide nav on the full-screen demo page
+  if (pathname.startsWith("/demo")) {
+    return null;
+  }
+
   return (
     <nav className="flex items-center gap-1 px-4 py-2 bg-bg-surface border-b border-bg-elevated">
       <span className="text-sm font-semibold text-text-primary mr-4 font-serif">
