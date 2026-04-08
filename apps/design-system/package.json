@@ -9,6 +9,7 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "lucide-react": "^1.7.0",
     "next": "catalog:",
     "react": "catalog:",
     "react-dom": "catalog:"
