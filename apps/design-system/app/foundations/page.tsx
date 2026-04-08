@@ -7,7 +7,6 @@ import { WeightSpecimen } from "@/components/weight-specimen";
 import { SpacingScale } from "@/components/spacing-scale";
 import { RadiusScale } from "@/components/radius-scale";
 import { ElevationScale } from "@/components/elevation-scale";
-import { ThemePreview } from "@/components/theme-preview";
 import { ComponentShowcase } from "@/components/component-showcase";
 
 const surfaceColors = [
@@ -49,14 +48,11 @@ const indigoScale = [
 ];
 
 const tabs = [
-  { id: "colors", label: "Colors", description: "Surface, text, and accent color tokens using OKLCH for perceptual uniformity." },
-  { id: "indigo", label: "Indigo Scale", description: "The 11-shade brand indigo scale from 50 to 950." },
-  { id: "themes", label: "Themes", description: "Community theme previews showing CSS custom property overrides." },
-  { id: "typography", label: "Typography", description: "Font specimens and weight showcase for all three typefaces." },
-  { id: "spacing", label: "Spacing", description: "Spacing tokens based on a 4px grid." },
-  { id: "radius", label: "Radius", description: "Border radius tokens for consistent rounding." },
-  { id: "elevation", label: "Elevation", description: "Shadow levels for layering and depth." },
-  { id: "components", label: "Components", description: "Core components built with the design tokens." },
+  { id: "colors", label: "Colors", description: "Surface, text, accent, and brand color tokens. All OKLCH for perceptual uniformity." },
+  { id: "typography", label: "Typography", description: "Three typefaces — sans, serif, mono — with weights and scale specimens." },
+  { id: "spacing", label: "Spacing", description: "4px base grid. All spacing tokens are multiples of the base unit." },
+  { id: "shape", label: "Shape & Depth", description: "Border radius tokens and shadow elevation levels." },
+  { id: "components", label: "Components", description: "Core UI components built with the design tokens." },
 ] as const;
 
 type TabId = (typeof tabs)[number]["id"];
@@ -65,9 +61,9 @@ function TabPanel({ id }: { id: TabId }) {
   switch (id) {
     case "colors":
       return (
-        <div className="space-y-8">
+        <div className="space-y-10">
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary">Surface Colors</h3>
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Surfaces</h3>
             <div className="grid grid-cols-5 gap-4">
               {surfaceColors.map((color) => (
                 <ColorSwatch key={color.name} {...color} />
@@ -75,7 +71,7 @@ function TabPanel({ id }: { id: TabId }) {
             </div>
           </div>
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary">Text Colors</h3>
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Text</h3>
             <div className="grid grid-cols-4 gap-4">
               {textColors.map((color) => (
                 <ColorSwatch key={color.name} {...color} />
@@ -83,9 +79,17 @@ function TabPanel({ id }: { id: TabId }) {
             </div>
           </div>
           <div className="space-y-4">
-            <h3 className="text-lg font-semibold text-text-secondary">Accent Colors</h3>
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Accents</h3>
             <div className="grid grid-cols-3 gap-4 sm:grid-cols-6">
               {accentColors.map((color) => (
+                <ColorSwatch key={color.name} {...color} />
+              ))}
+            </div>
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Brand Indigo</h3>
+            <div className="grid grid-cols-11 gap-1.5">
+              {indigoScale.map((color) => (
                 <ColorSwatch key={color.name} {...color} />
               ))}
             </div>
@@ -93,40 +97,28 @@ function TabPanel({ id }: { id: TabId }) {
         </div>
       );
 
-    case "indigo":
-      return (
-        <div className="grid grid-cols-11 gap-2">
-          {indigoScale.map((color) => (
-            <ColorSwatch key={color.name} {...color} />
-          ))}
-        </div>
-      );
-
-    case "themes":
-      return <ThemePreview />;
-
     case "typography":
       return (
-        <div className="space-y-8">
+        <div className="space-y-10">
           <div className="space-y-8">
             <TypeSpecimen
               family="Source Sans 3"
               cssClass="font-sans"
-              description="Primary body typeface. Used for all UI text, paragraphs, and labels."
+              description="Primary body typeface. UI text, paragraphs, labels."
             />
             <TypeSpecimen
               family="Source Serif 4"
               cssClass="font-serif"
-              description="Heading typeface. Used for titles, post headings, and display text."
+              description="Heading typeface. Titles, post headings, display text."
             />
             <TypeSpecimen
               family="JetBrains Mono"
               cssClass="font-mono"
-              description="Monospace typeface. Used for code snippets, token values, and technical content."
+              description="Monospace. Code snippets, token values, technical content."
             />
           </div>
-          <div className="space-y-8">
-            <h3 className="text-lg font-semibold text-text-secondary">Weights</h3>
+          <div className="space-y-6">
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Weights</h3>
             <WeightSpecimen family="Source Sans 3" cssClass="font-sans" />
             <WeightSpecimen family="Source Serif 4" cssClass="font-serif" />
             <WeightSpecimen family="JetBrains Mono" cssClass="font-mono" />
@@ -137,11 +129,19 @@ function TabPanel({ id }: { id: TabId }) {
     case "spacing":
       return <SpacingScale />;
 
-    case "radius":
-      return <RadiusScale />;
-
-    case "elevation":
-      return <ElevationScale />;
+    case "shape":
+      return (
+        <div className="space-y-10">
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Border Radius</h3>
+            <RadiusScale />
+          </div>
+          <div className="space-y-4">
+            <h3 className="text-sm font-semibold text-text-secondary uppercase tracking-wide">Elevation</h3>
+            <ElevationScale />
+          </div>
+        </div>
+      );
 
     case "components":
       return <ComponentShowcase />;
@@ -155,14 +155,19 @@ export default function FoundationsPage() {
   return (
     <main className="p-4 lg:p-8">
       <div className="mb-6">
-        <h1 className="text-3xl font-bold">Foundations</h1>
-        <p className="text-text-muted mt-2">
+        <h1
+          className="font-serif text-3xl font-bold"
+          style={{ lineHeight: "1.2", letterSpacing: "-0.025em" }}
+        >
+          Foundations
+        </h1>
+        <p className="text-text-muted mt-1 text-sm">
           Design tokens powering the Frontpage design system.
         </p>
       </div>
 
-      <div className="flex flex-col lg:flex-row gap-6">
-        {/* Mobile: horizontal scrollable pills */}
+      <div className="flex flex-col lg:flex-row gap-8">
+        {/* Mobile: horizontal pills */}
         <nav className="flex lg:hidden gap-2 overflow-x-auto pb-2 -mx-4 px-4 scrollbar-none">
           {tabs.map((tab) => (
             <button
@@ -179,8 +184,8 @@ export default function FoundationsPage() {
           ))}
         </nav>
 
-        {/* Desktop: vertical sidebar tabs */}
-        <nav className="hidden lg:block w-[200px] shrink-0 sticky top-8 self-start">
+        {/* Desktop: vertical sidebar */}
+        <nav className="hidden lg:block w-44 shrink-0 sticky top-16 self-start">
           <ul className="space-y-0.5">
             {tabs.map((tab) => (
               <li key={tab.id}>
@@ -199,12 +204,9 @@ export default function FoundationsPage() {
           </ul>
         </nav>
 
-        {/* Content area */}
-        <div className="flex-1 min-w-0">
-          <div
-            key={activeTab}
-            className="animate-fade-in"
-          >
+        {/* Content */}
+        <div className="flex-1 min-w-0 max-w-3xl">
+          <div key={activeTab} className="animate-fade-in">
             <div className="mb-6">
               <h2 className="text-xl font-semibold">{activeTabMeta.label}</h2>
               <p className="text-sm text-text-muted mt-1">{activeTabMeta.description}</p>

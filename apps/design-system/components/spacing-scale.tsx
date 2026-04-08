@@ -15,7 +15,7 @@ export function SpacingScale() {
     <div className="space-y-2">
       {spacingTokens.map(({ name, value }) => (
         <div key={name} className="flex items-center gap-4">
-          <span className="text-xs font-mono text-text-muted w-16 shrink-0 text-right">
+          <span className="text-xs font-mono text-text-muted w-24 shrink-0 text-right whitespace-nowrap">
             {name} ({value})
           </span>
           <div
