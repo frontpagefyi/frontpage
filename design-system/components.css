@@ -1658,6 +1658,7 @@ body.mobile-view .mockup-mobile { display: flex; justify-content: center; paddin
   transition: background-color 0.4s ease, color 0.3s ease;
   position: relative;
   height: 100vh;
+  overflow-x: hidden;
   overflow-y: auto;
 }
 
