@@ -1,6 +1,11 @@
 import { ColorSwatch } from "@/components/color-swatch";
 import { TypeSpecimen } from "@/components/type-specimen";
 import { SpacingScale } from "@/components/spacing-scale";
+import { RadiusScale } from "@/components/radius-scale";
+import { WeightSpecimen } from "@/components/weight-specimen";
+import { ElevationScale } from "@/components/elevation-scale";
+import { ThemePreview } from "@/components/theme-preview";
+import { ComponentShowcase } from "@/components/component-showcase";
 
 const surfaceColors = [
   { name: "bg-base", value: "oklch(13.6% 0.02 270)", cssVar: "--color-bg-base" },
@@ -91,6 +96,16 @@ export default function FoundationsPage() {
         </div>
       </section>
 
+      {/* Community Themes */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Community Themes</h2>
+        <p className="text-sm text-text-muted">
+          Communities can override CSS custom properties to create distinct
+          visual identities while sharing the same component library.
+        </p>
+        <ThemePreview />
+      </section>
+
       {/* Typography */}
       <section className="space-y-8">
         <h2 className="text-xl font-semibold">Typography</h2>
@@ -111,6 +126,14 @@ export default function FoundationsPage() {
         />
       </section>
 
+      {/* Font Weights */}
+      <section className="space-y-8">
+        <h2 className="text-xl font-semibold">Font Weights</h2>
+        <WeightSpecimen family="Source Sans 3" cssClass="font-sans" />
+        <WeightSpecimen family="Source Serif 4" cssClass="font-serif" />
+        <WeightSpecimen family="JetBrains Mono" cssClass="font-mono" />
+      </section>
+
       {/* Spacing */}
       <section className="space-y-4">
         <h2 className="text-xl font-semibold">Spacing Scale</h2>
@@ -118,6 +141,34 @@ export default function FoundationsPage() {
           Based on a 4px grid. All spacing tokens are multiples of the base unit.
         </p>
         <SpacingScale />
+      </section>
+
+      {/* Radius */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Radius Scale</h2>
+        <p className="text-sm text-text-muted">
+          Border radius tokens for consistent rounding across components.
+        </p>
+        <RadiusScale />
+      </section>
+
+      {/* Elevation */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Elevation Scale</h2>
+        <p className="text-sm text-text-muted">
+          Shadow levels for layering and depth. Higher levels indicate elements
+          closer to the user.
+        </p>
+        <ElevationScale />
+      </section>
+
+      {/* Component Preview */}
+      <section className="space-y-4">
+        <h2 className="text-xl font-semibold">Component Preview</h2>
+        <p className="text-sm text-text-muted">
+          Core components built with the design tokens above.
+        </p>
+        <ComponentShowcase />
       </section>
     </main>
   );
