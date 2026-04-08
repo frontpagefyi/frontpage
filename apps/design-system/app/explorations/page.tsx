@@ -7,6 +7,12 @@ const explorations = [
     description: "Forum table rows that expand inline to show full threaded discussions. Click a row to read, click again to collapse. Best of both worlds.",
     status: "Live",
   },
+  {
+    href: "/explorations/threaded-forum",
+    title: "Threaded Forum",
+    description: "A full-page interactive forum with sidebar navigation, sticky threads, hot reply indicators, and community theming. Classic forum table layout with modern design tokens.",
+    status: "Live",
+  },
 ];
 
 export default function ExplorationsPage() {
