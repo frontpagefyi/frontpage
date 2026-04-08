@@ -37,7 +37,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "date-fns": "^3.6.0",
-    "drizzle-orm": "^0.44.4",
+    "drizzle-orm": "^0.45.2",
     "flags": "^4.0.5",
     "jose": "^5.10.0",
     "next": "catalog:",
