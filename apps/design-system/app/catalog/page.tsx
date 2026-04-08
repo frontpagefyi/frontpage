@@ -1,4 +1,5 @@
 import { LayoutPreview } from "@/components/layout-preview";
+import { CatalogToc } from "@/components/catalog-toc";
 import { ForumLayout } from "@/components/layouts/forum";
 import { TimelineLayout } from "@/components/layouts/timeline";
 import { MagazineLayout } from "@/components/layouts/magazine";
@@ -81,45 +82,46 @@ const layouts = [
   { number: 39, name: "Newspaper Obituaries", vibe: "RIP to dead threads", description: "For dead threads only. \"Here lies...\" with cause of death and survivors. The thread graveyard.", component: ObituariesLayout },
 ];
 
+const tocItems = layouts.map((l) => ({
+  number: l.number,
+  name: l.name,
+  id: l.name.toLowerCase().replace(/\s+/g, "-"),
+}));
+
 export default function CatalogPage() {
   return (
-    <main className="py-12">
-      <div className="max-w-[960px] mx-auto px-6 mb-12">
-        <h1
-          className="font-serif text-4xl font-bold mb-2"
-          style={{ lineHeight: "1.2", letterSpacing: "-0.025em" }}
-        >
-          Layout Catalog
-        </h1>
-        <p className="text-text-secondary max-w-[600px]">
-          Alternative ways to display community content that aren&apos;t Reddit-style cards. Each preview uses the same sample data rendered in a different layout paradigm.
-        </p>
-      </div>
+    <div className="flex gap-0">
+      {/* Sidebar TOC */}
+      <aside className="hidden lg:block w-56 shrink-0 pl-6 pt-12">
+        <CatalogToc items={tocItems} />
+      </aside>
 
-      {/* Sticky nav */}
-      <nav className="sticky top-12 z-40 bg-bg-base border-b border-bg-elevated py-3 px-6 mb-8 flex gap-2 overflow-x-auto">
-        {layouts.map((layout) => (
-          <a
-            key={layout.name}
-            href={`#${layout.name.toLowerCase().replace(/\s+/g, "-")}`}
-            className="text-[11px] font-semibold text-text-muted px-2.5 py-1 rounded-full bg-bg-surface border border-bg-elevated whitespace-nowrap transition-colors hover:text-text-primary hover:border-accent-secondary"
+      {/* Main content */}
+      <main className="flex-1 min-w-0 py-12">
+        <div className="max-w-[960px] mx-auto px-6 mb-12">
+          <h1
+            className="font-serif text-4xl font-bold mb-2"
+            style={{ lineHeight: "1.2", letterSpacing: "-0.025em" }}
           >
-            {layout.number}. {layout.name}
-          </a>
-        ))}
-      </nav>
+            Layout Catalog
+          </h1>
+          <p className="text-text-secondary max-w-[600px]">
+            Alternative ways to display community content that aren&apos;t Reddit-style cards. Each preview uses the same sample data rendered in a different layout paradigm.
+          </p>
+        </div>
 
-      {layouts.map((layout) => (
-        <LayoutPreview
-          key={layout.number}
-          number={layout.number}
-          name={layout.name}
-          vibe={layout.vibe}
-          description={layout.description}
-        >
-          <layout.component />
-        </LayoutPreview>
-      ))}
-    </main>
+        {layouts.map((layout) => (
+          <LayoutPreview
+            key={layout.number}
+            number={layout.number}
+            name={layout.name}
+            vibe={layout.vibe}
+            description={layout.description}
+          >
+            <layout.component />
+          </LayoutPreview>
+        ))}
+      </main>
+    </div>
   );
 }
