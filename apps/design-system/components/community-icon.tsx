@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface CommunityIconProps {
   icon?: string;
   name?: string;
@@ -15,11 +17,12 @@ export function CommunityIcon({
 
   if (icon) {
     return (
-      <img
+      <Image
         src={icon}
         alt=""
+        width={size}
+        height={size}
         className={`rounded-lg object-cover overflow-hidden ${className}`}
-        style={{ width: size, height: size }}
       />
     );
   }

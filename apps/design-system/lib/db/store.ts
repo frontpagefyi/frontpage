@@ -13,6 +13,7 @@ import type {
   PostData,
   CommentData,
   CommunityData,
+  UserProfileData,
   VoteData,
   SaveData,
   MembershipData,
@@ -24,6 +25,7 @@ interface Store {
   communities: CommunityData[];
   posts: PostData[];
   comments: CommentData[];
+  users: UserProfileData[];
   votes: VoteData[];
   saves: SaveData[];
   memberships: MembershipData[];
@@ -33,6 +35,7 @@ const store: Store = {
   communities: [],
   posts: [],
   comments: [],
+  users: [],
   votes: [],
   saves: [],
   memberships: [],
@@ -54,15 +57,153 @@ function timeAgoToDate(timeAgo: string): Date {
   }
 }
 
-let nextId = 1;
-function genId(prefix: string): string {
-  return `${prefix}_${(nextId++).toString(36).padStart(4, "0")}`;
-}
-
 // ── Seed data ──
 
 function seed() {
   // Communities
+  // Users
+  const users: UserProfileData[] = [
+    {
+      username: "pixelweaver",
+      displayName: "Pixel Weaver",
+      initials: "pw",
+      avatarBg: "var(--color-indigo-600)",
+      avatarUrl: "https://i.pravatar.cc/200?u=pixelweaver",
+      bannerUrl: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Isometric artist and pixel art obsessive. Building worlds one tile at a time. Currently working on a city simulator with hand-placed shadows.",
+      handle: "pixelweaver.bsky.social",
+      joinedAt: timeAgoToDate("180d"),
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+    },
+    {
+      username: "shader_wizard",
+      displayName: "Shader Wizard",
+      initials: "sw",
+      avatarBg: "oklch(50% 0.15 180)",
+      avatarUrl: "https://i.pravatar.cc/200?u=shader_wizard",
+      bannerUrl: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "GLSL / WebGPU enthusiast. Writing shader tutorials and building generative art tools. Previously at Shadertoy.",
+      handle: "shaderwiz.bsky.social",
+      joinedAt: timeAgoToDate("365d"),
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+    },
+    {
+      username: "synthwave",
+      displayName: "Synthwave",
+      initials: "sy",
+      avatarBg: "oklch(60% 0.2 30)",
+      avatarUrl: "https://i.pravatar.cc/200?u=synthwave",
+      bannerUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Live coder, particle systems addict, retro futurist. Streaming creative coding sessions every Friday. Building a music visualiser in Rust.",
+      handle: "synthwave.frontpage.fyi",
+      joinedAt: timeAgoToDate("400d"),
+      badges: [{ variant: "og", icon: "Star", label: "OG" }, { variant: "live", icon: "Radio", label: "Live" }],
+    },
+    {
+      username: "pixel_nova",
+      displayName: "Pixel Nova",
+      initials: "pn",
+      avatarBg: "oklch(55% 0.18 310)",
+      avatarUrl: "https://i.pravatar.cc/200?u=pixel_nova",
+      bio: "Sprite artist and animation hobbyist. Aseprite evangelist. Making a game about mushrooms.",
+      handle: "pixelnova.bsky.social",
+      joinedAt: timeAgoToDate("90d"),
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+    },
+    {
+      username: "genart_weaver",
+      displayName: "Generative Weaver",
+      initials: "gw",
+      avatarBg: "oklch(55% 0.15 145)",
+      avatarUrl: "https://i.pravatar.cc/200?u=genart_weaver",
+      bio: "Algorithmic art historian and Processing sketcher. Researching the intersection of code and craft.",
+      handle: "genweaver.bsky.social",
+      joinedAt: timeAgoToDate("200d"),
+      badges: [],
+    },
+    {
+      username: "glitch_garden",
+      displayName: "Glitch Garden",
+      initials: "gg",
+      avatarBg: "oklch(55% 0.2 350)",
+      avatarUrl: "https://i.pravatar.cc/200?u=glitch_garden",
+      bio: "Community moderator. Keeping the creative space welcoming and weird. DMs open for feedback.",
+      handle: "glitchgarden.frontpage.fyi",
+      joinedAt: timeAgoToDate("500d"),
+      badges: [{ variant: "mod", icon: "Shield", label: "Mod" }],
+    },
+    {
+      username: "arcadeking",
+      displayName: "Arcade King",
+      initials: "ak",
+      avatarBg: "oklch(55% 0.2 350)",
+      avatarUrl: "https://i.pravatar.cc/200?u=arcadeking",
+      bannerUrl: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Game jam organiser and retro hardware collector. Running the weekly jam since 2024. CRT hoarder.",
+      handle: "arcadeking.bsky.social",
+      joinedAt: timeAgoToDate("300d"),
+      badges: [],
+    },
+    {
+      username: "8bit_betty",
+      displayName: "8-Bit Betty",
+      initials: "8b",
+      avatarBg: "oklch(65% 0.18 80)",
+      avatarUrl: "https://i.pravatar.cc/200?u=8bit_betty",
+      bio: "Game Boy Camera photographer. Hot take machine. Making a zine about low-res aesthetics.",
+      handle: "8bitbetty.bsky.social",
+      joinedAt: timeAgoToDate("150d"),
+      badges: [],
+    },
+    {
+      username: "crt_enjoyer",
+      displayName: "CRT Enjoyer",
+      initials: "ct",
+      avatarBg: "oklch(60% 0.15 200)",
+      avatarUrl: "https://i.pravatar.cc/200?u=crt_enjoyer",
+      bio: "Analogue video enthusiast. Restoring vintage monitors and building RGB mod guides.",
+      handle: "crtfan.bsky.social",
+      joinedAt: timeAgoToDate("120d"),
+      badges: [],
+    },
+    {
+      username: "greenthumb",
+      displayName: "Green Thumb",
+      initials: "gt",
+      avatarBg: "oklch(55% 0.15 145)",
+      avatarUrl: "https://i.pravatar.cc/200?u=greenthumb",
+      bannerUrl: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Zone 7b gardener. Companion planting nerd. Growing enough tomatoes to feed the neighbourhood.",
+      handle: "greenthumb.bsky.social",
+      joinedAt: timeAgoToDate("250d"),
+      badges: [],
+    },
+    {
+      username: "lenscraft",
+      displayName: "Lens Craft",
+      initials: "lc",
+      avatarBg: "oklch(55% 0.1 60)",
+      avatarUrl: "https://i.pravatar.cc/200?u=lenscraft",
+      bannerUrl: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Landscape and astrophotographer. Chasing golden hour at abandoned places. Fujifilm X-T5 shooter.",
+      handle: "lenscraft.bsky.social",
+      joinedAt: timeAgoToDate("200d"),
+      badges: [],
+    },
+    {
+      username: "nightmode",
+      displayName: "Night Mode",
+      initials: "nm",
+      avatarBg: "oklch(55% 0.15 300)",
+      avatarUrl: "https://i.pravatar.cc/200?u=nightmode",
+      bannerUrl: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&h=300&q=80",
+      bio: "Milky Way hunter. 45 stacked exposures is just the beginning. Building a star tracker from scratch.",
+      handle: "nightmode.bsky.social",
+      joinedAt: timeAgoToDate("180d"),
+      badges: [],
+    },
+  ];
+
   const communities: CommunityData[] = [
     {
       id: "comm_home",
@@ -252,7 +393,7 @@ function seed() {
       badges: [],
       title: "Weekend Game Jam results are in \u2014 47 entries!",
       body: "Huge turnout this week. The theme was \u201cone button\u201d and people went wild. Top 3 all built completely different games with the same constraint. Check out the submissions thread and vote for your favourites.",
-      votes: 567, commentCount: 134,
+      votes: 567, commentCount: 12,
     },
     {
       id: "post_rg_2", communityId: "comm_retro",
@@ -334,6 +475,41 @@ function seed() {
       createdAt: timeAgoToDate("45m"), votes: 5,
     },
     {
+      id: "cmt_4a", postId: "post_cc_1", parentId: "cmt_3",
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Just pushed it to my GitHub \u2014 it\u2019s a .aseprite file with guide layers for 30/45/60 degree light angles. Drop it as the bottom layer in any tile and paint on top.",
+      createdAt: timeAgoToDate("50m"), votes: 19,
+    },
+    {
+      id: "cmt_4b", postId: "post_cc_1", parentId: "cmt_4a",
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "This is perfect. Already imported it into my project. Quick question \u2014 do you lock the guide layer or keep it editable? I\u2019m worried about accidentally painting on it.",
+      createdAt: timeAgoToDate("40m"), votes: 6,
+    },
+    {
+      id: "cmt_4c", postId: "post_cc_1", parentId: "cmt_4b",
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [],
+      body: "Lock it! In Aseprite you can right-click the layer and hit Lock. I also set opacity to 20% so it\u2019s barely visible but still guides your hand.",
+      createdAt: timeAgoToDate("35m"), votes: 11,
+    },
+    {
+      id: "cmt_4d", postId: "post_cc_1", parentId: "cmt_4c",
+      author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "The 20% opacity tip is genius. I\u2019ve been toggling visibility on and off like a caveman this whole time.",
+      createdAt: timeAgoToDate("28m"), votes: 8,
+    },
+    {
+      id: "cmt_4e", postId: "post_cc_1", parentId: "cmt_4d",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "Same here lol. Someone should write up a proper Aseprite workflow post for iso art \u2014 there\u2019s so many little tricks like this that nobody talks about.",
+      createdAt: timeAgoToDate("22m"), votes: 4,
+    },
+    {
       id: "cmt_5", postId: "post_cc_1", parentId: null,
       author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
       badges: [{ variant: "og", icon: "Star", label: "OG" }],
@@ -374,6 +550,27 @@ function seed() {
       badges: [],
       body: "Please do! ENDESGA-64 is already my go-to but those water colours look incredible.",
       createdAt: timeAgoToDate("30m"), votes: 4,
+    },
+    {
+      id: "cmt_10a", postId: "post_cc_1", parentId: "cmt_10",
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Posted! The water colours are at indices 48-63 in the .pal. I basically took ENDESGA\u2019s existing blues and shifted them warmer with a touch more saturation for the shallows.",
+      createdAt: timeAgoToDate("25m"), votes: 12,
+    },
+    {
+      id: "cmt_10b", postId: "post_cc_1", parentId: "cmt_10a",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "The warm shift on the shallows is what makes it. Most iso water looks dead because people just use pure blue. Yours has that tropical reef energy.",
+      createdAt: timeAgoToDate("18m"), votes: 7,
+    },
+    {
+      id: "cmt_10c", postId: "post_cc_1", parentId: "cmt_10b",
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Honestly this sub-thread alone has taught me more about colour theory than a semester of art school. Saving all of this.",
+      createdAt: timeAgoToDate("12m"), votes: 15,
     },
     {
       id: "cmt_11", postId: "post_cc_1", parentId: null,
@@ -629,6 +826,62 @@ function seed() {
       body: "I submitted the platformer with the one-button dash mechanic. Didn\u2019t place but learned a ton about game feel in 48 hours.",
       createdAt: timeAgoToDate("30m"), votes: 15,
     },
+    {
+      id: "cmt_92a", postId: "post_rg_1", parentId: "cmt_92",
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "Your dash mechanic was actually my favourite. The screen shake on impact was so satisfying \u2014 how did you get that right in only 48 hours?",
+      createdAt: timeAgoToDate("25m"), votes: 8,
+    },
+    {
+      id: "cmt_92b", postId: "post_rg_1", parentId: "cmt_92a",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "Honestly I stole the formula from Vlambeer\u2019s GDC talk on game feel. 3 frames of freeze, 4px random offset, done. Works every time.",
+      createdAt: timeAgoToDate("20m"), votes: 22,
+    },
+    {
+      id: "cmt_92c", postId: "post_rg_1", parentId: "cmt_92b",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "That talk should be required watching for anyone doing jam games. The hitstop alone transforms everything.",
+      createdAt: timeAgoToDate("15m"), votes: 14,
+    },
+    {
+      id: "cmt_93", postId: "post_rg_1", parentId: "cmt_91",
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "64x64 is brutal but I\u2019m in. Pixel art people have an unfair advantage at that resolution though \u2014 are 3D entries even possible?",
+      createdAt: timeAgoToDate("22m"), votes: 9,
+    },
+    {
+      id: "cmt_93a", postId: "post_rg_1", parentId: "cmt_93",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "Absolutely \u2014 last time we did a resolution constraint someone rendered voxels at 32x32 and it looked amazing. The limitation IS the aesthetic.",
+      createdAt: timeAgoToDate("18m"), votes: 11,
+    },
+    {
+      id: "cmt_93b", postId: "post_rg_1", parentId: "cmt_93a",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Voxels at low res is underrated. You get that Minecraft-meets-Atari vibe. I might actually enter this one.",
+      createdAt: timeAgoToDate("10m"), votes: 6,
+    },
+    {
+      id: "cmt_94", postId: "post_rg_1", parentId: null,
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Top 3 all deserved it. The tower defence with one-button placement rotation was such a clever interpretation. Did anyone record gameplay of the top entries?",
+      createdAt: timeAgoToDate("25m"), votes: 27,
+    },
+    {
+      id: "cmt_94a", postId: "post_rg_1", parentId: "cmt_94",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "All three winners streamed their 48-hour process \u2014 VODs are linked in the results post. The tower defence dev\u2019s timelapse is especially wild to watch.",
+      createdAt: timeAgoToDate("20m"), votes: 16,
+    },
 
     // ── post_rg_2: Sony PVM thrift store ──
     {
@@ -781,6 +1034,7 @@ function seed() {
     },
   ];
 
+  store.users = users;
   store.communities = communities;
   store.posts = posts;
   store.comments = comments;
@@ -795,6 +1049,18 @@ seed();
 // ── Public read/write interface (used by server actions only) ──
 
 export const db = {
+  // Communities
+  // Users
+  getUser: (username: string) => store.users.find((u) => u.username === username),
+  getPostsByAuthor: (username: string) => store.posts.filter((p) => p.author === username),
+  getCommentsByAuthor: (username: string) => store.comments.filter((c) => c.author === username),
+  getCommunitiesForUser: (username: string) => {
+    const communityIds = new Set(
+      store.posts.filter((p) => p.author === username).map((p) => p.communityId),
+    );
+    return store.communities.filter((c) => communityIds.has(c.id));
+  },
+
   // Communities
   getCommunities: () => store.communities,
   getCommunity: (id: string) => store.communities.find((c) => c.id === id),

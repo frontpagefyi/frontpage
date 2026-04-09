@@ -1,12 +1,12 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import {
   ChevronRight,
   ChevronLeft,
   Plus,
   Compass,
-  Settings,
   Bell,
   Home,
   Search,
@@ -112,10 +112,12 @@ export function MobileHeader({
       <div className="relative overflow-hidden">
         {/* Blurred background image spans full area */}
         {bannerImage ? (
-          <img
+          <Image
             src={bannerImage}
             alt=""
             className="absolute inset-0 w-full h-full object-cover scale-110 blur-sm"
+            fill
+            sizes="100vw"
           />
         ) : null}
         <div className="absolute inset-0 bg-gradient-to-b from-bg-base/60 via-bg-base/70 to-bg-base/85" />
@@ -279,7 +281,7 @@ function MobileBottomNav({
                       : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
                   }`}
                 >
-                  <img src="/frontpage-logo.svg" alt="Frontpage" className="w-7 h-7" />
+                  <Image src="/frontpage-logo.svg" alt="Frontpage" width={28} height={28} style={{ width: 28, height: 28 }} />
                   Home
                 </button>
                 <div className="border-t border-bg-elevated mx-1 my-1.5" />
@@ -422,10 +424,13 @@ export function Sidebar({
                   }`}
                   title="Home"
                 >
-                  <img
+                  <Image
                     src="/frontpage-logo.svg"
                     alt="Frontpage"
-                    className="w-10 h-10 shrink-0 rounded-xl motion-safe:transition-[border-radius] motion-safe:duration-150 group-hover:rounded-lg"
+                    width={40}
+                    height={40}
+                    className="shrink-0 rounded-xl motion-safe:transition-[border-radius] motion-safe:duration-150 group-hover:rounded-lg"
+                    style={{ width: 40, height: 40 }}
                   />
                   <SidebarLabel
                     expanded={expanded}

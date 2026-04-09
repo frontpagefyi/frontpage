@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Image from "next/image";
 import { Pin, ChevronLeft, ChevronRight } from "lucide-react";
 import { Sidebar, MobileHeader } from "@/components/sidebar";
 import { Badge } from "@/components/badge";
@@ -249,10 +250,12 @@ export default function ThreadedForumPage() {
         <div className="border-b border-bg-elevated bg-bg-surface px-6 py-4">
           <div className="flex items-center gap-3 mb-2">
             {community?.icon ? (
-              <img
+              <Image
                 src={community.icon}
                 alt=""
-                className="w-9 h-9 rounded-lg object-cover"
+                width={36}
+                height={36}
+                className="rounded-lg object-cover"
               />
             ) : (
               <div className="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-600 to-indigo-800 flex items-center justify-center">

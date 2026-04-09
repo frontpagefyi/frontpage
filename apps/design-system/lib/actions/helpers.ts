@@ -1,4 +1,4 @@
-import type { CommentData, PostBadgeData } from "@/lib/db/schema";
+import type { CommentData } from "@/lib/db/schema";
 import type { Comment, Post, PostBadge } from "@/lib/types";
 import type { PostData, CommunityData } from "@/lib/db/schema";
 import { db } from "@/lib/db/store";
@@ -8,14 +8,16 @@ export function buildCommentTree(flat: CommentData[]): Comment[] {
   const map = new Map<string, Comment>();
   const roots: Comment[] = [];
 
-  // Create Comment nodes
+  // Create Comment nodes — resolve author from user store
   for (const c of flat) {
+    const user = db.getUser(c.author);
     map.set(c.id, {
       id: c.id,
       author: c.author,
-      initials: c.initials,
-      avatarBg: c.avatarBg,
-      badges: c.badges as PostBadge[],
+      initials: user?.initials ?? c.initials,
+      avatarBg: user?.avatarBg ?? c.avatarBg,
+      avatarUrl: user?.avatarUrl,
+      badges: (user?.badges ?? c.badges) as PostBadge[],
       body: c.body,
       time: formatTimeAgo(c.createdAt),
       votes: c.votes,
@@ -42,9 +44,10 @@ export function buildCommentTree(flat: CommentData[]): Comment[] {
   return roots;
 }
 
-/** Convert a PostData to the frontend Post type. */
+/** Convert a PostData to the frontend Post type. Resolves author from user store. */
 export function toPost(data: PostData): Post {
   const community = db.getCommunity(data.communityId);
+  const user = db.getUser(data.author);
   return {
     id: data.id,
     communityName: community?.name,
@@ -52,17 +55,18 @@ export function toPost(data: PostData): Post {
     communityColor: community?.theme?.["--accent-primary"],
     communityBanner: community?.banner.bannerImage,
     author: data.author,
-    initials: data.initials,
-    avatarBg: data.avatarBg,
+    initials: user?.initials ?? data.initials,
+    avatarBg: user?.avatarBg ?? data.avatarBg,
+    avatarUrl: user?.avatarUrl,
     time: formatTimeAgo(data.createdAt),
-    badges: data.badges as PostBadge[],
+    badges: (user?.badges ?? data.badges) as PostBadge[],
     title: data.title,
     image: data.image,
     body: data.body,
     linkPreview: data.linkPreview,
     video: data.video,
     votes: data.votes,
-    comments: data.commentCount,
+    comments: db.getCommentsByPost(data.id).length,
   };
 }
 

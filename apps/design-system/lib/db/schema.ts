@@ -68,6 +68,23 @@ export const communitySchema = z.object({
   banner: communityBannerSchema,
 });
 
+// ── User profiles ──
+
+export const userProfileSchema = z.object({
+  username: z.string(),
+  displayName: z.string(),
+  initials: z.string(),
+  avatarBg: z.string(),
+  avatarUrl: z.string().optional(),
+  bannerUrl: z.string().optional(),
+  bio: z.string(),
+  handle: z.string(), // AT Protocol handle
+  joinedAt: z.date(),
+  badges: z.array(postBadgeSchema).default([]),
+});
+
+export type UserProfileData = z.infer<typeof userProfileSchema>;
+
 // ── User interactions ──
 
 export const voteSchema = z.object({

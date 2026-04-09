@@ -6,6 +6,7 @@ import { Avatar } from "./avatar";
 import { Badge } from "./badge";
 import { ReplyComposer } from "./reply-composer";
 import type { Comment } from "@/lib/types";
+import { toast } from "@/lib/toast";
 
 function spawnHeartParticles(container: HTMLElement) {
   const colors = [
@@ -90,9 +91,11 @@ export function ThreadComment({
   }, [liked, comment.votes]);
 
   const handleCopyLink = useCallback(() => {
-    const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
-    navigator.clipboard.writeText(url);
+    const url = new URL(window.location.href);
+    url.hash = `comment-${comment.id}`;
+    navigator.clipboard.writeText(url.toString());
     onMenuToggle(null);
+    toast("Copied to clipboard");
   }, [comment.id, onMenuToggle]);
 
   return (
@@ -124,7 +127,7 @@ export function ThreadComment({
             onClick={() => setCollapsed(false)}
             className="flex items-center gap-2 py-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors w-full text-left"
           >
-            <Avatar initials={comment.initials} bg={comment.avatarBg} size={20} />
+            <Avatar initials={comment.initials} bg={comment.avatarBg} src={comment.avatarUrl} size={20} />
             <strong className="text-text-primary">{comment.author}</strong>
             <span>&middot; {comment.time}</span>
             <span className="text-accent-secondary flex items-center gap-0.5">
@@ -135,30 +138,33 @@ export function ThreadComment({
         ) : (
           <div className="flex items-start gap-2.5 group">
             <div className="shrink-0 mt-0.5">
-              <Avatar initials={comment.initials} bg={comment.avatarBg} size={depth === 0 ? 32 : 26} />
+              <Avatar initials={comment.initials} bg={comment.avatarBg} src={comment.avatarUrl} size={depth === 0 ? 32 : 26} />
             </div>
 
             <div className="flex-1 min-w-0">
               {/* Author line */}
               <div className="flex items-center gap-1.5 text-xs">
-                {hasReplies ? (
-                  <button
-                    onClick={() => setCollapsed(true)}
-                    className="flex items-center gap-1.5 hover:text-accent-secondary transition-colors"
-                  >
-                    <strong className="text-text-primary">{comment.author}</strong>
-                  </button>
-                ) : (
-                  <strong className="text-text-primary">{comment.author}</strong>
-                )}
+                <a
+                  href={`/explorations/profile/${comment.author}`}
+                  className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors"
+                >
+                  {comment.author}
+                </a>
                 {comment.badges?.map((b) => (
                   <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
                 ))}
                 <span className="text-text-muted">&middot; {comment.time}</span>
               </div>
 
-              {/* Body — selectable text */}
-              <p className="text-sm text-text-secondary leading-relaxed mt-1 select-text">
+              {/* Body — click to collapse children (only if not selecting text) */}
+              <p
+                className="text-sm text-text-secondary leading-relaxed mt-1 select-text cursor-pointer"
+                onClick={() => {
+                  const sel = window.getSelection();
+                  if (sel && sel.toString().length > 0) return;
+                  setCollapsed(true);
+                }}
+              >
                 {comment.body}
               </p>
 
@@ -173,6 +179,7 @@ export function ThreadComment({
                 >
                   <Heart
                     size={14}
+                    strokeWidth={2.25}
                     fill={liked ? "currentColor" : "none"}
                     className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
                   />
@@ -184,17 +191,14 @@ export function ThreadComment({
                     isReplying ? "text-accent-secondary" : "hover:text-text-secondary"
                   }`}
                 >
-                  <MessageCircle size={14} />
+                  <MessageCircle size={14} strokeWidth={2.25} />
                   Reply
                 </button>
                 <button
-                  onClick={() => {
-                    const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
-                    navigator.clipboard.writeText(url);
-                  }}
+                  onClick={handleCopyLink}
                   className="flex items-center gap-1.5 hover:text-text-secondary transition-colors"
                 >
-                  <Share2 size={14} />
+                  <Share2 size={14} strokeWidth={2.25} />
                   Share
                 </button>
 
@@ -203,7 +207,7 @@ export function ThreadComment({
                   <button
                     onClick={() => onMenuToggle(isMenuOpen ? null : comment.id)}
                     className={`flex items-center transition-colors ${
-                      isMenuOpen ? "text-text-secondary" : "opacity-0 group-hover:opacity-100 hover:text-text-secondary"
+                      isMenuOpen ? "text-text-secondary" : "text-text-muted hover:text-text-secondary"
                     }`}
                   >
                     <MoreHorizontal size={14} />
@@ -211,7 +215,7 @@ export function ThreadComment({
                   {isMenuOpen ? (
                     <>
                       <div className="fixed inset-0 z-[60]" onClick={() => onMenuToggle(null)} />
-                      <div className="absolute left-0 top-full mt-1 z-[70] bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_4px_16px_oklch(0%_0_0_/_0.3)] py-1 min-w-[140px]">
+                      <div className="absolute left-0 top-full mt-1 z-[70] bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_8px_24px_oklch(0%_0_0_/_0.4)] py-1 min-w-[140px]">
                         <button
                           onClick={handleCopyLink}
                           className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"

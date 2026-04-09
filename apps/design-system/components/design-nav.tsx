@@ -17,7 +17,10 @@ function DraggableBackButton() {
   const dragRef = useRef({ startX: 0, startY: 0, origX: 0, origY: 0, moved: false });
 
   useEffect(() => {
-    setPos({ x: window.innerWidth - 80, y: window.innerHeight - 140 });
+    const t = setTimeout(() => {
+      setPos({ x: window.innerWidth - 80, y: window.innerHeight - 140 });
+    }, 0);
+    return () => clearTimeout(t);
   }, []);
 
   const onPointerDown = useCallback((e: React.PointerEvent) => {
@@ -68,7 +71,7 @@ function DraggableBackButton() {
 export function DesignNav() {
   const pathname = usePathname();
 
-  const fullScreenDemos = ["/explorations/community-feed", "/explorations/threaded-forum"];
+  const fullScreenDemos = ["/explorations/community-feed", "/explorations/threaded-forum", "/explorations/profile"];
   if (fullScreenDemos.some((d) => pathname.startsWith(d))) {
     return <DraggableBackButton />;
   }

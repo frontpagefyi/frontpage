@@ -19,6 +19,7 @@ export interface Post {
   author: string;
   initials: string;
   avatarBg: string;
+  avatarUrl?: string;
   time: string;
   badges?: PostBadge[];
   title: string;
@@ -47,6 +48,7 @@ export interface Comment {
   author: string;
   initials: string;
   avatarBg: string;
+  avatarUrl?: string;
   badges?: PostBadge[];
   body: string;
   time: string;

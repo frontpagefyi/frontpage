@@ -6,7 +6,7 @@ interface AvatarProps {
   className?: string;
 }
 
-export function Avatar({ initials, bg, size = 32, src, className = "" }: AvatarProps) {
+export function Avatar({ bg, size = 32, src, className = "" }: AvatarProps) {
   const style = {
     width: size,
     height: size,

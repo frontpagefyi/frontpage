@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import {
   Heart,
   MessageCircle,
@@ -71,8 +72,8 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       style={style}
     >
       <div className="flex items-center gap-2 text-xs text-text-muted">
-        <Avatar initials={post.initials} bg={post.avatarBg} size={24} />
-        <strong className="text-text-primary">{post.author}</strong>
+        <Avatar initials={post.initials} bg={post.avatarBg} src={post.avatarUrl} size={24} />
+        <a href={`/explorations/profile/${post.author}`} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
         {post.badges?.map((b) => (
           <Badge
             key={b.label}
@@ -88,15 +89,17 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
             className="relative flex items-center gap-1 ml-auto pl-0.5 pr-2 py-0.5 rounded-full text-[10px] font-medium text-white active:scale-[0.97] transition-all overflow-hidden"
           >
             {post.communityBanner ? (
-              <img
+              <Image
                 src={post.communityBanner}
                 alt=""
                 className="absolute inset-0 w-full h-full object-cover"
+                fill
+                sizes="120px"
               />
             ) : null}
             <div className="absolute inset-0 bg-black/40" />
             {post.communityIcon ? (
-              <img src={post.communityIcon} alt="" className="relative z-10 w-3.5 h-3.5 rounded-full object-cover" />
+              <Image src={post.communityIcon} alt="" width={14} height={14} className="relative z-10 rounded-full object-cover" style={{ width: 'auto', height: 'auto' }} />
             ) : null}
             <span className="relative z-10">{post.communityName}</span>
           </button>
@@ -109,10 +112,13 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
 
       {post.image ? (
         <div className="rounded-lg overflow-hidden">
-          <img
+          <Image
             src={post.image}
             alt={post.title}
+            width={600}
+            height={400}
             className="w-full aspect-video object-cover"
+            style={{ width: '100%', height: 'auto' }}
           />
         </div>
       ) : null}
@@ -126,10 +132,13 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           href="#"
           className="flex gap-3 p-3 rounded-lg bg-bg-elevated border border-bg-overlay no-underline"
         >
-          <img
+          <Image
             src={post.linkPreview.image}
             alt={post.linkPreview.title}
-            className="w-24 h-16 rounded object-cover shrink-0"
+            width={96}
+            height={64}
+            className="rounded object-cover shrink-0"
+            style={{ width: 96, height: 64 }}
           />
           <div>
             <div className="text-sm font-semibold">
@@ -143,10 +152,13 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       ) : null}
       {post.video ? (
         <div className="rounded-lg overflow-hidden relative cursor-pointer">
-          <img
+          <Image
             src={post.video.thumbnail}
             alt="Video thumbnail"
+            width={600}
+            height={400}
             className="w-full aspect-video object-cover"
+            style={{ width: '100%', height: 'auto' }}
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">
@@ -168,6 +180,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
         >
           <Heart
             size={16}
+            strokeWidth={2.25}
             fill={liked ? "currentColor" : "none"}
             className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
           />
@@ -177,10 +190,10 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           onClick={onCommentClick}
           className="flex items-center gap-1.5 hover:text-text-secondary hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.97] motion-safe:transition-colors cursor-pointer"
         >
-          <MessageCircle size={16} /> {post.comments}
+          <MessageCircle size={16} strokeWidth={2.25} /> {post.comments}
         </button>
         <button className="flex items-center gap-1.5 hover:text-text-secondary hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.97] motion-safe:transition-colors cursor-pointer">
-          <Share2 size={16} /> Share
+          <Share2 size={16} strokeWidth={2.25} /> Share
         </button>
         <button
           onClick={() => {
@@ -195,6 +208,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           <Bookmark
             key={saveCount}
             size={16}
+            strokeWidth={2.25}
             fill={saved ? "currentColor" : "none"}
             className={saveCount > 0 ? "motion-safe:animate-[bookmark-drop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
           />

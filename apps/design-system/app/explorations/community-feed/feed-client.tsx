@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useMemo, useTransition, useRef, useCallback } from "react";
+import { useState, useMemo, useTransition, useCallback, useEffect } from "react";
+import Image from "next/image";
 import { Users, Clock, PenLine } from "lucide-react";
 import { Sidebar, MobileHeader } from "@/components/sidebar";
 import { ContentTabs } from "@/components/content-tabs";
@@ -68,10 +69,48 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
   const [joinedSet, setJoinedSet] = useState<Set<string>>(new Set());
   const [mobileTab, setMobileTab] = useState<MobileTab>("posts");
   const [feedKey, setFeedKey] = useState(0);
-  const isFirstLoad = useRef(true);
+  const [showAnimation, setShowAnimation] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [, startTransition] = useTransition();
+
+  // Sync selected post with URL (?post=id)
+  const selectPost = useCallback((post: Post | null) => {
+    setSelectedPost(post);
+    const url = new URL(window.location.href);
+    if (post?.id) {
+      url.searchParams.set("post", post.id);
+    } else {
+      url.searchParams.delete("post");
+    }
+    window.history.pushState({}, "", url.toString());
+  }, []);
+
+  // Restore post from URL on mount
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    const postId = params.get("post");
+    if (postId) {
+      const found = initialPosts.find((p) => p.id === postId);
+      if (found) setSelectedPost(found);
+    }
+  }, [initialPosts]);
+
+  // Handle browser back/forward
+  useEffect(() => {
+    const onPopState = () => {
+      const params = new URLSearchParams(window.location.search);
+      const postId = params.get("post");
+      if (postId) {
+        const found = posts.find((p) => p.id === postId);
+        setSelectedPost(found ?? null);
+      } else {
+        setSelectedPost(null);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [posts]);
 
   const community = communities[activeIndex];
   const isJoined = joinedSet.has(community.id);
@@ -89,15 +128,15 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
     setActiveIndex(i);
     setSortKey("hot");
     setMobileTab("posts");
-    setSelectedPost(null);
-    isFirstLoad.current = false;
+    selectPost(null);
+    setShowAnimation(true);
     setFeedKey((k) => k + 1);
-    // Fetch posts for the new community
+    // Fetch new posts (old ones stay visible until these arrive)
     startTransition(async () => {
       const newPosts = await getPostsByCommunity(communities[i].id);
       setPosts(newPosts);
     });
-  }, [activeIndex, communities, startTransition]);
+  }, [activeIndex, communities, startTransition, selectPost]);
 
   const handleSort = (key: SortKey) => {
     setSortKey(key);
@@ -134,7 +173,7 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
               <ThreadView
                 post={selectedPost}
                 communityName={community.name}
-                onBack={() => setSelectedPost(null)}
+                onBack={() => selectPost(null)}
               />
             </div>
             <div className="hidden md:block">
@@ -142,7 +181,7 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
               <ThreadView
                 post={selectedPost}
                 communityName={community.name}
-                onBack={() => setSelectedPost(null)}
+                onBack={() => selectPost(null)}
               />
             </div>
           </>
@@ -180,8 +219,8 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
                         const idx = communities.findIndex((c) => c.name === post.communityName);
                         if (idx >= 0) handleCommunityClick(idx);
                       }}
-                      onCommentClick={() => setSelectedPost(post)}
-                      style={isFirstLoad.current ? {
+                      onCommentClick={() => selectPost(post)}
+                      style={showAnimation ? {
                         animation: `post-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.06}s both`,
                       } : undefined}
                     />
@@ -229,7 +268,7 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
                               const idx = communities.findIndex((c) => c.name === post.communityName);
                               if (idx >= 0) handleCommunityClick(idx);
                             }}
-                            onCommentClick={() => setSelectedPost(post)}
+                            onCommentClick={() => selectPost(post)}
                             style={{
                               animation: `post-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.06}s both`,
                             }}
@@ -284,10 +323,13 @@ function Banner({ community }: { community: ClientCommunity }) {
   return (
     <div className="relative h-48 overflow-hidden">
       {community.banner.bannerImage ? (
-        <img
+        <Image
           src={community.banner.bannerImage}
           alt={community.banner.name}
+          width={800}
+          height={300}
           className="w-full h-full object-cover"
+          style={{ width: '100%', height: '100%' }}
         />
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-bg-base/90 to-transparent" />

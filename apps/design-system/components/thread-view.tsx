@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef, useEffect } from "react";
+import Image from "next/image";
 import {
   Heart,
   MessageCircle,
@@ -21,6 +22,7 @@ import { Badge } from "./badge";
 import { ThreadComment } from "./thread-comment";
 import { getThread, addComment as addCommentAction } from "@/lib/actions/posts";
 import type { Post, Comment } from "@/lib/types";
+import { toast } from "@/lib/toast";
 
 function spawnHeartParticles(container: HTMLElement) {
   const colors = [
@@ -112,22 +114,26 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
       >
         {/* Post image */}
         {post.image ? (
-          <div className="relative">
-            <img
+          <div className="relative h-48 md:h-72">
+            <Image
               src={post.image}
               alt={post.title}
-              className="w-full h-48 md:h-72 object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 672px"
+              className="object-cover"
             />
             <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-transparent to-transparent" />
           </div>
         ) : null}
 
         {post.video ? (
-          <div className="relative cursor-pointer">
-            <img
+          <div className="relative h-48 md:h-72 cursor-pointer">
+            <Image
               src={post.video.thumbnail}
               alt="Video thumbnail"
-              className="w-full h-48 md:h-72 object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 672px"
+              className="object-cover"
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
               <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
@@ -140,10 +146,10 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
         <div className="p-4 md:p-6">
           {/* Author */}
           <div className="flex items-center gap-2.5 mb-4">
-            <Avatar initials={post.initials} bg={post.avatarBg} size={36} />
+            <Avatar initials={post.initials} bg={post.avatarBg} src={post.avatarUrl} size={36} />
             <div>
               <div className="flex items-center gap-1.5 text-sm">
-                <strong className="text-text-primary">{post.author}</strong>
+                <a href={`/explorations/profile/${post.author}`} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
                 {post.badges?.map((b) => (
                   <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
                 ))}
@@ -177,10 +183,13 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
               href="#"
               className="flex gap-3 p-3 rounded-lg bg-bg-elevated border border-bg-overlay no-underline mb-4"
             >
-              <img
+              <Image
                 src={post.linkPreview.image}
                 alt={post.linkPreview.title}
-                className="w-24 h-16 rounded object-cover shrink-0"
+                width={96}
+                height={64}
+                className="rounded object-cover shrink-0"
+                style={{ width: 'auto', height: 'auto' }}
               />
               <div>
                 <div className="text-sm font-semibold">{post.linkPreview.title}</div>
@@ -204,6 +213,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
             >
               <Heart
                 size={16}
+                strokeWidth={2.25}
                 fill={liked ? "currentColor" : "none"}
                 className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
               />
@@ -211,17 +221,18 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
             </button>
 
             <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all">
-              <MessageCircle size={16} />
+              <MessageCircle size={16} strokeWidth={2.25} />
               {post.comments}
             </button>
 
             <button
               onClick={() => {
                 navigator.clipboard.writeText(window.location.href);
+                toast("Copied to clipboard");
               }}
               className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all"
             >
-              <Share2 size={16} />
+              <Share2 size={16} strokeWidth={2.25} />
               Share
             </button>
 
@@ -240,6 +251,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
               <Bookmark
                 key={saveCount}
                 size={16}
+                strokeWidth={2.25}
                 fill={saved ? "currentColor" : "none"}
                 className={saveCount > 0 ? "motion-safe:animate-[bookmark-drop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
               />
@@ -266,6 +278,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
                       onClick={() => {
                         navigator.clipboard.writeText(window.location.href);
                         setPostMenuOpen(false);
+                        toast("Copied to clipboard");
                       }}
                       className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
                     >

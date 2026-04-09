@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { Settings, LogOut, Moon, BookOpen, Star, ChevronRight, Users } from "lucide-react";
 import { Avatar } from "./avatar";
 import { DraggableDrawer } from "./draggable-drawer";
@@ -68,10 +69,13 @@ function PanelContent({
       {/* Banner */}
       <div className="relative">
         <div className="h-24 overflow-hidden rounded-t-2xl md:rounded-none relative">
-          <img
+          <Image
             src="https://images.unsplash.com/photo-1534972195531-d756b9bfa9f2?auto=format&fit=crop&w=600&h=200&q=80"
             alt=""
+            width={600}
+            height={200}
             className="w-full h-full object-cover"
+            style={{ width: '100%', height: '100%' }}
           />
           <div className="absolute inset-0 bg-gradient-to-t from-bg-surface/60 to-transparent" />
           <div className="absolute bottom-0 left-0 right-0 h-px bg-bg-elevated/50 shadow-[0_1px_3px_oklch(0%_0_0_/_0.2)]" />
