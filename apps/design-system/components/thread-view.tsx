@@ -12,6 +12,9 @@ import {
   Play,
   ExternalLink,
   Send,
+  MoreHorizontal,
+  Link2,
+  Flag,
 } from "lucide-react";
 import { Avatar } from "./avatar";
 import { Badge } from "./badge";
@@ -61,6 +64,9 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
   const heartRef = useRef<HTMLButtonElement>(null);
   const [comments, setComments] = useState<Comment[]>([]);
   const [replyText, setReplyText] = useState("");
+  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
+  const [postMenuOpen, setPostMenuOpen] = useState(false);
 
   // Load comments from server action
   useEffect(() => {
@@ -88,7 +94,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
   return (
     <div
       className="max-w-2xl mx-auto px-4 py-4 md:py-6"
-      style={{ animation: "comment-enter 0.3s ease-out both" }}
+      style={{ animation: "thread-enter 0.3s cubic-bezier(0.05, 0.7, 0.1, 1) both" }}
     >
       {/* Back button */}
       <button
@@ -102,7 +108,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
       {/* ── Original Post ── */}
       <article
         className="bg-bg-surface rounded-xl border border-bg-elevated overflow-hidden"
-        style={{ animation: "post-enter 0.5s cubic-bezier(0, 0, 0.2, 1) both" }}
+        style={{ animation: "post-enter 0.25s cubic-bezier(0, 0, 0, 1) both" }}
       >
         {/* Post image */}
         {post.image ? (
@@ -190,27 +196,32 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
             <button
               ref={heartRef}
               onClick={handleLike}
-              className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs tabular-nums transition-all ${
+              className={`relative flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm tabular-nums transition-all ${
                 liked
                   ? "text-[oklch(55%_0.2_20)] bg-[oklch(55%_0.2_20_/_0.1)]"
                   : "text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60"
               }`}
             >
               <Heart
-                size={15}
+                size={16}
                 fill={liked ? "currentColor" : "none"}
                 className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
               />
               {likeCount}
             </button>
 
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all">
-              <MessageCircle size={15} />
-              {post.comments} comments
+            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all">
+              <MessageCircle size={16} />
+              {post.comments}
             </button>
 
-            <button className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all">
-              <Share2 size={15} />
+            <button
+              onClick={() => {
+                navigator.clipboard.writeText(window.location.href);
+              }}
+              className="flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60 transition-all"
+            >
+              <Share2 size={16} />
               Share
             </button>
 
@@ -220,7 +231,7 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
                 setSaved(next);
                 if (next) setSaveCount((c) => c + 1);
               }}
-              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-xs transition-all ml-auto ${
+              className={`flex items-center gap-1.5 px-3 py-2 rounded-lg text-sm transition-all ${
                 saved
                   ? "text-accent-primary bg-accent-primary/10"
                   : "text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60"
@@ -228,12 +239,51 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
             >
               <Bookmark
                 key={saveCount}
-                size={15}
+                size={16}
                 fill={saved ? "currentColor" : "none"}
                 className={saveCount > 0 ? "motion-safe:animate-[bookmark-drop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
               />
               {saved ? "Saved" : "Save"}
             </button>
+
+            {/* More menu */}
+            <div className="relative ml-auto">
+              <button
+                onClick={() => { setPostMenuOpen(!postMenuOpen); setActiveMenuId(null); }}
+                className={`flex items-center px-2 py-2 rounded-lg transition-all ${
+                  postMenuOpen
+                    ? "text-text-secondary bg-bg-elevated/60"
+                    : "text-text-muted hover:text-text-secondary hover:bg-bg-elevated/60"
+                }`}
+              >
+                <MoreHorizontal size={16} />
+              </button>
+              {postMenuOpen ? (
+                <>
+                  <div className="fixed inset-0 z-[60]" onClick={() => setPostMenuOpen(false)} />
+                  <div className="absolute right-0 bottom-full mb-1 z-[70] bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_4px_16px_oklch(0%_0_0_/_0.3)] py-1 min-w-[150px]">
+                    <button
+                      onClick={() => {
+                        navigator.clipboard.writeText(window.location.href);
+                        setPostMenuOpen(false);
+                      }}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
+                    >
+                      <Link2 size={13} />
+                      Copy link
+                    </button>
+                    <div className="border-t border-bg-elevated my-1" />
+                    <button
+                      onClick={() => setPostMenuOpen(false)}
+                      className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated hover:text-accent-destructive transition-colors"
+                    >
+                      <Flag size={13} />
+                      Report post
+                    </button>
+                  </div>
+                </>
+              ) : null}
+            </div>
           </div>
         </div>
       </article>
@@ -263,7 +313,11 @@ export function ThreadView({ post, communityName, onBack }: ThreadViewProps) {
             key={comment.id}
             comment={comment}
             index={i}
-            parentDelay={0.3}
+            parentDelay={0.05}
+            activeReplyId={activeReplyId}
+            onReplyToggle={setActiveReplyId}
+            activeMenuId={activeMenuId}
+            onMenuToggle={(id) => { setActiveMenuId(id); if (id) setPostMenuOpen(false); }}
           />
         ))}
       </div>

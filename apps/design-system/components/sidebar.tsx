@@ -267,14 +267,34 @@ function MobileBottomNav({
           </div>
           <div className="border-t border-bg-elevated mx-4 my-1" />
           <div className="px-4 pb-4">
+            {/* Home link */}
+            {communities.length > 0 && communities[0].name === "Frontpage" ? (
+              <>
+                <button
+                  key="frontpage-home"
+                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); }}
+                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
+                    communities[0].active
+                      ? "bg-accent-secondary/10 text-text-primary font-semibold"
+                      : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
+                  }`}
+                >
+                  <img src="/frontpage-logo.svg" alt="Frontpage" className="w-7 h-7" />
+                  Home
+                </button>
+                <div className="border-t border-bg-elevated mx-1 my-1.5" />
+              </>
+            ) : null}
             <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
               Communities
             </p>
-            {communities.map((comm, i) => (
+            {communities.filter((_, i) => !(i === 0 && communities[0].name === "Frontpage")).map((comm) => {
+              const idx = communities.indexOf(comm);
+              return (
               <button
                 key={comm.name}
                 onClick={() => {
-                  onCommunityClick?.(i);
+                  onCommunityClick?.(idx);
                   setDrawerOpen(false);
                 }}
                 className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
@@ -286,7 +306,8 @@ function MobileBottomNav({
                 <CommunityIcon icon={comm.icon} name={comm.name} size={28} />
                 {comm.name}
               </button>
-            ))}
+              );
+            })}
           </div>
         </DraggableDrawer>
       </div>
@@ -297,7 +318,7 @@ function MobileBottomNav({
         aria-label="Navigation"
       >
         <button
-          onClick={closeAll}
+          onClick={() => { closeAll(); onCommunityClick?.(0); }}
           className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center ${
             !searchOpen && !notifOpen && !drawerOpen && !profileOpen ? "text-accent-secondary" : "text-text-muted"
           }`}
@@ -387,20 +408,38 @@ export function Sidebar({
           }}
           aria-label="Communities"
         >
-          {/* ── Logo ── */}
-          <div className="flex items-center gap-3 h-16 shrink-0 px-[15px]">
-            <img
-              src="/frontpage-logo.svg"
-              alt="Frontpage"
-              className="w-10 h-10 shrink-0"
-            />
-            <SidebarLabel
-              expanded={expanded}
-              className="font-serif font-bold text-text-primary"
-            >
-              Frontpage
-            </SidebarLabel>
-          </div>
+          {/* ── Logo = Home button ── */}
+          {(() => {
+            const isHome = communities[0]?.name === "Frontpage" && communities[0]?.active;
+            return (
+              <div className="shrink-0 px-2 pt-3 pb-1">
+                <button
+                  onClick={() => onCommunityClick?.(0)}
+                  className={`group relative flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-left ${
+                    isHome
+                      ? "bg-accent-secondary/10 text-text-primary"
+                      : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
+                  }`}
+                  title="Home"
+                >
+                  <img
+                    src="/frontpage-logo.svg"
+                    alt="Frontpage"
+                    className="w-10 h-10 shrink-0 rounded-xl motion-safe:transition-[border-radius] motion-safe:duration-150 group-hover:rounded-lg"
+                  />
+                  <SidebarLabel
+                    expanded={expanded}
+                    className="font-serif font-bold"
+                  >
+                    Frontpage
+                  </SidebarLabel>
+                  {isHome ? (
+                    <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-accent-secondary" />
+                  ) : null}
+                </button>
+              </div>
+            );
+          })()}
 
           <div className="h-[10vh] shrink-0" />
 
@@ -415,10 +454,13 @@ export function Sidebar({
               Communities
             </div>
             <div className="space-y-1">
-              {communities.map((comm, i) => (
+              {communities.map((comm, i) => {
+                if (i === 0 && comm.name === "Frontpage") return null;
+                const originalIndex = i;
+                return (
                 <button
                   key={comm.name}
-                  onClick={() => onCommunityClick?.(i)}
+                  onClick={() => onCommunityClick?.(originalIndex)}
                   className={`group relative flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-left ${
                     comm.active
                       ? "bg-accent-secondary/10 text-text-primary"
@@ -459,7 +501,8 @@ export function Sidebar({
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-accent-secondary" />
                   ) : null}
                 </button>
-              ))}
+                );
+              })}
             </div>
             <div className="border-t border-bg-elevated mx-1 my-2" />
             <div className="space-y-0.5">
@@ -534,7 +577,7 @@ export function Sidebar({
         {/* ── Expand/collapse bubble ── */}
         <button
           onClick={() => setExpanded(!expanded)}
-          className="absolute top-5 -right-3 w-6 h-6 rounded-full bg-bg-elevated border border-bg-overlay flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-overlay motion-safe:transition-colors z-10"
+          className="absolute top-1/2 -translate-y-1/2 -right-3 w-6 h-6 rounded-full bg-bg-elevated border border-bg-overlay flex items-center justify-center text-text-muted hover:text-text-primary hover:bg-bg-overlay motion-safe:transition-colors z-10"
           title={expanded ? "Collapse sidebar" : "Expand sidebar"}
         >
           {expanded ? <ChevronLeft size={14} /> : <ChevronRight size={14} />}

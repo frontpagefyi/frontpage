@@ -42,11 +42,13 @@ function spawnHeartParticles(container: HTMLElement) {
 
 interface FeedPostProps {
   post: Post;
+  showCommunity?: boolean;
+  onCommunityClick?: () => void;
   style?: React.CSSProperties;
   onCommentClick?: () => void;
 }
 
-export function FeedPost({ post, style, onCommentClick }: FeedPostProps) {
+export function FeedPost({ post, showCommunity, onCommunityClick, style, onCommentClick }: FeedPostProps) {
   const [liked, setLiked] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveCount, setSaveCount] = useState(0);
@@ -65,7 +67,7 @@ export function FeedPost({ post, style, onCommentClick }: FeedPostProps) {
 
   return (
     <article
-      className="bg-bg-surface rounded-xl border border-bg-elevated p-4 space-y-3 motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-200 hover:translate-y-[-2px] hover:border-[oklch(100%_0_0_/_0.12)] hover:shadow-[0_4px_20px_oklch(0%_0_0_/_0.15)]"
+      className="bg-bg-surface rounded-xl border border-bg-elevated p-4 space-y-4 motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-200 hover:translate-y-[-2px] hover:border-[oklch(100%_0_0_/_0.12)] hover:shadow-[0_4px_20px_oklch(0%_0_0_/_0.15)]"
       style={style}
     >
       <div className="flex items-center gap-2 text-xs text-text-muted">
@@ -80,9 +82,28 @@ export function FeedPost({ post, style, onCommentClick }: FeedPostProps) {
           />
         ))}
         <span>&middot; {post.time}</span>
+        {showCommunity && post.communityName ? (
+          <button
+            onClick={(e) => { e.stopPropagation(); onCommunityClick?.(); }}
+            className="relative flex items-center gap-1 ml-auto pl-0.5 pr-2 py-0.5 rounded-full text-[10px] font-medium text-white active:scale-[0.97] transition-all overflow-hidden"
+          >
+            {post.communityBanner ? (
+              <img
+                src={post.communityBanner}
+                alt=""
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            ) : null}
+            <div className="absolute inset-0 bg-black/40" />
+            {post.communityIcon ? (
+              <img src={post.communityIcon} alt="" className="relative z-10 w-3.5 h-3.5 rounded-full object-cover" />
+            ) : null}
+            <span className="relative z-10">{post.communityName}</span>
+          </button>
+        ) : null}
       </div>
 
-      <h3 className="font-serif text-base font-semibold leading-snug">
+      <h3 className="font-serif text-lg font-semibold leading-snug">
         {post.title}
       </h3>
 
@@ -91,7 +112,7 @@ export function FeedPost({ post, style, onCommentClick }: FeedPostProps) {
           <img
             src={post.image}
             alt={post.title}
-            className="w-full object-cover"
+            className="w-full aspect-video object-cover"
           />
         </div>
       ) : null}
@@ -125,7 +146,7 @@ export function FeedPost({ post, style, onCommentClick }: FeedPostProps) {
           <img
             src={post.video.thumbnail}
             alt="Video thumbnail"
-            className="w-full object-cover"
+            className="w-full aspect-video object-cover"
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">

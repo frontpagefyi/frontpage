@@ -46,7 +46,7 @@ export function ReplyComposer({
   return (
     <div
       className="mt-3 flex gap-2.5 items-start"
-      style={{ animation: "comment-enter 0.25s ease-out both" }}
+      style={{ animation: "comment-enter 0.25s cubic-bezier(0, 0, 0, 1) both" }}
     >
       <div className="shrink-0 mt-1">
         <Avatar

@@ -45,7 +45,9 @@ export function SearchOverlay({ open, onClose, posts = [] }: SearchOverlayProps)
       const t = setTimeout(() => inputRef.current?.focus(), 150);
       return () => clearTimeout(t);
     } else {
-      setQuery("");
+      // Clear query asynchronously to avoid setState in effect body
+      const t = setTimeout(() => setQuery(""), 0);
+      return () => clearTimeout(t);
     }
   }, [open]);
 

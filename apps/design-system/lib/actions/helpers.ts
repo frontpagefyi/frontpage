@@ -1,6 +1,7 @@
 import type { CommentData, PostBadgeData } from "@/lib/db/schema";
 import type { Comment, Post, PostBadge } from "@/lib/types";
 import type { PostData, CommunityData } from "@/lib/db/schema";
+import { db } from "@/lib/db/store";
 
 /** Build a nested comment tree from flat comments. */
 export function buildCommentTree(flat: CommentData[]): Comment[] {
@@ -43,8 +44,13 @@ export function buildCommentTree(flat: CommentData[]): Comment[] {
 
 /** Convert a PostData to the frontend Post type. */
 export function toPost(data: PostData): Post {
+  const community = db.getCommunity(data.communityId);
   return {
     id: data.id,
+    communityName: community?.name,
+    communityIcon: community?.icon,
+    communityColor: community?.theme?.["--accent-primary"],
+    communityBanner: community?.banner.bannerImage,
     author: data.author,
     initials: data.initials,
     avatarBg: data.avatarBg,

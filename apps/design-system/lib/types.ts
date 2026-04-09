@@ -12,6 +12,10 @@ export interface LinkPreview {
 
 export interface Post {
   id?: string;
+  communityName?: string;
+  communityIcon?: string;
+  communityColor?: string;
+  communityBanner?: string;
   author: string;
   initials: string;
   avatarBg: string;

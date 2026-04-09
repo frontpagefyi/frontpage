@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition } from "react";
+import { useState, useMemo, useTransition, useRef, useCallback } from "react";
 import { Users, Clock, PenLine } from "lucide-react";
 import { Sidebar, MobileHeader } from "@/components/sidebar";
 import { ContentTabs } from "@/components/content-tabs";
@@ -68,6 +68,7 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
   const [joinedSet, setJoinedSet] = useState<Set<string>>(new Set());
   const [mobileTab, setMobileTab] = useState<MobileTab>("posts");
   const [feedKey, setFeedKey] = useState(0);
+  const isFirstLoad = useRef(true);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [, startTransition] = useTransition();
@@ -83,22 +84,23 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
 
   const sorted = useMemo(() => sortPosts(posts, sortKey), [posts, sortKey]);
 
-  const handleCommunityClick = (i: number) => {
+  const handleCommunityClick = useCallback((i: number) => {
+    if (i === activeIndex) return;
     setActiveIndex(i);
     setSortKey("hot");
     setMobileTab("posts");
     setSelectedPost(null);
+    isFirstLoad.current = false;
     setFeedKey((k) => k + 1);
     // Fetch posts for the new community
     startTransition(async () => {
       const newPosts = await getPostsByCommunity(communities[i].id);
       setPosts(newPosts);
     });
-  };
+  }, [activeIndex, communities, startTransition]);
 
   const handleSort = (key: SortKey) => {
     setSortKey(key);
-    setFeedKey((k) => k + 1);
   };
 
   const handleJoinToggle = () => {
@@ -173,10 +175,15 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
                     <FeedPost
                       key={`${post.author}-${post.title}`}
                       post={post}
-                      onCommentClick={() => setSelectedPost(post)}
-                      style={{
-                        animation: `post-enter 0.6s cubic-bezier(0, 0, 0.2, 1) ${i * 0.12}s both`,
+                      showCommunity={community.id === "comm_home"}
+                      onCommunityClick={() => {
+                        const idx = communities.findIndex((c) => c.name === post.communityName);
+                        if (idx >= 0) handleCommunityClick(idx);
                       }}
+                      onCommentClick={() => setSelectedPost(post)}
+                      style={isFirstLoad.current ? {
+                        animation: `post-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.06}s both`,
+                      } : undefined}
                     />
                   ))}
                 </div>
@@ -217,9 +224,14 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
                           <FeedPost
                             key={`${post.author}-${post.title}`}
                             post={post}
+                            showCommunity={community.id === "comm_home"}
+                            onCommunityClick={() => {
+                              const idx = communities.findIndex((c) => c.name === post.communityName);
+                              if (idx >= 0) handleCommunityClick(idx);
+                            }}
                             onCommentClick={() => setSelectedPost(post)}
                             style={{
-                              animation: `post-enter 0.6s cubic-bezier(0, 0, 0.2, 1) ${i * 0.12}s both`,
+                              animation: `post-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.06}s both`,
                             }}
                           />
                         ))}
@@ -252,14 +264,14 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
           </>
         )}
 
-        {/* New Post FAB */}
+        {/* New Post FAB — desktop only (mobile uses actions drawer) */}
         {!selectedPost ? (
           <button
-            className="fixed bottom-6 right-6 md:absolute md:bottom-6 md:right-6 z-30 flex items-center gap-2 px-4 py-3 rounded-full bg-accent-primary text-white text-sm font-medium shadow-lg hover:brightness-110 active:scale-95 transition-all"
+            className="hidden md:flex absolute bottom-6 right-6 z-30 items-center gap-2 px-4 py-3 rounded-full bg-accent-primary text-white text-sm font-medium shadow-lg hover:brightness-110 active:scale-95 transition-all"
             aria-label="New post"
           >
             <PenLine size={18} />
-            <span className="hidden sm:inline">New Post</span>
+            New Post
           </button>
         ) : null}
       </main>

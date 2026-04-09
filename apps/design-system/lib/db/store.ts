@@ -65,6 +65,18 @@ function seed() {
   // Communities
   const communities: CommunityData[] = [
     {
+      id: "comm_home",
+      name: "Frontpage",
+      icon: "/frontpage-logo.svg",
+      banner: {
+        name: "Frontpage",
+        bannerImage: "https://images.unsplash.com/photo-1451187580459-43490279c0fa?auto=format&fit=crop&w=1200&h=400&q=80",
+        members: "28,920",
+        online: 302,
+        established: "Jan 2024",
+      },
+    },
+    {
       id: "comm_creative",
       name: "Creative Coding",
       icon: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=56&h=56&q=80",
@@ -377,6 +389,396 @@ function seed() {
       body: "Any chance you\u2019d make this available as a tileset? Would love to use some of these buildings in a game jam project (with credit obviously).",
       createdAt: timeAgoToDate("20m"), votes: 9,
     },
+
+    // ── post_cc_2: GLSL tutorial ──
+    {
+      id: "cmt_20", postId: "post_cc_2", parentId: null,
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "This is the best shader tutorial I\u2019ve seen in years. The way you break down the column logic is so clear \u2014 I finally understand how the spacing works.",
+      createdAt: timeAgoToDate("4h"), votes: 34,
+    },
+    {
+      id: "cmt_21", postId: "post_cc_2", parentId: "cmt_20",
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Glad it clicked! The column spacing was actually the hardest part to explain. I rewrote that section three times before it felt right.",
+      createdAt: timeAgoToDate("3h"), votes: 12,
+    },
+    {
+      id: "cmt_22", postId: "post_cc_2", parentId: null,
+      author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "Any plans for a part 2? Would love to see how you\u2019d approach the trail fade effect \u2014 mine always looks too linear.",
+      createdAt: timeAgoToDate("3h"), votes: 18,
+    },
+    {
+      id: "cmt_23", postId: "post_cc_2", parentId: "cmt_22",
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Part 2 is already drafted! It covers the phosphor persistence and the trail fade. Should be up next week.",
+      createdAt: timeAgoToDate("2h"), votes: 22,
+    },
+    {
+      id: "cmt_24", postId: "post_cc_2", parentId: null,
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [],
+      body: "Tried this in my live stream last night. Chat went wild when the characters started falling. Great stuff.",
+      createdAt: timeAgoToDate("2h"), votes: 9,
+    },
+
+    // ── post_cc_3: Algorithmic Art history ──
+    {
+      id: "cmt_30", postId: "post_cc_3", parentId: null,
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "The Vera Moln\u00e1r section is beautifully written. She doesn\u2019t get nearly enough credit for how far ahead of her time she was.",
+      createdAt: timeAgoToDate("7h"), votes: 28,
+    },
+    {
+      id: "cmt_31", postId: "post_cc_3", parentId: "cmt_30",
+      author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "Agreed. Her \u201cMachine Imaginaire\u201d work from the 1970s could pass as a modern generative NFT drop. Timeless stuff.",
+      createdAt: timeAgoToDate("6h"), votes: 15,
+    },
+    {
+      id: "cmt_32", postId: "post_cc_3", parentId: null,
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Bookmarking this for my students. I teach an intro to creative coding and finding good historical context is always hard.",
+      createdAt: timeAgoToDate("5h"), votes: 19,
+    },
+
+    // ── post_cc_4: Live coding particle system ──
+    {
+      id: "cmt_40", postId: "post_cc_4", parentId: null,
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Caught this live and it was incredible. The moment you added gravity and everything just *clicked* \u2014 the chat exploded.",
+      createdAt: timeAgoToDate("11h"), votes: 45,
+    },
+    {
+      id: "cmt_41", postId: "post_cc_4", parentId: "cmt_40",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Ha yeah that was a good moment. Honestly I wasn\u2019t sure the verlet integration would work first try but sometimes you get lucky.",
+      createdAt: timeAgoToDate("10h"), votes: 18,
+    },
+    {
+      id: "cmt_42", postId: "post_cc_4", parentId: null,
+      author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "Is the VOD available anywhere? I missed the stream and the timestamp links aren\u2019t working for me.",
+      createdAt: timeAgoToDate("9h"), votes: 7,
+    },
+    {
+      id: "cmt_43", postId: "post_cc_4", parentId: "cmt_42",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Yeah the VOD is up now \u2014 had to re-encode it. Should be on the channel page.",
+      createdAt: timeAgoToDate("8h"), votes: 5,
+    },
+    {
+      id: "cmt_44", postId: "post_cc_4", parentId: null,
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "The way you debug live is really instructive. Most tutorials edit out the mistakes but watching you reason through the collision detection bug was the most useful part.",
+      createdAt: timeAgoToDate("8h"), votes: 31,
+    },
+
+    // ── post_cc_5: Aseprite vs Pixelorama ──
+    {
+      id: "cmt_50", postId: "post_cc_5", parentId: null,
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "I switched to Pixelorama six months ago and haven\u2019t looked back. The animation timeline is genuinely better now, and being open source means I can actually fix bugs myself.",
+      createdAt: timeAgoToDate("22h"), votes: 21,
+    },
+    {
+      id: "cmt_51", postId: "post_cc_5", parentId: "cmt_50",
+      author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "The one thing keeping me on Aseprite is the scripting API. I have dozens of Lua scripts for batch operations that I\u2019d have to rewrite.",
+      createdAt: timeAgoToDate("20h"), votes: 14,
+    },
+    {
+      id: "cmt_52", postId: "post_cc_5", parentId: null,
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [],
+      body: "Hot take: LibreSprite (the Aseprite fork from before it went paid) is still perfectly fine for 90% of pixel art workflows.",
+      createdAt: timeAgoToDate("18h"), votes: 8,
+    },
+    {
+      id: "cmt_53", postId: "post_cc_5", parentId: "cmt_52",
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "LibreSprite hasn\u2019t had a release in over a year though. At some point the lack of updates starts to matter.",
+      createdAt: timeAgoToDate("16h"), votes: 11,
+    },
+
+    // ── post_hg_1: Companion planting ──
+    {
+      id: "cmt_60", postId: "post_hg_1", parentId: null,
+      author: "seedpacket", initials: "sp", avatarBg: "oklch(60% 0.12 60)",
+      badges: [],
+      body: "This is exactly what I needed. I have a 4x8 raised bed and I\u2019ve been winging the layout every year. The tomato-basil-marigold combo is genius.",
+      createdAt: timeAgoToDate("1h"), votes: 24,
+    },
+    {
+      id: "cmt_61", postId: "post_hg_1", parentId: "cmt_60",
+      author: "greenthumb", initials: "gt", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "The marigolds are key \u2014 they repel aphids and whiteflies. I plant them as a border around everything now.",
+      createdAt: timeAgoToDate("1h"), votes: 16,
+    },
+    {
+      id: "cmt_62", postId: "post_hg_1", parentId: null,
+      author: "rootbound", initials: "rb", avatarBg: "oklch(50% 0.18 200)",
+      badges: [],
+      body: "One thing to add: don\u2019t plant fennel near anything. It\u2019s allelopathic and will stunt everything around it. Learned that the hard way.",
+      createdAt: timeAgoToDate("1h"), votes: 33,
+    },
+    {
+      id: "cmt_63", postId: "post_hg_1", parentId: "cmt_62",
+      author: "seedpacket", initials: "sp", avatarBg: "oklch(60% 0.12 60)",
+      badges: [],
+      body: "Wait really? I was about to plant fennel right next to my peppers. You just saved my harvest.",
+      createdAt: timeAgoToDate("45m"), votes: 8,
+    },
+
+    // ── post_hg_2: Tomato leaf curl ──
+    {
+      id: "cmt_70", postId: "post_hg_2", parentId: null,
+      author: "greenthumb", initials: "gt", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "Sounds like physiological leaf roll \u2014 super common in zone 7b when you get hot days followed by cool nights. It\u2019s cosmetic, the plant is fine.",
+      createdAt: timeAgoToDate("4h"), votes: 38,
+    },
+    {
+      id: "cmt_71", postId: "post_hg_2", parentId: "cmt_70",
+      author: "seedpacket", initials: "sp", avatarBg: "oklch(60% 0.12 60)",
+      badges: [],
+      body: "Oh thank god. I was about to rip them all out and start over. So I just leave them alone?",
+      createdAt: timeAgoToDate("3h"), votes: 5,
+    },
+    {
+      id: "cmt_72", postId: "post_hg_2", parentId: "cmt_71",
+      author: "greenthumb", initials: "gt", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "Yep. Just make sure you\u2019re not overwatering. Every other day might be too much depending on your soil. Stick your finger 2 inches in \u2014 if it\u2019s still moist, skip the watering.",
+      createdAt: timeAgoToDate("2h"), votes: 21,
+    },
+    {
+      id: "cmt_73", postId: "post_hg_2", parentId: null,
+      author: "rootbound", initials: "rb", avatarBg: "oklch(50% 0.18 200)",
+      badges: [],
+      body: "Could also be herbicide drift if anyone nearby sprayed their lawn recently. That causes a very similar curl pattern.",
+      createdAt: timeAgoToDate("3h"), votes: 14,
+    },
+
+    // ── post_hg_3: Wicking bed IBC tote ──
+    {
+      id: "cmt_80", postId: "post_hg_3", parentId: null,
+      author: "greenthumb", initials: "gt", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "This is brilliant. How long does the reservoir last before you need to refill? I\u2019m gone for work 3\u20134 days at a time and that\u2019s my biggest concern.",
+      createdAt: timeAgoToDate("7h"), votes: 29,
+    },
+    {
+      id: "cmt_81", postId: "post_hg_3", parentId: "cmt_80",
+      author: "rootbound", initials: "rb", avatarBg: "oklch(50% 0.18 200)",
+      badges: [],
+      body: "In peak summer about 5\u20136 days with a full IBC tote (275 gallons). In spring/fall I\u2019ve gone 2 weeks without refilling. It\u2019s honestly changed my whole approach to gardening.",
+      createdAt: timeAgoToDate("6h"), votes: 22,
+    },
+    {
+      id: "cmt_82", postId: "post_hg_3", parentId: null,
+      author: "seedpacket", initials: "sp", avatarBg: "oklch(60% 0.12 60)",
+      badges: [],
+      body: "Where did you source the IBC tote? I\u2019ve seen them on marketplace but I\u2019m always worried about what was stored in them before.",
+      createdAt: timeAgoToDate("5h"), votes: 11,
+    },
+    {
+      id: "cmt_83", postId: "post_hg_3", parentId: "cmt_82",
+      author: "rootbound", initials: "rb", avatarBg: "oklch(50% 0.18 200)",
+      badges: [],
+      body: "Food-grade only \u2014 look for ones that held juice concentrate or food-safe soap. The label should say \u201cUN31HA1\u201d for food grade. I got mine from a juice factory for $40.",
+      createdAt: timeAgoToDate("4h"), votes: 19,
+    },
+
+    // ── post_rg_1: Weekend Game Jam ──
+    {
+      id: "cmt_90", postId: "post_rg_1", parentId: null,
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "The \u201cone button\u201d constraint produced some of the most creative entries I\u2019ve seen. That rhythm game where you only tap to change lanes was so simple and so addictive.",
+      createdAt: timeAgoToDate("45m"), votes: 42,
+    },
+    {
+      id: "cmt_91", postId: "post_rg_1", parentId: "cmt_90",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "Right? Constraints breed creativity. Next month\u2019s theme is \u201c64x64 resolution\u201d \u2014 should be another good one.",
+      createdAt: timeAgoToDate("30m"), votes: 18,
+    },
+    {
+      id: "cmt_92", postId: "post_rg_1", parentId: null,
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "I submitted the platformer with the one-button dash mechanic. Didn\u2019t place but learned a ton about game feel in 48 hours.",
+      createdAt: timeAgoToDate("30m"), votes: 15,
+    },
+
+    // ── post_rg_2: Sony PVM thrift store ──
+    {
+      id: "cmt_100", postId: "post_rg_2", parentId: null,
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "Fifteen dollars?! I paid $400 for mine and I thought THAT was a deal. The retro CRT market has gone completely insane.",
+      createdAt: timeAgoToDate("3h"), votes: 89,
+    },
+    {
+      id: "cmt_101", postId: "post_rg_2", parentId: "cmt_100",
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "I know, I couldn\u2019t believe it either. The thrift store had it labeled as \u201cold TV \u2014 works.\u201d They had no idea what they had.",
+      createdAt: timeAgoToDate("2h"), votes: 45,
+    },
+    {
+      id: "cmt_102", postId: "post_rg_2", parentId: null,
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "The 20M4U is the sweet spot \u2014 600 TV lines, component input, and small enough to actually fit on a desk. Incredible find.",
+      createdAt: timeAgoToDate("2h"), votes: 34,
+    },
+    {
+      id: "cmt_103", postId: "post_rg_2", parentId: "cmt_102",
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "Already hooked up my SNES. Chrono Trigger on a PVM is a religious experience.",
+      createdAt: timeAgoToDate("1h"), votes: 52,
+    },
+
+    // ── post_rg_3: Game Boy Camera hot take ──
+    {
+      id: "cmt_110", postId: "post_rg_3", parentId: null,
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "I unironically agree. The limitations force you to think about every single pixel. Modern cameras give you too many decisions to make.",
+      createdAt: timeAgoToDate("6h"), votes: 38,
+    },
+    {
+      id: "cmt_111", postId: "post_rg_3", parentId: "cmt_110",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "Exactly. And the thermal prints have this ephemeral quality \u2014 they fade over time, which makes each one feel precious.",
+      createdAt: timeAgoToDate("5h"), votes: 22,
+    },
+    {
+      id: "cmt_112", postId: "post_rg_3", parentId: null,
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "Counter-take: the Game Boy Camera is a toy and that\u2019s fine. Not everything needs to be elevated to High Art. It\u2019s fun precisely because it doesn\u2019t take itself seriously.",
+      createdAt: timeAgoToDate("5h"), votes: 27,
+    },
+    {
+      id: "cmt_113", postId: "post_rg_3", parentId: "cmt_112",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "Why can\u2019t it be both? The best art comes from play. That\u2019s literally what the Game Boy was designed for.",
+      createdAt: timeAgoToDate("4h"), votes: 19,
+    },
+
+    // ── post_ph_1: Golden hour observatory ──
+    {
+      id: "cmt_120", postId: "post_ph_1", parentId: null,
+      author: "darkroom_dan", initials: "df", avatarBg: "oklch(50% 0.12 200)",
+      badges: [],
+      body: "The way the light hits the dome is unreal. What lens were you shooting with? The flare control is immaculate.",
+      createdAt: timeAgoToDate("3h"), votes: 35,
+    },
+    {
+      id: "cmt_121", postId: "post_ph_1", parentId: "cmt_120",
+      author: "lenscraft", initials: "lc", avatarBg: "oklch(55% 0.1 60)",
+      badges: [],
+      body: "Sigma 35mm f/1.4 Art. No filters, just waited for the exact right moment. Got there 2 hours early and just sat with the light.",
+      createdAt: timeAgoToDate("2h"), votes: 21,
+    },
+    {
+      id: "cmt_122", postId: "post_ph_1", parentId: null,
+      author: "nightmode", initials: "nm", avatarBg: "oklch(55% 0.15 300)",
+      badges: [],
+      body: "Is this the Griffith observatory or somewhere else? The decay on the building is gorgeous \u2014 gives it so much character.",
+      createdAt: timeAgoToDate("2h"), votes: 14,
+    },
+    {
+      id: "cmt_123", postId: "post_ph_1", parentId: "cmt_122",
+      author: "lenscraft", initials: "lc", avatarBg: "oklch(55% 0.1 60)",
+      badges: [],
+      body: "It\u2019s an abandoned one in rural New Mexico. Can\u2019t share the exact location but it\u2019s worth the drive if you\u2019re ever out that way.",
+      createdAt: timeAgoToDate("1h"), votes: 18,
+    },
+
+    // ── post_ph_2: Weekly challenge Reflections ──
+    {
+      id: "cmt_130", postId: "post_ph_2", parentId: null,
+      author: "lenscraft", initials: "lc", avatarBg: "oklch(55% 0.1 60)",
+      badges: [],
+      body: "Thanks for the shoutout! That puddle shot was pure luck honestly \u2014 it rained 5 minutes before sunset and I just happened to be standing in the right spot.",
+      createdAt: timeAgoToDate("5h"), votes: 28,
+    },
+    {
+      id: "cmt_131", postId: "post_ph_2", parentId: "cmt_130",
+      author: "darkroom_dan", initials: "df", avatarBg: "oklch(50% 0.12 200)",
+      badges: [],
+      body: "Luck is just preparation meeting opportunity. You were there with the right lens at the right time \u2014 that\u2019s not an accident.",
+      createdAt: timeAgoToDate("4h"), votes: 19,
+    },
+    {
+      id: "cmt_132", postId: "post_ph_2", parentId: null,
+      author: "nightmode", initials: "nm", avatarBg: "oklch(55% 0.15 300)",
+      badges: [],
+      body: "89 submissions is insane for a weekly challenge. This community has really grown. What\u2019s tomorrow\u2019s theme?",
+      createdAt: timeAgoToDate("4h"), votes: 12,
+    },
+    {
+      id: "cmt_133", postId: "post_ph_2", parentId: "cmt_132",
+      author: "darkroom_dan", initials: "df", avatarBg: "oklch(50% 0.12 200)",
+      badges: [],
+      body: "Tomorrow\u2019s theme is \u201cNegative Space.\u201d Should be a fun one for the minimalists in here.",
+      createdAt: timeAgoToDate("3h"), votes: 15,
+    },
+
+    // ── post_ph_3: Milky Way Death Valley ──
+    {
+      id: "cmt_140", postId: "post_ph_3", parentId: null,
+      author: "lenscraft", initials: "lc", avatarBg: "oklch(55% 0.1 60)",
+      badges: [],
+      body: "45 stacked exposures. The dedication is insane. What was your total integration time? The noise floor on this is incredibly low.",
+      createdAt: timeAgoToDate("9h"), votes: 67,
+    },
+    {
+      id: "cmt_141", postId: "post_ph_3", parentId: "cmt_140",
+      author: "nightmode", initials: "nm", avatarBg: "oklch(55% 0.15 300)",
+      badges: [],
+      body: "About 90 minutes total \u2014 each frame was 2 minutes at ISO 3200. Stacked in Sequator then graded in Lightroom. The Bortle 1 skies at Death Valley do most of the heavy lifting.",
+      createdAt: timeAgoToDate("8h"), votes: 42,
+    },
+    {
+      id: "cmt_142", postId: "post_ph_3", parentId: null,
+      author: "darkroom_dan", initials: "df", avatarBg: "oklch(50% 0.12 200)",
+      badges: [],
+      body: "This makes me want to drive out to a dark sky site. What tracker are you using for 2-minute exposures?",
+      createdAt: timeAgoToDate("7h"), votes: 23,
+    },
+    {
+      id: "cmt_143", postId: "post_ph_3", parentId: "cmt_142",
+      author: "nightmode", initials: "nm", avatarBg: "oklch(55% 0.15 300)",
+      badges: [],
+      body: "Star Adventurer GTi. It\u2019s portable enough to hike with and accurate enough for 2\u20133 minute exposures at 35mm. Can\u2019t recommend it enough for landscape astro.",
+      createdAt: timeAgoToDate("6h"), votes: 31,
+    },
   ];
 
   store.communities = communities;
@@ -398,8 +800,11 @@ export const db = {
   getCommunity: (id: string) => store.communities.find((c) => c.id === id),
 
   // Posts
+  getAllPosts: () => [...store.posts],
   getPostsByCommunity: (communityId: string) =>
-    store.posts.filter((p) => p.communityId === communityId),
+    communityId === "comm_home"
+      ? [...store.posts]
+      : store.posts.filter((p) => p.communityId === communityId),
   getPost: (id: string) => store.posts.find((p) => p.id === id),
 
   // Comments (flat — caller builds the tree)

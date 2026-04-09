@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { Heart, MessageCircle, ChevronDown, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Share2, Link2, Flag, ChevronRight, MoreHorizontal } from "lucide-react";
 import { Avatar } from "./avatar";
 import { Badge } from "./badge";
 import { ReplyComposer } from "./reply-composer";
@@ -34,11 +34,20 @@ function spawnHeartParticles(container: HTMLElement) {
   }
 }
 
+function countAllReplies(comment: Comment): number {
+  if (!comment.replies) return 0;
+  return comment.replies.reduce((sum, r) => sum + 1 + countAllReplies(r), 0);
+}
+
 interface ThreadCommentProps {
   comment: Comment;
   depth?: number;
   index?: number;
   parentDelay?: number;
+  activeReplyId: string | null;
+  onReplyToggle: (id: string | null) => void;
+  activeMenuId: string | null;
+  onMenuToggle: (id: string | null) => void;
 }
 
 const THREAD_COLORS = [
@@ -49,16 +58,27 @@ const THREAD_COLORS = [
   "oklch(65% 0.2 350)",     // rose
 ];
 
-export function ThreadComment({ comment, depth = 0, index = 0, parentDelay = 0 }: ThreadCommentProps) {
+export function ThreadComment({
+  comment,
+  depth = 0,
+  index = 0,
+  parentDelay = 0,
+  activeReplyId,
+  onReplyToggle,
+  activeMenuId,
+  onMenuToggle,
+}: ThreadCommentProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [liked, setLiked] = useState(false);
   const [voteCount, setVoteCount] = useState(comment.votes);
-  const [replying, setReplying] = useState(false);
   const heartRef = useRef<HTMLButtonElement>(null);
 
   const threadColor = THREAD_COLORS[depth % THREAD_COLORS.length];
-  const entryDelay = parentDelay + index * 0.06;
+  const entryDelay = parentDelay + index * 0.03;
   const hasReplies = comment.replies && comment.replies.length > 0;
+  const isReplying = activeReplyId === comment.id;
+  const isMenuOpen = activeMenuId === comment.id;
+  const totalReplies = hasReplies ? countAllReplies(comment) : 0;
 
   const handleLike = useCallback(() => {
     const next = !liked;
@@ -69,123 +89,179 @@ export function ThreadComment({ comment, depth = 0, index = 0, parentDelay = 0 }
     }
   }, [liked, comment.votes]);
 
+  const handleCopyLink = useCallback(() => {
+    const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
+    navigator.clipboard.writeText(url);
+    onMenuToggle(null);
+  }, [comment.id, onMenuToggle]);
+
   return (
     <div
       className="relative"
+      id={`comment-${comment.id}`}
       style={{
-        animation: `comment-enter 0.4s cubic-bezier(0, 0, 0.2, 1) ${entryDelay}s both`,
+        animation: `comment-enter 0.25s cubic-bezier(0, 0, 0, 1) ${entryDelay}s both`,
       }}
     >
-      {/* Thread connector line */}
+      {/* Clickable thread line */}
       {depth > 0 ? (
-        <div
-          className="absolute left-0 top-0 bottom-0 w-px"
-          style={{ backgroundColor: threadColor, opacity: 0.25 }}
-        />
+        <button
+          onClick={() => setCollapsed(!collapsed)}
+          className="absolute left-0 top-0 bottom-0 w-4 group/line cursor-pointer z-[1]"
+          aria-label={collapsed ? "Expand thread" : "Collapse thread"}
+        >
+          <div
+            className="absolute left-0 top-0 bottom-0 w-0.5 rounded-full transition-[width,opacity] group-hover/line:w-1 group-hover/line:opacity-50"
+            style={{ backgroundColor: threadColor, opacity: 0.2 }}
+          />
+        </button>
       ) : null}
 
       <div className={depth > 0 ? "pl-4" : ""}>
-        {/* Comment header */}
-        <div className="flex items-start gap-2.5 group">
-          <div className="shrink-0 mt-0.5">
-            <Avatar initials={comment.initials} bg={comment.avatarBg} size={depth === 0 ? 32 : 26} />
-          </div>
+        {/* Collapsed state */}
+        {collapsed ? (
+          <button
+            onClick={() => setCollapsed(false)}
+            className="flex items-center gap-2 py-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors w-full text-left"
+          >
+            <Avatar initials={comment.initials} bg={comment.avatarBg} size={20} />
+            <strong className="text-text-primary">{comment.author}</strong>
+            <span>&middot; {comment.time}</span>
+            <span className="text-accent-secondary flex items-center gap-0.5">
+              <ChevronRight size={11} />
+              {totalReplies > 0 ? `${totalReplies + 1} comments` : "expand"}
+            </span>
+          </button>
+        ) : (
+          <div className="flex items-start gap-2.5 group">
+            <div className="shrink-0 mt-0.5">
+              <Avatar initials={comment.initials} bg={comment.avatarBg} size={depth === 0 ? 32 : 26} />
+            </div>
 
-          <div className="flex-1 min-w-0">
-            {/* Author line */}
-            <div className="flex items-center gap-1.5 text-xs">
-              <strong className="text-text-primary">{comment.author}</strong>
-              {comment.badges?.map((b) => (
-                <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
-              ))}
-              <span className="text-text-muted">&middot; {comment.time}</span>
+            <div className="flex-1 min-w-0">
+              {/* Author line */}
+              <div className="flex items-center gap-1.5 text-xs">
+                {hasReplies ? (
+                  <button
+                    onClick={() => setCollapsed(true)}
+                    className="flex items-center gap-1.5 hover:text-accent-secondary transition-colors"
+                  >
+                    <strong className="text-text-primary">{comment.author}</strong>
+                  </button>
+                ) : (
+                  <strong className="text-text-primary">{comment.author}</strong>
+                )}
+                {comment.badges?.map((b) => (
+                  <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
+                ))}
+                <span className="text-text-muted">&middot; {comment.time}</span>
+              </div>
 
-              {/* Collapse toggle */}
-              {hasReplies ? (
+              {/* Body — selectable text */}
+              <p className="text-sm text-text-secondary leading-relaxed mt-1 select-text">
+                {comment.body}
+              </p>
+
+              {/* Actions — bigger, inline */}
+              <div className="flex items-center gap-4 mt-2 text-xs text-text-muted">
                 <button
-                  onClick={() => setCollapsed(!collapsed)}
-                  className="ml-auto text-text-muted hover:text-text-secondary transition-colors p-0.5 opacity-0 group-hover:opacity-100"
-                  aria-label={collapsed ? "Expand replies" : "Collapse replies"}
+                  ref={heartRef}
+                  onClick={handleLike}
+                  className={`relative flex items-center gap-1.5 tabular-nums transition-colors ${
+                    liked ? "text-[oklch(55%_0.2_20)]" : "hover:text-text-secondary"
+                  }`}
                 >
-                  <ChevronDown
+                  <Heart
                     size={14}
-                    className="transition-transform duration-200"
-                    style={{ transform: collapsed ? "rotate(-90deg)" : "rotate(0)" }}
+                    fill={liked ? "currentColor" : "none"}
+                    className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
                   />
+                  {voteCount}
                 </button>
+                <button
+                  onClick={() => onReplyToggle(isReplying ? null : comment.id)}
+                  className={`flex items-center gap-1.5 transition-colors ${
+                    isReplying ? "text-accent-secondary" : "hover:text-text-secondary"
+                  }`}
+                >
+                  <MessageCircle size={14} />
+                  Reply
+                </button>
+                <button
+                  onClick={() => {
+                    const url = `${window.location.origin}${window.location.pathname}#comment-${comment.id}`;
+                    navigator.clipboard.writeText(url);
+                  }}
+                  className="flex items-center gap-1.5 hover:text-text-secondary transition-colors"
+                >
+                  <Share2 size={14} />
+                  Share
+                </button>
+
+                {/* More menu */}
+                <div className="relative">
+                  <button
+                    onClick={() => onMenuToggle(isMenuOpen ? null : comment.id)}
+                    className={`flex items-center transition-colors ${
+                      isMenuOpen ? "text-text-secondary" : "opacity-0 group-hover:opacity-100 hover:text-text-secondary"
+                    }`}
+                  >
+                    <MoreHorizontal size={14} />
+                  </button>
+                  {isMenuOpen ? (
+                    <>
+                      <div className="fixed inset-0 z-[60]" onClick={() => onMenuToggle(null)} />
+                      <div className="absolute left-0 top-full mt-1 z-[70] bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_4px_16px_oklch(0%_0_0_/_0.3)] py-1 min-w-[140px]">
+                        <button
+                          onClick={handleCopyLink}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
+                        >
+                          <Link2 size={13} />
+                          Copy link
+                        </button>
+                        <div className="border-t border-bg-elevated my-1" />
+                        <button
+                          onClick={() => onMenuToggle(null)}
+                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated hover:text-accent-destructive transition-colors"
+                        >
+                          <Flag size={13} />
+                          Report
+                        </button>
+                      </div>
+                    </>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* Reply composer */}
+              {isReplying ? (
+                <ReplyComposer
+                  onSubmit={() => onReplyToggle(null)}
+                  onCancel={() => onReplyToggle(null)}
+                />
+              ) : null}
+
+              {/* Nested replies */}
+              {hasReplies ? (
+                <div className="mt-3 space-y-3">
+                  {comment.replies!.map((reply, i) => (
+                    <ThreadComment
+                      key={reply.id}
+                      comment={reply}
+                      depth={depth + 1}
+                      index={i}
+                      parentDelay={entryDelay + 0.04}
+                      activeReplyId={activeReplyId}
+                      onReplyToggle={onReplyToggle}
+                      activeMenuId={activeMenuId}
+                      onMenuToggle={onMenuToggle}
+                    />
+                  ))}
+                </div>
               ) : null}
             </div>
-
-            {/* Body */}
-            <p className="text-sm text-text-secondary leading-relaxed mt-1">
-              {comment.body}
-            </p>
-
-            {/* Actions */}
-            <div className="flex items-center gap-3 mt-2 text-[11px] text-text-muted">
-              <button
-                ref={heartRef}
-                onClick={handleLike}
-                className={`flex items-center gap-1 tabular-nums transition-colors ${
-                  liked ? "text-[oklch(55%_0.2_20)]" : "hover:text-text-secondary"
-                }`}
-              >
-                <Heart
-                  size={13}
-                  fill={liked ? "currentColor" : "none"}
-                  className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
-                />
-                {voteCount}
-              </button>
-              <button
-                onClick={() => setReplying(!replying)}
-                className={`flex items-center gap-1 transition-colors ${
-                  replying ? "text-accent-secondary" : "hover:text-text-secondary"
-                }`}
-              >
-                <MessageCircle size={13} />
-                Reply
-              </button>
-              <button className="hover:text-text-secondary transition-colors ml-auto opacity-0 group-hover:opacity-100">
-                <MoreHorizontal size={13} />
-              </button>
-            </div>
-
-            {/* Reply composer */}
-            {replying ? (
-              <ReplyComposer
-                onSubmit={() => setReplying(false)}
-                onCancel={() => setReplying(false)}
-              />
-            ) : null}
-
-            {/* Nested replies */}
-            {hasReplies && !collapsed ? (
-              <div className="mt-3 space-y-3">
-                {comment.replies!.map((reply, i) => (
-                  <ThreadComment
-                    key={reply.id}
-                    comment={reply}
-                    depth={depth + 1}
-                    index={i}
-                    parentDelay={entryDelay + 0.08}
-                  />
-                ))}
-              </div>
-            ) : null}
-
-            {/* Collapsed indicator */}
-            {hasReplies && collapsed ? (
-              <button
-                onClick={() => setCollapsed(false)}
-                className="mt-2 text-[11px] text-accent-secondary hover:text-accent-secondary/80 transition-colors flex items-center gap-1"
-              >
-                <ChevronDown size={12} className="-rotate-90" />
-                {comment.replies!.length} {comment.replies!.length === 1 ? "reply" : "replies"} hidden
-              </button>
-            ) : null}
           </div>
-        </div>
+        )}
       </div>
     </div>
   );
