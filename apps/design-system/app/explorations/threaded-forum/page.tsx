@@ -2,9 +2,10 @@
 
 import { useState } from "react";
 import { Pin, ChevronLeft, ChevronRight } from "lucide-react";
-import { Sidebar } from "@/components/sidebar";
+import { Sidebar, MobileHeader } from "@/components/sidebar";
 import { Badge } from "@/components/badge";
 import { communities } from "@/lib/sample-data";
+import { themeToStyle } from "@/lib/theme";
 
 interface ForumThread {
   id: number;
@@ -221,24 +222,29 @@ export default function ThreadedForumPage() {
 
   const community = communities[activeCommunity];
 
+  const themeStyle = themeToStyle(community?.theme);
+
   return (
     <div
-      className="flex h-[calc(100vh-57px)] overflow-hidden"
-      style={community?.theme as React.CSSProperties}
+      className="flex h-dvh overflow-hidden bg-bg-base text-text-primary"
+      style={themeStyle}
     >
       {/* Sidebar */}
-      <div className="shrink-0 h-full">
-        <Sidebar
-          communities={sidebarCommunities}
-          onCommunityClick={(i) => {
-            setActiveCommunity(i);
-            setSelectedThread(null);
-          }}
-        />
-      </div>
+      <Sidebar
+        communities={sidebarCommunities}
+        onCommunityClick={(i) => {
+          setActiveCommunity(i);
+          setSelectedThread(null);
+        }}
+      />
 
       {/* Forum content */}
-      <div className="flex-1 overflow-y-auto bg-bg-base">
+      <div className="flex-1 overflow-y-auto bg-bg-base pb-20 md:pb-0">
+        <MobileHeader
+          communityName={community?.name}
+          communityIcon={community?.icon}
+          bannerImage={community?.banner.bannerImage}
+        />
         {/* Forum header */}
         <div className="border-b border-bg-elevated bg-bg-surface px-6 py-4">
           <div className="flex items-center gap-3 mb-2">

@@ -19,7 +19,7 @@ export const communities: Community[] = [
         initials: "pw",
         avatarBg: "var(--color-indigo-600)",
         time: "3h ago",
-        badges: [{ variant: "artist", icon: "Palette", label: "Artist" }],
+        badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
         title: "Just finished this isometric city \u2014 6 months of pixel work",
         image:
           "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=800&h=400&q=80",
@@ -31,7 +31,7 @@ export const communities: Community[] = [
         initials: "sw",
         avatarBg: "oklch(50% 0.15 180)",
         time: "5h ago",
-        badges: [{ variant: "og", icon: "Crown", label: "OG" }],
+        badges: [{ variant: "og", icon: "Star", label: "OG" }],
         title: "New GLSL tutorial: Recreating The Matrix Code effect",
         body: "Step-by-step breakdown of how to create the iconic falling characters effect using fragment shaders. Covers the column setup, randomized character selection, and that signature green phosphor glow. Full source on GitHub.",
         votes: 142,
@@ -60,7 +60,7 @@ export const communities: Community[] = [
         avatarBg: "oklch(60% 0.2 30)",
         time: "12h ago",
         badges: [
-          { variant: "og", icon: "Crown", label: "OG" },
+          { variant: "og", icon: "Star", label: "OG" },
           { variant: "live", icon: "Radio", label: "Live" },
         ],
         title: "Live coding session: building a particle system from scratch",
@@ -76,7 +76,7 @@ export const communities: Community[] = [
         initials: "pn",
         avatarBg: "oklch(55% 0.18 310)",
         time: "1d ago",
-        badges: [{ variant: "artist", icon: "Palette", label: "Artist" }],
+        badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
         title:
           "What\u2019s everyone using for pixel art these days? Aseprite vs Pixelorama?",
         body: "I\u2019ve been using Aseprite forever but Pixelorama is looking really good lately. It\u2019s open source and the animation timeline has gotten way better. Anyone made the switch?",

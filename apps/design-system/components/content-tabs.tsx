@@ -8,6 +8,8 @@ type TabKey = "posts" | "atmo" | "wiki";
 
 interface ContentTabsProps {
   children: Record<TabKey, ReactNode>;
+  sortKey?: "hot" | "new" | "top";
+  onSortChange?: (key: "hot" | "new" | "top") => void;
 }
 
 const secondaryTabs: { key: TabKey; icon: typeof AtSign; label: string }[] = [
@@ -15,7 +17,7 @@ const secondaryTabs: { key: TabKey; icon: typeof AtSign; label: string }[] = [
   { key: "wiki", icon: BookOpen, label: "Wiki" },
 ];
 
-export function ContentTabs({ children }: ContentTabsProps) {
+export function ContentTabs({ children, sortKey, onSortChange }: ContentTabsProps) {
   const [activeTab, setActiveTab] = useState<TabKey>("posts");
 
   return (
@@ -31,7 +33,7 @@ export function ContentTabs({ children }: ContentTabsProps) {
             Posts
           </button>
         ) : (
-          <FeedSort />
+          <FeedSort value={sortKey} onChange={onSortChange} />
         )}
 
         <div className="flex-1" />
@@ -70,7 +72,9 @@ export function ContentTabs({ children }: ContentTabsProps) {
       </div>
 
       {/* Active panel */}
-      <div>{children[activeTab]}</div>
+      <div key={activeTab} className="animate-fade-in">
+        {children[activeTab]}
+      </div>
     </div>
   );
 }

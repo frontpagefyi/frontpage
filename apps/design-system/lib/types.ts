@@ -11,6 +11,7 @@ export interface LinkPreview {
 }
 
 export interface Post {
+  id?: string;
   author: string;
   initials: string;
   avatarBg: string;
@@ -35,6 +36,18 @@ export interface CommunityBanner {
   members: string;
   online: number;
   established: string;
+}
+
+export interface Comment {
+  id: string;
+  author: string;
+  initials: string;
+  avatarBg: string;
+  badges?: PostBadge[];
+  body: string;
+  time: string;
+  votes: number;
+  replies?: Comment[];
 }
 
 export interface Community {

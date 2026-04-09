@@ -10,26 +10,26 @@ import { ElevationScale } from "@/components/elevation-scale";
 import { ComponentShowcase } from "@/components/component-showcase";
 
 const surfaceColors = [
-  { name: "bg-base", value: "oklch(13.6% 0.02 270)", cssVar: "--color-bg-base" },
-  { name: "bg-surface", value: "oklch(18% 0.018 270)", cssVar: "--color-bg-surface" },
-  { name: "bg-elevated", value: "oklch(22% 0.016 270)", cssVar: "--color-bg-elevated" },
-  { name: "bg-overlay", value: "oklch(26% 0.014 270)", cssVar: "--color-bg-overlay" },
-  { name: "bg-interactive", value: "oklch(30% 0.012 270)", cssVar: "--color-bg-interactive" },
+  { name: "bg-base", value: "oklch(13.6% 0.036 259)", cssVar: "--color-bg-base" },
+  { name: "bg-surface", value: "oklch(18% 0.036 259)", cssVar: "--color-bg-surface" },
+  { name: "bg-elevated", value: "oklch(22% 0.037 260)", cssVar: "--color-bg-elevated" },
+  { name: "bg-overlay", value: "oklch(26% 0.037 260)", cssVar: "--color-bg-overlay" },
+  { name: "bg-interactive", value: "oklch(28% 0.037 260)", cssVar: "--color-bg-interactive" },
 ];
 
 const textColors = [
-  { name: "text-primary", value: "oklch(95% 0.005 270)", cssVar: "--color-text-primary" },
-  { name: "text-secondary", value: "oklch(75% 0.02 270)", cssVar: "--color-text-secondary" },
-  { name: "text-muted", value: "oklch(62% 0.025 270)", cssVar: "--color-text-muted" },
-  { name: "text-inverse", value: "oklch(13.6% 0.02 270)", cssVar: "--color-text-inverse" },
+  { name: "text-primary", value: "oklch(98.4% 0.003 248)", cssVar: "--color-text-primary" },
+  { name: "text-secondary", value: "oklch(71% 0.035 257)", cssVar: "--color-text-secondary" },
+  { name: "text-muted", value: "oklch(55% 0.041 257)", cssVar: "--color-text-muted" },
+  { name: "text-inverse", value: "oklch(13.6% 0.036 259)", cssVar: "--color-text-inverse" },
 ];
 
 const accentColors = [
   { name: "accent-primary", value: "oklch(75% 0.18 75)", cssVar: "--color-accent-primary" },
-  { name: "accent-secondary", value: "oklch(55% 0.2 280)", cssVar: "--color-accent-secondary" },
+  { name: "accent-secondary", value: "oklch(64.8% 0.147 259)", cssVar: "--color-accent-secondary" },
   { name: "accent-success", value: "oklch(72% 0.19 150)", cssVar: "--color-accent-success" },
   { name: "accent-warning", value: "oklch(85% 0.16 85)", cssVar: "--color-accent-warning" },
-  { name: "accent-destructive", value: "oklch(55% 0.22 25)", cssVar: "--color-accent-destructive" },
+  { name: "accent-destructive", value: "oklch(63.7% 0.208 25)", cssVar: "--color-accent-destructive" },
   { name: "accent-live", value: "oklch(60% 0.27 25)", cssVar: "--color-accent-live" },
 ];
 

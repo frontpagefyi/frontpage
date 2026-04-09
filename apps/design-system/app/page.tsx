@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { Layers, Paintbrush, LayoutGrid, FlaskConical } from "lucide-react";
+import { Paintbrush, FlaskConical } from "lucide-react";
 
 const sections = [
   {
@@ -10,25 +10,11 @@ const sections = [
     color: "text-accent-primary",
   },
   {
-    href: "/demo",
-    title: "Interactive Demo",
-    description: "The current Frontpage community design with sidebar, feed, atmosphere tab, and community switching.",
-    icon: Layers,
-    color: "text-accent-secondary",
-  },
-  {
-    href: "/catalog",
-    title: "Layout Catalog",
-    description: "39 alternative ways to display community content. Mini-previews of every layout concept from forum to aquarium.",
-    icon: LayoutGrid,
-    color: "text-accent-success",
-  },
-  {
     href: "/explorations",
     title: "Explorations",
-    description: "Full-page interactive prototypes. Each one takes a catalog concept and builds it out as a real, working page.",
+    description: "Interactive demos and 39 layout concepts exploring alternatives to Reddit-style cards. From forums to aquariums.",
     icon: FlaskConical,
-    color: "text-accent-destructive",
+    color: "text-accent-secondary",
   },
 ];
 

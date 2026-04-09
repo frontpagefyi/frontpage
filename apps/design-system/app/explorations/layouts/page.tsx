@@ -1,3 +1,5 @@
+import Link from "next/link";
+import { ArrowLeft } from "lucide-react";
 import { LayoutPreview } from "@/components/layout-preview";
 import { CatalogToc } from "@/components/catalog-toc";
 import { ForumLayout } from "@/components/layouts/forum";
@@ -88,7 +90,7 @@ const tocItems = layouts.map((l) => ({
   id: l.name.toLowerCase().replace(/\s+/g, "-"),
 }));
 
-export default function CatalogPage() {
+export default function LayoutsPage() {
   return (
     <div className="flex gap-0">
       {/* Sidebar TOC */}
@@ -99,14 +101,23 @@ export default function CatalogPage() {
       {/* Main content */}
       <main className="flex-1 min-w-0 py-12">
         <div className="max-w-[960px] mx-auto px-6 mb-12">
+          <Link
+            href="/explorations"
+            className="inline-flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors mb-4"
+          >
+            <ArrowLeft size={12} />
+            Explorations
+          </Link>
           <h1
             className="font-serif text-4xl font-bold mb-2"
             style={{ lineHeight: "1.2", letterSpacing: "-0.025em" }}
           >
-            Layout Catalog
+            Layout Concepts
           </h1>
           <p className="text-text-secondary max-w-[600px]">
-            Alternative ways to display community content that aren&apos;t Reddit-style cards. Each preview uses the same sample data rendered in a different layout paradigm.
+            39 alternative ways to display community content that aren&apos;t
+            Reddit-style cards. Each preview uses the same sample data rendered
+            in a different layout paradigm.
           </p>
         </div>
 

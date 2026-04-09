@@ -6,23 +6,23 @@
   --font-serif: 'Source Serif 4', ui-serif, Georgia, serif;
   --font-mono: 'JetBrains Mono', ui-monospace, monospace;
 
-  /* Colors — OKLCH */
-  --color-bg-base: oklch(13.6% 0.02 270);
-  --color-bg-surface: oklch(18% 0.018 270);
-  --color-bg-elevated: oklch(22% 0.016 270);
-  --color-bg-overlay: oklch(26% 0.014 270);
-  --color-bg-interactive: oklch(30% 0.012 270);
+  /* Colors — OKLCH (aligned with Frontpage app, hue ~259) */
+  --color-bg-base: oklch(13.6% 0.036 259);
+  --color-bg-surface: oklch(18% 0.036 259);
+  --color-bg-elevated: oklch(22% 0.037 260);
+  --color-bg-overlay: oklch(26% 0.037 260);
+  --color-bg-interactive: oklch(28% 0.037 260);
 
-  --color-text-primary: oklch(95% 0.005 270);
-  --color-text-secondary: oklch(75% 0.02 270);
-  --color-text-muted: oklch(62% 0.025 270);
-  --color-text-inverse: oklch(13.6% 0.02 270);
+  --color-text-primary: oklch(98.4% 0.003 248);
+  --color-text-secondary: oklch(71% 0.035 257);
+  --color-text-muted: oklch(55% 0.041 257);
+  --color-text-inverse: oklch(13.6% 0.036 259);
 
   --color-accent-primary: oklch(75% 0.18 75);
-  --color-accent-secondary: oklch(55% 0.2 280);
+  --color-accent-secondary: oklch(64.8% 0.147 259);
   --color-accent-success: oklch(72% 0.19 150);
   --color-accent-warning: oklch(85% 0.16 85);
-  --color-accent-destructive: oklch(55% 0.22 25);
+  --color-accent-destructive: oklch(63.7% 0.208 25);
   --color-accent-live: oklch(60% 0.27 25);
 
   /* Brand indigo scale */
@@ -55,6 +55,9 @@
   --radius-lg: 12px;
   --radius-xl: 16px;
   --radius-full: 9999px;
+
+  /* Easing */
+  --ease-sidebar: cubic-bezier(0.34, 1.3, 0.64, 1);
 }
 
 /* Base resets */
@@ -92,6 +95,60 @@ h1, h2, h3, h4, h5, h6 {
   &::-webkit-scrollbar {
     display: none;
   }
+}
+
+/* Heart like animation */
+@keyframes heart-pop {
+  0% { transform: scale(1); }
+  15% { transform: scale(0.7); }
+  40% { transform: scale(1.5); }
+  70% { transform: scale(0.9); }
+  100% { transform: scale(1); }
+}
+
+/* Heart particle burst */
+@keyframes heart-float {
+  0% {
+    opacity: 1;
+    transform: translate(-50%, -50%) scale(0.2) rotate(0deg);
+  }
+  30% {
+    opacity: 1;
+    transform: translate(calc(-50% + var(--hx) * 0.5), calc(-50% + var(--hy) * 0.5)) scale(var(--hs)) rotate(calc(var(--hr) * 0.4));
+  }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--hx)), calc(-50% + var(--hy) - 8px)) scale(calc(var(--hs) * 0.3)) rotate(var(--hr));
+  }
+}
+
+/* Post entry stagger */
+@keyframes post-enter {
+  0% { opacity: 0; transform: translateY(20px) scale(0.97); }
+  40% { opacity: 1; }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+/* Bookmark save animation — drops down then springs up */
+@keyframes bookmark-drop {
+  0% { transform: translateY(0) scale(1) rotate(0deg); }
+  25% { transform: translateY(8px) scale(0.6) rotate(-8deg); }
+  50% { transform: translateY(-12px) scale(1.4) rotate(4deg); }
+  70% { transform: translateY(3px) scale(0.9) rotate(-2deg); }
+  85% { transform: translateY(-3px) scale(1.1) rotate(0deg); }
+  100% { transform: translateY(0) scale(1) rotate(0deg); }
+}
+
+/* Comment thread entry — slides in from left with fade */
+@keyframes comment-enter {
+  0% { opacity: 0; transform: translateX(-12px); }
+  100% { opacity: 1; transform: translateX(0); }
+}
+
+/* Collapse/expand height transition helper */
+@keyframes collapse-in {
+  0% { opacity: 0; max-height: 0; }
+  100% { opacity: 1; max-height: 2000px; }
 }
 
 /* Focus styles — WCAG 2.4.7, 2.4.11 */
