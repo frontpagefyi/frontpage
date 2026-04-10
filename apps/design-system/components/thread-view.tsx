@@ -106,22 +106,29 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
     window.history.pushState({}, "", url.toString());
   }, []);
 
-  // Fetch comments if not provided as prop, and restore sub-thread from URL
+  // Sync comments when initialComments prop updates (from parent async fetch)
   useEffect(() => {
-    const restore = (loaded: Comment[]) => {
+    if (initialComments && initialComments.length > 0) {
+      setComments(initialComments);
+      // Restore sub-thread from URL
       const threadId = new URLSearchParams(window.location.search).get("thread");
       if (threadId) {
-        const found = findComment(loaded, threadId);
+        const found = findComment(initialComments, threadId);
         if (found) setThreadStack([found]);
       }
-    };
+    }
+  }, [initialComments]);
 
-    if (initialComments && initialComments.length > 0) {
-      restore(initialComments);
-    } else if (post.id) {
+  // Fallback: fetch if no initial comments provided
+  useEffect(() => {
+    if ((!initialComments || initialComments.length === 0) && post.id) {
       getThread(post.id).then((loaded) => {
         setComments(loaded);
-        restore(loaded);
+        const threadId = new URLSearchParams(window.location.search).get("thread");
+        if (threadId) {
+          const found = findComment(loaded, threadId);
+          if (found) setThreadStack([found]);
+        }
       });
     }
   }, [post.id]); // eslint-disable-line react-hooks/exhaustive-deps
