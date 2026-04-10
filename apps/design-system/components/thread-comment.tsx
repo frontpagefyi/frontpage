@@ -1,39 +1,15 @@
 "use client";
 
 import { useState, useCallback, useRef } from "react";
-import { Heart, MessageCircle, Share2, Link2, Flag, ChevronRight, MoreHorizontal } from "lucide-react";
+import { Heart, MessageCircle, Share2, Link2, Flag, ChevronRight } from "lucide-react";
+import { MoreMenu } from "./more-menu";
 import { Avatar } from "./avatar";
 import { Badge } from "./badge";
-import { ReplyComposer } from "./reply-composer";
 import type { Comment } from "@/lib/types";
 import { toast } from "@/lib/toast";
-
-function spawnHeartParticles(container: HTMLElement) {
-  const colors = [
-    "oklch(55% 0.22 20)",
-    "oklch(65% 0.20 30)",
-    "oklch(60% 0.18 350)",
-    "oklch(70% 0.15 15)",
-    "oklch(55% 0.25 10)",
-    "oklch(50% 0.20 340)",
-    "oklch(62% 0.22 25)",
-  ];
-  for (let i = 0; i < 7; i++) {
-    const angle = (Math.PI * 2 * i) / 7 + (Math.random() - 0.5) * 0.5;
-    const dist = 20 + Math.random() * 20;
-    const el = document.createElement("span");
-    el.textContent = "♥";
-    el.style.cssText = `
-      position:absolute;left:50%;top:50%;pointer-events:none;font-size:${8 + Math.random() * 4}px;
-      color:${colors[i]};z-index:10;
-      --hx:${Math.cos(angle) * dist}px;--hy:${Math.sin(angle) * dist}px;
-      --hs:${0.3 + Math.random() * 0.7};--hr:${Math.random() * 90 - 45}deg;
-      animation:heart-float ${0.9 + Math.random() * 0.4}s ease-out forwards;
-    `;
-    container.appendChild(el);
-    el.addEventListener("animationend", () => el.remove());
-  }
-}
+import { renderWithMentions } from "@/lib/mention";
+import { routes } from "@/lib/constants";
+import { spawnHeartParticles } from "@/lib/particles";
 
 function countAllReplies(comment: Comment): number {
   if (!comment.replies) return 0;
@@ -49,7 +25,10 @@ interface ThreadCommentProps {
   onReplyToggle: (id: string | null) => void;
   activeMenuId: string | null;
   onMenuToggle: (id: string | null) => void;
+  onContinueThread?: (comment: Comment) => void;
 }
+
+const MAX_VISUAL_DEPTH = 3;
 
 const THREAD_COLORS = [
   "oklch(64.8% 0.147 259)", // indigo
@@ -68,6 +47,7 @@ export function ThreadComment({
   onReplyToggle,
   activeMenuId,
   onMenuToggle,
+  onContinueThread,
 }: ThreadCommentProps) {
   const [collapsed, setCollapsed] = useState(false);
   const [liked, setLiked] = useState(false);
@@ -86,7 +66,7 @@ export function ThreadComment({
     setLiked(next);
     setVoteCount(comment.votes + (next ? 1 : 0));
     if (next && heartRef.current) {
-      spawnHeartParticles(heartRef.current);
+      spawnHeartParticles(heartRef.current, "sm");
     }
   }, [liked, comment.votes]);
 
@@ -145,7 +125,7 @@ export function ThreadComment({
               {/* Author line */}
               <div className="flex items-center gap-1.5 text-xs">
                 <a
-                  href={`/explorations/profile/${comment.author}`}
+                  href={routes.profile(comment.author)}
                   className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors"
                 >
                   {comment.author}
@@ -165,7 +145,7 @@ export function ThreadComment({
                   setCollapsed(true);
                 }}
               >
-                {comment.body}
+                {renderWithMentions(comment.body)}
               </p>
 
               {/* Actions — bigger, inline */}
@@ -203,65 +183,50 @@ export function ThreadComment({
                 </button>
 
                 {/* More menu */}
-                <div className="relative">
-                  <button
-                    onClick={() => onMenuToggle(isMenuOpen ? null : comment.id)}
-                    className={`flex items-center transition-colors ${
-                      isMenuOpen ? "text-text-secondary" : "text-text-muted hover:text-text-secondary"
-                    }`}
-                  >
-                    <MoreHorizontal size={14} />
-                  </button>
-                  {isMenuOpen ? (
-                    <>
-                      <div className="fixed inset-0 z-[60]" onClick={() => onMenuToggle(null)} />
-                      <div className="absolute left-0 top-full mt-1 z-[70] bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_8px_24px_oklch(0%_0_0_/_0.4)] py-1 min-w-[140px]">
-                        <button
-                          onClick={handleCopyLink}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
-                        >
-                          <Link2 size={13} />
-                          Copy link
-                        </button>
-                        <div className="border-t border-bg-elevated my-1" />
-                        <button
-                          onClick={() => onMenuToggle(null)}
-                          className="flex items-center gap-2 w-full px-3 py-2 text-xs text-text-muted hover:bg-bg-elevated hover:text-accent-destructive transition-colors"
-                        >
-                          <Flag size={13} />
-                          Report
-                        </button>
-                      </div>
-                    </>
-                  ) : null}
-                </div>
+                <MoreMenu
+                  open={isMenuOpen}
+                  onToggle={() => onMenuToggle(isMenuOpen ? null : comment.id)}
+                  onClose={() => onMenuToggle(null)}
+                  position="below"
+                  items={[
+                    { icon: <Link2 size={13} />, label: "Copy link", onClick: handleCopyLink },
+                    { icon: <Flag size={13} />, label: "Report", destructive: true, onClick: () => onMenuToggle(null) },
+                  ]}
+                />
               </div>
 
-              {/* Reply composer */}
+              {/* Reply indicator — composer rendered at root level by ThreadView */}
               {isReplying ? (
-                <ReplyComposer
-                  onSubmit={() => onReplyToggle(null)}
-                  onCancel={() => onReplyToggle(null)}
-                />
+                <div className="text-[11px] text-accent-secondary mt-2">Replying...</div>
               ) : null}
 
-              {/* Nested replies */}
+              {/* Nested replies — cap at MAX_VISUAL_DEPTH then show "Continue thread" */}
               {hasReplies ? (
-                <div className="mt-3 space-y-3">
-                  {comment.replies!.map((reply, i) => (
-                    <ThreadComment
-                      key={reply.id}
-                      comment={reply}
-                      depth={depth + 1}
-                      index={i}
-                      parentDelay={entryDelay + 0.04}
-                      activeReplyId={activeReplyId}
-                      onReplyToggle={onReplyToggle}
-                      activeMenuId={activeMenuId}
-                      onMenuToggle={onMenuToggle}
-                    />
-                  ))}
-                </div>
+                depth >= MAX_VISUAL_DEPTH ? (
+                  <button
+                    onClick={() => onContinueThread?.(comment)}
+                    className="mt-3 text-xs text-accent-secondary hover:text-accent-secondary/80 transition-colors flex items-center gap-1"
+                  >
+                    Continue this thread ({totalReplies} more) →
+                  </button>
+                ) : (
+                  <div className="mt-3 space-y-3">
+                    {comment.replies!.map((reply, i) => (
+                      <ThreadComment
+                        key={reply.id}
+                        comment={reply}
+                        depth={depth + 1}
+                        index={i}
+                        parentDelay={entryDelay + 0.04}
+                        activeReplyId={activeReplyId}
+                        onReplyToggle={onReplyToggle}
+                        activeMenuId={activeMenuId}
+                        onMenuToggle={onMenuToggle}
+                        onContinueThread={onContinueThread}
+                      />
+                    ))}
+                  </div>
+                )
               ) : null}
             </div>
           </div>

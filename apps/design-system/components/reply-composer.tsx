@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useRef, useEffect } from "react";
+import { useState } from "react";
 import { Send } from "lucide-react";
 import { Avatar } from "./avatar";
+import { CURRENT_USER } from "@/lib/constants";
 
 interface ReplyComposerProps {
   onSubmit: (text: string) => void;
@@ -18,28 +19,11 @@ export function ReplyComposer({
   autoFocus = true,
 }: ReplyComposerProps) {
   const [text, setText] = useState("");
-  const textareaRef = useRef<HTMLTextAreaElement>(null);
-
-  useEffect(() => {
-    if (autoFocus && textareaRef.current) {
-      textareaRef.current.focus();
-    }
-  }, [autoFocus]);
 
   const handleSubmit = () => {
     if (text.trim()) {
       onSubmit(text.trim());
       setText("");
-    }
-  };
-
-  const handleKeyDown = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) {
-      e.preventDefault();
-      handleSubmit();
-    }
-    if (e.key === "Escape") {
-      onCancel();
     }
   };
 
@@ -49,22 +33,21 @@ export function ReplyComposer({
       style={{ animation: "comment-enter 0.25s cubic-bezier(0, 0, 0, 1) both" }}
     >
       <div className="shrink-0 mt-1">
-        <Avatar
-          initials=""
-          bg=""
-          src="https://i.pravatar.cc/80?u=frontpage-demo"
-          size={24}
-        />
+        <Avatar initials="" bg="" src={CURRENT_USER.avatarUrl} size={24} />
       </div>
       <div className="flex-1 rounded-xl bg-bg-elevated/60 border border-bg-overlay focus-within:border-accent-secondary/40 transition-colors">
         <textarea
-          ref={textareaRef}
+          // eslint-disable-next-line jsx-a11y/no-autofocus
+          autoFocus={autoFocus}
           value={text}
           onChange={(e) => setText(e.target.value)}
-          onKeyDown={handleKeyDown}
+          onKeyDown={(e) => {
+            if (e.key === "Enter" && (e.metaKey || e.ctrlKey)) { e.preventDefault(); handleSubmit(); }
+            if (e.key === "Escape") onCancel();
+          }}
           placeholder={placeholder}
           rows={2}
-          className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted px-3 pt-2.5 pb-1 resize-none outline-none"
+          className="w-full bg-transparent text-sm text-text-primary placeholder:text-text-muted px-3 pt-2.5 pb-1 resize-none outline-none focus-visible:outline-none"
         />
         <div className="flex items-center justify-between px-3 pb-2">
           <span className="text-[10px] text-text-muted">

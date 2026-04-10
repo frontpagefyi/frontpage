@@ -65,6 +65,11 @@ body {
   background: var(--color-bg-base);
   color: var(--color-text-primary);
   font-family: var(--font-sans);
+  overscroll-behavior-y: none;
+}
+
+button, [role="button"], [role="tab"] {
+  cursor: pointer;
 }
 
 h1, h2, h3, h4, h5, h6 {
@@ -172,8 +177,4 @@ h1, h2, h3, h4, h5, h6 {
   100% { opacity: 1; max-height: 2000px; }
 }
 
-/* Focus styles — WCAG 2.4.7, 2.4.11 */
-*:focus-visible {
-  outline: 2px solid var(--color-accent-secondary);
-  outline-offset: 2px;
-}
+/* Focus styles handled per-component via Tailwind focus-visible: utilities */

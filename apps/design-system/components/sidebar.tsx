@@ -21,6 +21,9 @@ import { SearchOverlay } from "./search-overlay";
 import { NotificationsPanel } from "./notifications-panel";
 import { ProfilePanel } from "./profile-panel";
 import { DraggableDrawer } from "./draggable-drawer";
+import { GooBlobs } from "./goo-blobs";
+import { useGooBlob } from "@/lib/use-goo-blob";
+import { CURRENT_USER } from "@/lib/constants";
 
 const EASE = "var(--ease-sidebar)";
 
@@ -37,6 +40,7 @@ interface SidebarProps {
   posts?: import("@/lib/types").Post[];
   onCommunityClick?: (index: number) => void;
   onMobileTab?: (tab: string) => void;
+  onSelectPost?: (post: import("@/lib/types").Post) => void;
 }
 
 function SidebarLabel({
@@ -183,25 +187,37 @@ function MobileBottomNav({
   posts,
   onCommunityClick,
   onMobileTab,
+  onSelectPost,
 }: {
   avatarSrc: string;
   communities: SidebarCommunity[];
   posts: import("@/lib/types").Post[];
   onCommunityClick?: (index: number) => void;
   onMobileTab?: (tab: string) => void;
+  onSelectPost?: (post: import("@/lib/types").Post) => void;
 }) {
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState(0);
+  const { containerRef: navRef, setItemRef: setTabRef, pill } = useGooBlob(activeTab);
 
   const closeAll = () => { setSearchOpen(false); setNotifOpen(false); setDrawerOpen(false); setProfileOpen(false); };
 
+  const tabs = [
+    { icon: <Home size={20} />, label: "Home", action: () => { closeAll(); setActiveTab(0); onCommunityClick?.(0); } },
+    { icon: <Search size={20} />, label: "Search", action: () => { closeAll(); setActiveTab(1); setSearchOpen(!searchOpen); } },
+    { icon: <Layers size={20} />, label: "Actions", action: () => { closeAll(); setActiveTab(2); setDrawerOpen(!drawerOpen); } },
+    { icon: <Bell size={20} />, label: "Alerts", action: () => { closeAll(); setActiveTab(3); setNotifOpen(!notifOpen); } },
+    { icon: <Avatar initials="" bg="" src={avatarSrc} size={22} />, label: "Profile", action: () => { closeAll(); setActiveTab(4); setProfileOpen(!profileOpen); } },
+  ];
+
   return (
     <>
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} posts={posts} />
-      <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
-      <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} avatarSrc={avatarSrc} />
+      <SearchOverlay open={searchOpen} onClose={() => { setSearchOpen(false); setActiveTab(0); }} posts={posts} onSelectPost={onSelectPost} />
+      <NotificationsPanel open={notifOpen} onClose={() => { setNotifOpen(false); setActiveTab(0); }} />
+      <ProfilePanel open={profileOpen} onClose={() => { setProfileOpen(false); setActiveTab(0); }} avatarSrc={avatarSrc} />
 
       {/* Drawer backdrop + panel */}
       <div
@@ -217,9 +233,9 @@ function MobileBottomNav({
               ? "opacity 0.25s ease"
               : "opacity 0.35s ease 0.1s",
           }}
-          onClick={() => setDrawerOpen(false)}
+          onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
         />
-        <DraggableDrawer open={drawerOpen} onClose={() => setDrawerOpen(false)} className="max-h-[70vh] overflow-y-auto">
+        <DraggableDrawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setActiveTab(0); }} className="max-h-[70vh] overflow-y-auto">
           <div className="w-10 h-1 rounded-full bg-bg-elevated mx-auto mt-3 mb-2" />
           <div className="px-4 pb-2">
             <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
@@ -227,21 +243,21 @@ function MobileBottomNav({
             </p>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
             >
               <Plus size={18} className="text-accent-secondary" />
               New post
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
             >
               <Users size={18} className="text-text-muted" />
               New community
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => setDrawerOpen(false)}
+              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
             >
               <Compass size={18} className="text-text-muted" />
               Discover
@@ -254,14 +270,14 @@ function MobileBottomNav({
             </p>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); onMobileTab?.("atmo"); }}
+              onClick={() => { setDrawerOpen(false); setActiveTab(0); onMobileTab?.("atmo"); }}
             >
               <AtSign size={18} className="text-text-muted" />
               Atmosphere
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); onMobileTab?.("wiki"); }}
+              onClick={() => { setDrawerOpen(false); setActiveTab(0); onMobileTab?.("wiki"); }}
             >
               <BookOpen size={18} className="text-text-muted" />
               Wiki
@@ -269,12 +285,11 @@ function MobileBottomNav({
           </div>
           <div className="border-t border-bg-elevated mx-4 my-1" />
           <div className="px-4 pb-4">
-            {/* Home link */}
             {communities.length > 0 && communities[0].name === "Frontpage" ? (
               <>
                 <button
                   key="frontpage-home"
-                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); }}
+                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); setActiveTab(0); }}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
                     communities[0].active
                       ? "bg-accent-secondary/10 text-text-primary font-semibold"
@@ -290,88 +305,48 @@ function MobileBottomNav({
             <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
               Communities
             </p>
-            {communities.filter((_, i) => !(i === 0 && communities[0].name === "Frontpage")).map((comm) => {
-              const idx = communities.indexOf(comm);
+            {communities.map((comm, i) => {
+              if (i === 0 && comm.name === "Frontpage") return null;
               return (
-              <button
-                key={comm.name}
-                onClick={() => {
-                  onCommunityClick?.(idx);
-                  setDrawerOpen(false);
-                }}
-                className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                  comm.active
-                    ? "bg-accent-secondary/10 text-text-primary font-semibold"
-                    : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
-                }`}
-              >
-                <CommunityIcon icon={comm.icon} name={comm.name} size={28} />
-                {comm.name}
-              </button>
+                <button
+                  key={comm.name}
+                  onClick={() => { onCommunityClick?.(i); setDrawerOpen(false); setActiveTab(0); }}
+                  className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
+                    comm.active
+                      ? "bg-accent-secondary/10 text-text-primary font-semibold"
+                      : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
+                  }`}
+                >
+                  <CommunityIcon icon={comm.icon} name={comm.name} size={28} />
+                  {comm.name}
+                </button>
               );
             })}
           </div>
         </DraggableDrawer>
       </div>
 
-      {/* Bottom tab bar */}
+      {/* Bottom tab bar with liquid blob */}
       <nav
-        className="fixed bottom-0 left-0 right-0 z-[100] bg-bg-surface border-t border-bg-elevated flex justify-around items-end px-2 pt-2 pb-[env(safe-area-inset-bottom,8px)] md:hidden"
+        className="fixed bottom-0 left-0 right-0 z-[100] bg-bg-surface border-t border-bg-elevated px-1 pt-1 pb-[env(safe-area-inset-bottom,6px)] md:hidden"
         aria-label="Navigation"
       >
-        <button
-          onClick={() => { closeAll(); onCommunityClick?.(0); }}
-          className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center ${
-            !searchOpen && !notifOpen && !drawerOpen && !profileOpen ? "text-accent-secondary" : "text-text-muted"
-          }`}
-        >
-          <Home size={20} />
-          <span className="text-[10px]">Home</span>
-        </button>
-        <button
-          onClick={() => { closeAll(); setSearchOpen(!searchOpen); }}
-          className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center ${
-            searchOpen ? "text-accent-secondary" : "text-text-muted"
-          }`}
-        >
-          <Search size={20} />
-          <span className="text-[10px]">Search</span>
-        </button>
-        <button
-          onClick={() => { closeAll(); setDrawerOpen(!drawerOpen); }}
-          className="flex flex-col items-center gap-0.5 min-w-[44px] justify-center text-text-muted -mt-5"
-        >
-          <div
-            className={`w-11 h-11 rounded-full bg-accent-secondary flex items-center justify-center shadow-[0_4px_16px_oklch(64.8%_0.147_259_/_0.4)] active:scale-[0.92] active:shadow-[0_2px_8px_oklch(64.8%_0.147_259_/_0.25)] motion-safe:transition-[transform,box-shadow,rotate] motion-safe:duration-300 ${
-              drawerOpen ? "rotate-45" : "rotate-0"
-            }`}
-          >
-            {drawerOpen ? (
-              <Plus size={20} className="text-white" />
-            ) : (
-              <Layers size={20} className="text-white" />
-            )}
-          </div>
-          <span className="text-[10px]">{drawerOpen ? "Close" : "Actions"}</span>
-        </button>
-        <button
-          onClick={() => { closeAll(); setNotifOpen(!notifOpen); }}
-          className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center ${
-            notifOpen ? "text-accent-secondary" : "text-text-muted"
-          }`}
-        >
-          <Bell size={20} />
-          <span className="text-[10px]">Alerts</span>
-        </button>
-        <button
-          onClick={() => { closeAll(); setProfileOpen(!profileOpen); }}
-          className={`flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center ${
-            profileOpen ? "text-accent-secondary" : "text-text-muted"
-          }`}
-        >
-          <Avatar initials="" bg="" src={avatarSrc} size={24} />
-          <span className="text-[10px]">Profile</span>
-        </button>
+        <div ref={navRef as React.RefObject<HTMLDivElement>} className="relative flex justify-around">
+          <GooBlobs filterId="goo-nav" pill={pill} height="h-10" className="rounded-xl" stdDeviation={5} />
+          {tabs.map((tab, i) => (
+            <button
+              key={tab.label}
+              ref={setTabRef(i)}
+              onClick={tab.action}
+              className={`relative z-10 flex flex-col items-center gap-0.5 min-w-[44px] min-h-[44px] justify-center transition-colors ${
+                activeTab === i ? "text-text-primary" : "text-text-muted"
+              }`}
+            >
+              {tab.icon}
+              <span className="text-[10px]">{tab.label}</span>
+            </button>
+          ))}
+        </div>
       </nav>
     </>
   );
@@ -379,10 +354,11 @@ function MobileBottomNav({
 
 export function Sidebar({
   communities,
-  avatarSrc = "https://i.pravatar.cc/80?u=frontpage-demo",
+  avatarSrc = CURRENT_USER.avatarUrl,
   posts = [],
   onCommunityClick,
   onMobileTab,
+  onSelectPost,
 }: SidebarProps) {
   const [expanded, setExpanded] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
@@ -392,7 +368,7 @@ export function Sidebar({
 
   return (
     <>
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} posts={posts} />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} posts={posts} onSelectPost={onSelectPost} />
       <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
       <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} avatarSrc={avatarSrc} />
 
@@ -561,6 +537,14 @@ export function Sidebar({
           {/* ── Bottom ── */}
           <div className="shrink-0 border-t border-bg-elevated px-2 py-2 space-y-0.5">
             <SidebarItem
+              icon={<Search size={20} />}
+              label="Search"
+              expanded={expanded}
+              title="Search"
+              onClick={() => setSearchOpen(true)}
+              className="text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
+            />
+            <SidebarItem
               icon={<Bell size={20} />}
               label="Notifications"
               expanded={expanded}
@@ -596,6 +580,7 @@ export function Sidebar({
         posts={posts}
         onCommunityClick={onCommunityClick}
         onMobileTab={onMobileTab}
+        onSelectPost={onSelectPost}
       />
     </>
   );

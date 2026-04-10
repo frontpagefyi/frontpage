@@ -21,9 +21,10 @@ interface SearchOverlayProps {
   open: boolean;
   onClose: () => void;
   posts?: Post[];
+  onSelectPost?: (post: Post) => void;
 }
 
-export function SearchOverlay({ open, onClose, posts = [] }: SearchOverlayProps) {
+export function SearchOverlay({ open, onClose, posts = [], onSelectPost }: SearchOverlayProps) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [query, setQuery] = useState("");
 
@@ -120,7 +121,8 @@ export function SearchOverlay({ open, onClose, posts = [] }: SearchOverlayProps)
                 <div className="space-y-0.5">
                   {results.map((post, i) => (
                     <button
-                      key={`${post.author}-${post.title}`}
+                      key={post.id ?? `${post.author}-${post.title}`}
+                      onClick={() => { onSelectPost?.(post); onClose(); }}
                       className="flex flex-col gap-1 w-full px-3 py-3 rounded-xl text-left hover:bg-bg-surface transition-colors"
                       style={{
                         animation: `post-enter 0.3s ease ${i * 0.05}s both`,
@@ -210,8 +212,8 @@ export function SearchOverlay({ open, onClose, posts = [] }: SearchOverlayProps)
           </>
         )}
 
-        {/* Keyboard hint */}
-        <div className="mt-6 text-center text-[10px] text-text-muted">
+        {/* Keyboard hint — desktop only */}
+        <div className="mt-6 text-center text-[10px] text-text-muted hidden md:block">
           <kbd className="px-1.5 py-0.5 rounded bg-bg-elevated border border-bg-overlay text-[10px]">
             esc
           </kbd>{" "}

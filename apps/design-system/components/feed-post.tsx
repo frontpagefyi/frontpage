@@ -8,38 +8,20 @@ import {
   Bookmark,
   ExternalLink,
   Play,
+  Link2,
+  Flag,
+  Ban,
 } from "lucide-react";
-import { useState, useRef, useCallback } from "react";
+import { MoreMenu } from "./more-menu";
+import { useState } from "react";
+import { toast } from "@/lib/toast";
 import { Avatar } from "./avatar";
 import { Badge } from "./badge";
 import type { Post } from "@/lib/types";
-
-function spawnHeartParticles(container: HTMLElement) {
-  const colors = [
-    "oklch(55% 0.22 20)",
-    "oklch(65% 0.20 30)",
-    "oklch(60% 0.18 350)",
-    "oklch(70% 0.15 15)",
-    "oklch(55% 0.25 10)",
-    "oklch(50% 0.20 340)",
-    "oklch(62% 0.22 25)",
-  ];
-  for (let i = 0; i < 7; i++) {
-    const angle = (Math.PI * 2 * i) / 7 + (Math.random() - 0.5) * 0.5;
-    const dist = 25 + Math.random() * 30;
-    const el = document.createElement("span");
-    el.textContent = "♥";
-    el.style.cssText = `
-      position:absolute;left:50%;top:50%;pointer-events:none;font-size:${10 + Math.random() * 6}px;
-      color:${colors[i]};z-index:10;
-      --hx:${Math.cos(angle) * dist}px;--hy:${Math.sin(angle) * dist}px;
-      --hs:${0.3 + Math.random() * 0.7};--hr:${Math.random() * 90 - 45}deg;
-      animation:heart-float ${0.9 + Math.random() * 0.4}s ease-out forwards;
-    `;
-    container.appendChild(el);
-    el.addEventListener("animationend", () => el.remove());
-  }
-}
+import { renderWithMentions } from "@/lib/mention";
+import { routes, ANIM } from "@/lib/constants";
+import { useLike } from "@/lib/use-like";
+import { useSave } from "@/lib/use-save";
 
 interface FeedPostProps {
   post: Post;
@@ -50,60 +32,68 @@ interface FeedPostProps {
 }
 
 export function FeedPost({ post, showCommunity, onCommunityClick, style, onCommentClick }: FeedPostProps) {
-  const [liked, setLiked] = useState(false);
-  const [saved, setSaved] = useState(false);
-  const [saveCount, setSaveCount] = useState(0);
-  const baseVotes = typeof post.votes === "number" ? post.votes : parseInt(post.votes) || 0;
-  const [likeCount, setLikeCount] = useState(baseVotes);
-  const heartRef = useRef<HTMLButtonElement>(null);
-
-  const handleLike = useCallback(() => {
-    const next = !liked;
-    setLiked(next);
-    setLikeCount(baseVotes + (next ? 1 : 0));
-    if (next && heartRef.current) {
-      spawnHeartParticles(heartRef.current);
-    }
-  }, [liked, baseVotes]);
+  const { liked, count: likeCount, heartRef, toggle: toggleLike } = useLike(post.votes);
+  const { saved, animKey: saveCount, toggle: toggleSave } = useSave();
+  const [menuOpen, setMenuOpen] = useState(false);
 
   return (
     <article
       className="bg-bg-surface rounded-xl border border-bg-elevated p-4 space-y-4 motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-200 hover:translate-y-[-2px] hover:border-[oklch(100%_0_0_/_0.12)] hover:shadow-[0_4px_20px_oklch(0%_0_0_/_0.15)]"
       style={style}
     >
-      <div className="flex items-center gap-2 text-xs text-text-muted">
-        <Avatar initials={post.initials} bg={post.avatarBg} src={post.avatarUrl} size={24} />
-        <a href={`/explorations/profile/${post.author}`} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
-        {post.badges?.map((b) => (
-          <Badge
-            key={b.label}
-            variant={b.variant}
-            label={b.label}
-            icon={b.icon}
-          />
-        ))}
-        <span>&middot; {post.time}</span>
-        {showCommunity && post.communityName ? (
+      <div className="flex items-start gap-2 text-xs text-text-muted">
+        {/* Stacked avatar: community icon + user avatar overlay (dev.to pattern) */}
+        {showCommunity && post.communityIcon ? (
           <button
             onClick={(e) => { e.stopPropagation(); onCommunityClick?.(); }}
-            className="relative flex items-center gap-1 ml-auto pl-0.5 pr-2 py-0.5 rounded-full text-[10px] font-medium text-white active:scale-[0.97] transition-all overflow-hidden"
+            className="relative shrink-0 mt-0.5"
           >
-            {post.communityBanner ? (
+            <Image
+              src={post.communityIcon}
+              alt={post.communityName ?? ""}
+              width={28}
+              height={28}
+              className="rounded-lg object-cover"
+              style={{ width: 28, height: 28 }}
+            />
+            {post.avatarUrl ? (
               <Image
-                src={post.communityBanner}
-                alt=""
-                className="absolute inset-0 w-full h-full object-cover"
-                fill
-                sizes="120px"
+                src={post.avatarUrl}
+                alt={post.author}
+                width={16}
+                height={16}
+                className="absolute -bottom-1 -right-1 rounded-full object-cover ring-2 ring-bg-surface"
+                style={{ width: 16, height: 16 }}
               />
-            ) : null}
-            <div className="absolute inset-0 bg-black/40" />
-            {post.communityIcon ? (
-              <Image src={post.communityIcon} alt="" width={14} height={14} className="relative z-10 rounded-full object-cover" style={{ width: 'auto', height: 'auto' }} />
-            ) : null}
-            <span className="relative z-10">{post.communityName}</span>
+            ) : (
+              <div
+                className="absolute -bottom-1 -right-1 w-4 h-4 rounded-full ring-2 ring-bg-surface flex items-center justify-center text-[6px] font-bold text-white"
+                style={{ backgroundColor: post.avatarBg }}
+              >
+                {post.initials?.charAt(0).toUpperCase()}
+              </div>
+            )}
           </button>
-        ) : null}
+        ) : (
+          <Avatar initials={post.initials} bg={post.avatarBg} src={post.avatarUrl} size={24} />
+        )}
+        <div className="flex-1 min-w-0">
+          <div className="flex items-center gap-1.5">
+            <a href={routes.profile(post.author)} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
+            {post.badges?.map((b) => (
+              <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
+            ))}
+            <span>&middot; {post.time}</span>
+          </div>
+          {showCommunity && post.communityName ? (
+            <button
+              onClick={(e) => { e.stopPropagation(); onCommunityClick?.(); }}
+              className="text-[11px] text-text-muted hover:text-accent-secondary transition-colors"
+            >
+              {post.communityName}
+            </button>
+          ) : null}
+        </div>
       </div>
 
       <h3 className="font-serif text-lg font-semibold leading-snug">
@@ -124,7 +114,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       ) : null}
       {post.body ? (
         <p className="text-sm text-text-secondary leading-relaxed">
-          {post.body}
+          {renderWithMentions(post.body)}
         </p>
       ) : null}
       {post.linkPreview ? (
@@ -171,7 +161,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       <div className="flex gap-4 text-xs text-text-muted pt-1">
         <button
           ref={heartRef}
-          onClick={handleLike}
+          onClick={toggleLike}
           className={`relative flex items-center gap-1.5 tabular-nums motion-safe:transition-colors hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.97] ${
             liked
               ? "text-[oklch(55%_0.2_20)]"
@@ -196,11 +186,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           <Share2 size={16} strokeWidth={2.25} /> Share
         </button>
         <button
-          onClick={() => {
-            const next = !saved;
-            setSaved(next);
-            if (next) setSaveCount(c => c + 1);
-          }}
+          onClick={toggleSave}
           className={`flex items-center gap-1.5 hover:translate-y-[-1px] active:translate-y-0 active:scale-[0.97] motion-safe:transition-colors cursor-pointer ${
             saved ? "text-accent-primary" : "hover:text-text-secondary"
           }`}
@@ -214,6 +200,26 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           />
           {saved ? "Saved" : "Save"}
         </button>
+        <div className="ml-auto">
+          <MoreMenu
+            open={menuOpen}
+            onToggle={() => setMenuOpen(!menuOpen)}
+            onClose={() => setMenuOpen(false)}
+            position="above"
+            items={[
+              { icon: <Link2 size={13} />, label: "Copy link", onClick: () => {
+                const url = post.id
+                  ? `${window.location.origin}/explorations/community-feed?post=${post.id}`
+                  : window.location.href;
+                navigator.clipboard.writeText(url);
+                toast("Copied to clipboard");
+                setMenuOpen(false);
+              }},
+              { icon: <Flag size={13} />, label: "Report post", destructive: true, onClick: () => { toast("Post reported"); setMenuOpen(false); }},
+              { icon: <Ban size={13} />, label: "Block user", destructive: true, onClick: () => { toast(`Blocked ${post.author}`); setMenuOpen(false); }},
+            ]}
+          />
+        </div>
       </div>
     </article>
   );

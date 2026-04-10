@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useTransition, useCallback, useEffect } from "react";
+import { useState, useMemo, useTransition, useCallback, useEffect, useRef } from "react";
 import Image from "next/image";
 import { Users, Clock, PenLine } from "lucide-react";
 import { Sidebar, MobileHeader } from "@/components/sidebar";
@@ -11,11 +11,12 @@ import { ThreadView } from "@/components/thread-view";
 import { themeToStyle } from "@/lib/theme";
 import {
   getPostsByCommunity,
+  getThread,
 } from "@/lib/actions/posts";
 import {
   toggleJoin as toggleJoinAction,
 } from "@/lib/actions/communities";
-import type { Post, CommunityTheme, CommunityBanner } from "@/lib/types";
+import type { Post, Comment, CommunityTheme, CommunityBanner } from "@/lib/types";
 
 type SortKey = "hot" | "new" | "top";
 type MobileTab = "posts" | "atmo" | "wiki";
@@ -48,69 +49,145 @@ function sortPosts(posts: Post[], sort: SortKey): Post[] {
   switch (sort) {
     case "hot":
       return sorted.sort((a, b) => {
-        const va = typeof a.votes === "number" ? a.votes : parseInt(a.votes as string) || 0;
-        const vb = typeof b.votes === "number" ? b.votes : parseInt(b.votes as string) || 0;
+        const va = a.votes;
+        const vb = b.votes;
         return vb / (1 + parseTime(b.time) / 60) - va / (1 + parseTime(a.time) / 60);
       });
     case "new":
       return sorted.sort((a, b) => parseTime(a.time) - parseTime(b.time));
     case "top":
       return sorted.sort((a, b) => {
-        const va = typeof a.votes === "number" ? a.votes : parseInt(a.votes as string) || 0;
-        const vb = typeof b.votes === "number" ? b.votes : parseInt(b.votes as string) || 0;
+        const va = a.votes;
+        const vb = b.votes;
         return vb - va;
       });
   }
 }
 
 export function FeedClient({ communities, initialPosts }: FeedClientProps) {
-  const [activeIndex, setActiveIndex] = useState(0);
+  const [activeIndex, _setActiveIndex] = useState(0);
+  const activeIndexRef = useRef(0);
+  const setActiveIndex = useCallback((i: number) => { _setActiveIndex(i); activeIndexRef.current = i; }, []);
   const [sortKey, setSortKey] = useState<SortKey>("hot");
   const [joinedSet, setJoinedSet] = useState<Set<string>>(new Set());
   const [mobileTab, setMobileTab] = useState<MobileTab>("posts");
   const [feedKey, setFeedKey] = useState(0);
   const [showAnimation, setShowAnimation] = useState(false);
+  const [loading, setLoading] = useState(false);
   const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+  const [selectedComments, setSelectedComments] = useState<Comment[]>([]);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [, startTransition] = useTransition();
 
-  // Sync selected post with URL (?post=id)
-  const selectPost = useCallback((post: Post | null) => {
-    setSelectedPost(post);
+  const scrollRef = useRef(0);
+  const mainRef = useRef<HTMLElement>(null);
+
+  // Build URL from current state
+  const buildUrl = useCallback((communityId: string, postId?: string | null) => {
     const url = new URL(window.location.href);
-    if (post?.id) {
-      url.searchParams.set("post", post.id);
+    url.searchParams.set("community", communityId);
+    if (postId) {
+      url.searchParams.set("post", postId);
     } else {
       url.searchParams.delete("post");
     }
-    window.history.pushState({}, "", url.toString());
+    return url.toString();
   }, []);
 
-  // Restore post from URL on mount
+  // Navigate to a post (saves scroll position, prefetches comments)
+  const selectPost = useCallback((post: Post | null) => {
+    if (post?.id) {
+      scrollRef.current = mainRef.current?.scrollTop ?? 0;
+      getThread(post.id).then(setSelectedComments);
+    } else {
+      setSelectedComments([]);
+    }
+    setSelectedPost(post);
+    const communityId = communities[activeIndex]?.id ?? "comm_home";
+    window.history.pushState(
+      { scroll: post ? scrollRef.current : 0 },
+      "",
+      buildUrl(communityId, post?.id),
+    );
+  }, [activeIndex, communities, buildUrl]);
+
+  // Restore from URL on mount
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
+    const communityParam = params.get("community");
     const postId = params.get("post");
+
+    if (communityParam) {
+      const idx = communities.findIndex((c) => c.id === communityParam);
+      if (idx >= 0 && idx !== activeIndex) {
+        setActiveIndex(idx);
+        startTransition(async () => {
+          const newPosts = await getPostsByCommunity(communityParam);
+          setPosts(newPosts);
+          if (postId) {
+            const found = newPosts.find((p) => p.id === postId);
+            if (found) setSelectedPost(found);
+          }
+        });
+        return;
+      }
+    }
+
     if (postId) {
       const found = initialPosts.find((p) => p.id === postId);
       if (found) setSelectedPost(found);
     }
-  }, [initialPosts]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle browser back/forward
   useEffect(() => {
-    const onPopState = () => {
+    const onPopState = (e: PopStateEvent) => {
       const params = new URLSearchParams(window.location.search);
+      const communityParam = params.get("community");
       const postId = params.get("post");
+
+      // Restore community
+      if (communityParam) {
+        const idx = communities.findIndex((c) => c.id === communityParam);
+        if (idx >= 0 && idx !== activeIndexRef.current) {
+          setActiveIndex(idx);
+          setLoading(true);
+          startTransition(async () => {
+            const newPosts = await getPostsByCommunity(communityParam);
+            setPosts(newPosts);
+            setLoading(false);
+            if (postId) {
+              const found = newPosts.find((p) => p.id === postId);
+              setSelectedPost(found ?? null);
+            } else {
+              setSelectedPost(null);
+              // Restore scroll position
+              const savedScroll = e.state?.scroll ?? 0;
+              requestAnimationFrame(() => {
+                mainRef.current?.scrollTo(0, savedScroll);
+              });
+            }
+          });
+          return;
+        }
+      }
+
+      // Same community, toggle post
       if (postId) {
         const found = posts.find((p) => p.id === postId);
         setSelectedPost(found ?? null);
       } else {
         setSelectedPost(null);
+        // Restore scroll position
+        const savedScroll = e.state?.scroll ?? 0;
+        requestAnimationFrame(() => {
+          mainRef.current?.scrollTo(0, savedScroll);
+        });
       }
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [posts]);
+  }, [posts, communities, startTransition, setActiveIndex]);
 
   const community = communities[activeIndex];
   const isJoined = joinedSet.has(community.id);
@@ -128,15 +205,17 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
     setActiveIndex(i);
     setSortKey("hot");
     setMobileTab("posts");
-    selectPost(null);
+    setSelectedPost(null);
     setShowAnimation(true);
+    setLoading(true);
     setFeedKey((k) => k + 1);
-    // Fetch new posts (old ones stay visible until these arrive)
+    window.history.pushState({ scroll: 0 }, "", buildUrl(communities[i].id));
     startTransition(async () => {
       const newPosts = await getPostsByCommunity(communities[i].id);
       setPosts(newPosts);
+      setLoading(false);
     });
-  }, [activeIndex, communities, startTransition, selectPost]);
+  }, [activeIndex, communities, startTransition, buildUrl]);
 
   const handleSort = (key: SortKey) => {
     setSortKey(key);
@@ -163,15 +242,17 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
         posts={posts}
         onCommunityClick={handleCommunityClick}
         onMobileTab={(tab) => setMobileTab(tab as MobileTab)}
+        onSelectPost={selectPost}
       />
 
-      <main className="relative flex-1 overflow-y-auto pb-20 md:pb-0">
+      <main ref={mainRef} className="relative flex-1 overflow-y-auto pb-20 md:pb-0">
         {/* ── Thread View ── */}
         {selectedPost ? (
           <>
             <div className="md:hidden">
               <ThreadView
                 post={selectedPost}
+                initialComments={selectedComments}
                 communityName={community.name}
                 onBack={() => selectPost(null)}
               />
@@ -180,6 +261,7 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
               <Banner community={community} />
               <ThreadView
                 post={selectedPost}
+                initialComments={selectedComments}
                 communityName={community.name}
                 onBack={() => selectPost(null)}
               />
@@ -209,10 +291,10 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
 
             <div className="md:hidden">
               {mobileTab === "posts" ? (
-                <div key={feedKey} className="px-4 py-4 space-y-4">
+                <div key={feedKey} className={`px-4 py-4 space-y-4 transition-opacity duration-150 ${loading ? "opacity-0" : "opacity-100"}`}>
                   {sorted.map((post, i) => (
                     <FeedPost
-                      key={`${post.author}-${post.title}`}
+                      key={post.id ?? `${post.author}-${post.title}`}
                       post={post}
                       showCommunity={community.id === "comm_home"}
                       onCommunityClick={() => {
@@ -258,10 +340,10 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
                 <ContentTabs sortKey={sortKey} onSortChange={handleSort}>
                   {{
                     posts: (
-                      <div key={feedKey} className="space-y-4">
+                      <div key={feedKey} className={`space-y-4 transition-opacity duration-150 ${loading ? "opacity-0" : "opacity-100"}`}>
                         {sorted.map((post, i) => (
                           <FeedPost
-                            key={`${post.author}-${post.title}`}
+                            key={post.id ?? `${post.author}-${post.title}`}
                             post={post}
                             showCommunity={community.id === "comm_home"}
                             onCommunityClick={() => {
@@ -326,10 +408,9 @@ function Banner({ community }: { community: ClientCommunity }) {
         <Image
           src={community.banner.bannerImage}
           alt={community.banner.name}
-          width={800}
-          height={300}
-          className="w-full h-full object-cover"
-          style={{ width: '100%', height: '100%' }}
+          fill
+          sizes="100vw"
+          className="object-cover"
         />
       ) : null}
       <div className="absolute inset-0 bg-gradient-to-t from-bg-base/90 to-transparent" />

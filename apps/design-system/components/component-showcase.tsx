@@ -34,7 +34,7 @@ export function ComponentShowcase() {
         <h3 className="text-sm font-semibold text-text-secondary">
           Feed Sort
         </h3>
-        <FeedSort />
+        <FeedSort value="hot" onChange={() => {}} />
       </div>
 
       {/* Buttons */}

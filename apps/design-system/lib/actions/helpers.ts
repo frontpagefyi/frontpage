@@ -66,7 +66,7 @@ export function toPost(data: PostData): Post {
     linkPreview: data.linkPreview,
     video: data.video,
     votes: data.votes,
-    comments: db.getCommentsByPost(data.id).length,
+    comments: data.commentCount,
   };
 }
 

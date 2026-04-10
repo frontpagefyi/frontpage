@@ -190,7 +190,7 @@ export const communities: Community[] = [
         title: "Found a Sony PVM-20M4U at a thrift store for $15",
         image:
           "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?auto=format&fit=crop&w=800&h=400&q=80",
-        votes: "1.2k",
+        votes: 1200,
         comments: 203,
       },
       {
@@ -260,7 +260,7 @@ export const communities: Community[] = [
         title: "Milky Way over Death Valley \u2014 45 stacked exposures",
         image:
           "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&h=400&q=80",
-        votes: "1.8k",
+        votes: 1800,
         comments: 187,
       },
     ],

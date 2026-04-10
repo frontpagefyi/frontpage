@@ -820,6 +820,55 @@ function seed() {
       createdAt: timeAgoToDate("30m"), votes: 18,
     },
     {
+      id: "cmt_90a", postId: "post_rg_1", parentId: "cmt_90",
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "The rhythm game was mine! I almost went with a snake clone but the lane-switching idea hit me at 2am on day one. Glad people liked it.",
+      createdAt: timeAgoToDate("28m"), votes: 31,
+    },
+    {
+      id: "cmt_90a1", postId: "post_rg_1", parentId: "cmt_90a",
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "Wait that was YOU? @pixel_nova please tell me you\u2019re going to expand it into a full game. The music sync was perfect.",
+      createdAt: timeAgoToDate("25m"), votes: 12,
+    },
+    {
+      id: "cmt_90a2", postId: "post_rg_1", parentId: "cmt_90a",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "It deserved top 3 honestly. The polish level for 48 hours was unreal.",
+      createdAt: timeAgoToDate("24m"), votes: 8,
+    },
+    {
+      id: "cmt_90b", postId: "post_rg_1", parentId: "cmt_90",
+      author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
+      badges: [],
+      body: "I love one-button games as a design exercise. Forces you to think about timing and rhythm instead of input complexity. My favourite constraint jams are always the simplest.",
+      createdAt: timeAgoToDate("22m"), votes: 14,
+    },
+    {
+      id: "cmt_91a", postId: "post_rg_1", parentId: "cmt_91",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "64x64 is going to be amazing. Already sketching out tile ideas. Are we allowed to use sub-pixel rendering or is it strict 64x64?",
+      createdAt: timeAgoToDate("26m"), votes: 7,
+    },
+    {
+      id: "cmt_91b", postId: "post_rg_1", parentId: "cmt_91",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Strict pixel grid please. Half the fun is working within the literal constraint. Sub-pixel defeats the purpose.",
+      createdAt: timeAgoToDate("23m"), votes: 16,
+    },
+    {
+      id: "cmt_91b1", postId: "post_rg_1", parentId: "cmt_91b",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "Confirmed \u2014 strict 64x64 pixel grid. Output resolution can be whatever but the game world is 64x64. No sub-pixel cheating.",
+      createdAt: timeAgoToDate("20m"), votes: 22,
+    },
+    {
       id: "cmt_92", postId: "post_rg_1", parentId: null,
       author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
       badges: [],
@@ -846,6 +895,62 @@ function seed() {
       badges: [],
       body: "That talk should be required watching for anyone doing jam games. The hitstop alone transforms everything.",
       createdAt: timeAgoToDate("15m"), votes: 14,
+    },
+    {
+      id: "cmt_92d", postId: "post_rg_1", parentId: "cmt_92c",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "The other one that changed my life was the Jan Willem Nijman talk about screen shake. Same conference I think. Between those two talks you have 90% of game feel solved.",
+      createdAt: timeAgoToDate("12m"), votes: 19,
+    },
+    {
+      id: "cmt_92e", postId: "post_rg_1", parentId: "cmt_92d",
+      author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "That\u2019s the one where he literally just adds screen shake to a boring rectangle game and it becomes playable? I show that to every new dev I mentor.",
+      createdAt: timeAgoToDate("10m"), votes: 11,
+    },
+    {
+      id: "cmt_92f", postId: "post_rg_1", parentId: "cmt_92e",
+      author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
+      badges: [],
+      body: "Someone needs to make a modern version of that talk with WebGPU examples. The principles are timeless but the tooling has changed so much.",
+      createdAt: timeAgoToDate("8m"), votes: 7,
+    },
+    {
+      id: "cmt_92g", postId: "post_rg_1", parentId: "cmt_92f",
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "I\u2019ve actually been drafting something like this. Screen shake, hitstop, chromatic aberration on impact, camera lerp \u2014 all in a single WebGPU compute shader. @arcadeking @8bit_betty would people watch that?",
+      createdAt: timeAgoToDate("6m"), votes: 28,
+    },
+    {
+      id: "cmt_92h", postId: "post_rg_1", parentId: "cmt_92g",
+      author: "arcadeking", initials: "ak", avatarBg: "oklch(55% 0.2 350)",
+      badges: [],
+      body: "Absolutely yes. Post it here when it\u2019s done, I\u2019ll pin it.",
+      createdAt: timeAgoToDate("5m"), votes: 15,
+    },
+    {
+      id: "cmt_92i", postId: "post_rg_1", parentId: "cmt_92h",
+      author: "pixel_nova", initials: "pn", avatarBg: "oklch(55% 0.18 310)",
+      badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      body: "Can you include sprite squash and stretch too? That\u2019s the one I always get wrong. My characters look like they\u2019re made of concrete.",
+      createdAt: timeAgoToDate("4m"), votes: 9,
+    },
+    {
+      id: "cmt_92j", postId: "post_rg_1", parentId: "cmt_92i",
+      author: "shader_wizard", initials: "sw", avatarBg: "oklch(50% 0.15 180)",
+      badges: [{ variant: "og", icon: "Star", label: "OG" }],
+      body: "Good shout \u2014 adding it to the outline. Squash/stretch is deceptively hard to get right because the timing curve matters more than the amount.",
+      createdAt: timeAgoToDate("3m"), votes: 6,
+    },
+    {
+      id: "cmt_92k", postId: "post_rg_1", parentId: "cmt_92j",
+      author: "8bit_betty", initials: "8b", avatarBg: "oklch(65% 0.18 80)",
+      badges: [],
+      body: "This thread went from \u201cnice game jam\u201d to \u201csomeone is about to make the definitive game feel tutorial\u201d and I\u2019m here for it.",
+      createdAt: timeAgoToDate("2m"), votes: 21,
     },
     {
       id: "cmt_93", postId: "post_rg_1", parentId: "cmt_91",
@@ -1041,6 +1146,11 @@ function seed() {
   store.votes = [];
   store.saves = [];
   store.memberships = [];
+
+  // Sync commentCount from actual comment data
+  for (const post of store.posts) {
+    post.commentCount = store.comments.filter((c) => c.postId === post.id).length;
+  }
 }
 
 // Seed on first import

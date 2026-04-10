@@ -27,7 +27,7 @@ export interface Post {
   body?: string;
   linkPreview?: LinkPreview;
   video?: { thumbnail: string };
-  votes: number | string;
+  votes: number;
   comments: number;
 }
 
