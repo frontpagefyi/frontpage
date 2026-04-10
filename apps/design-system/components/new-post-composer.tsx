@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef, useEffect, useCallback } from "react";
+import { useState, useRef, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
 import { X, Loader2, Type, ImagePlus, Link2, Video, ExternalLink, ArrowRight } from "lucide-react";
 import { Avatar } from "./avatar";
@@ -48,10 +48,40 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
   const [linkMeta, setLinkMeta] = useState<LinkMeta | null>(null);
   const [fetchingLink, setFetchingLink] = useState(false);
   const [submitting, setSubmitting] = useState(false);
+  const [attempted, setAttempted] = useState(false);
+  const [submitError, setSubmitError] = useState<string | null>(null);
   const titleRef = useRef<HTMLTextAreaElement>(null);
   const urlRef = useRef<HTMLInputElement>(null);
   const titleValueRef = useRef(title);
   titleValueRef.current = title;
+  const fetchIdRef = useRef(0);
+
+  // Derived validation errors — recomputed every render from current state
+  const errors = useMemo(() => {
+    const e: Partial<Record<"title" | "image" | "url", string>> = {};
+    if (!title.trim()) e.title = "Title is required";
+    switch (postType) {
+      case "image":
+        if (!image.trim()) e.image = "Image URL is required";
+        else if (imageChecking) e.image = "Validating image...";
+        else if (imageValid === false) e.image = "URL doesn\u2019t point to a valid image";
+        else if (imageValid !== true) e.image = "Paste an image URL and press Enter to validate";
+        break;
+      case "link":
+        if (!url.trim()) e.url = "URL is required";
+        else if (fetchingLink) e.url = "Fetching preview...";
+        else if (!linkMeta) e.url = "Press Enter or click the arrow to fetch the preview";
+        break;
+      case "video":
+        if (!url.trim()) e.url = "Video URL is required";
+        else if (fetchingLink) e.url = "Fetching preview...";
+        else if (!linkMeta) e.url = "Press Enter or click the arrow to fetch the preview";
+        break;
+    }
+    return e;
+  }, [title, postType, image, imageValid, imageChecking, url, linkMeta, fetchingLink]);
+
+  const hasErrors = Object.keys(errors).length > 0;
 
   // Auto-focus on open
   useEffect(() => {
@@ -76,6 +106,8 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
       setLinkMeta(null);
       setFetchingLink(false);
       setSubmitting(false);
+      setAttempted(false);
+      setSubmitError(null);
     }
   }, [open]);
 
@@ -86,24 +118,32 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
     }
   }, [postType, open]);
 
-  const canSubmit = title.trim().length > 0 && !submitting;
+  // Clear attempted when switching post type so stale errors don't linger
+  useEffect(() => { setAttempted(false); }, [postType]);
 
   const handleSubmit = async () => {
-    if (!canSubmit) return;
+    setAttempted(true);
+    setSubmitError(null);
+    if (hasErrors) return;
     setSubmitting(true);
-    await onSubmit({
-      type: postType,
-      title: title.trim(),
-      body: body.trim() || undefined,
-      image: postType === "image" ? image.trim() || undefined : undefined,
-      url: postType === "link" || postType === "video" ? url.trim() || undefined : undefined,
-      linkPreview: linkMeta?.image ? {
-        image: linkMeta.image,
-        title: linkMeta.title ?? title.trim(),
-        domain: linkMeta.domain,
-      } : undefined,
-    });
-    onClose();
+    try {
+      await onSubmit({
+        type: postType,
+        title: title.trim(),
+        body: body.trim() || undefined,
+        image: postType === "image" ? image.trim() || undefined : undefined,
+        url: postType === "link" || postType === "video" ? url.trim() || undefined : undefined,
+        linkPreview: linkMeta?.image ? {
+          image: linkMeta.image,
+          title: linkMeta.title ?? title.trim(),
+          domain: linkMeta.domain,
+        } : undefined,
+      });
+      onClose();
+    } catch (err) {
+      setSubmitError(err instanceof Error ? err.message : "Failed to create post");
+      setSubmitting(false);
+    }
   };
 
   const doFetchLink = useCallback(async (rawUrl: string) => {
@@ -111,11 +151,13 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
     if (!trimmed) return;
 
     const normalized = trimmed.startsWith("http") ? trimmed : `https://${trimmed}`;
+    const id = ++fetchIdRef.current;
     setUrl(normalized);
     setFetchingLink(true);
     setLinkMeta(null);
 
     const meta = await fetchLinkMeta(normalized);
+    if (id !== fetchIdRef.current) return; // stale — user changed URL while we were fetching
     setFetchingLink(false);
     if (meta) {
       setLinkMeta(meta);
@@ -146,8 +188,10 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
     const trimmed = rawUrl.trim();
     if (!trimmed) { setImageValid(null); return; }
     try { new URL(trimmed); } catch { setImageValid(false); return; }
+    const id = ++fetchIdRef.current;
     setImageChecking(true);
     const valid = await validateImageUrl(trimmed);
+    if (id !== fetchIdRef.current) return; // stale
     setImageChecking(false);
     setImageValid(valid);
   }, []);
@@ -231,11 +275,15 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
                   ref={urlRef}
                   value={url}
                   onChange={(e) => setUrl(e.target.value)}
-                  onBlur={() => doFetchLink(url)}
+                  onBlur={() => { if (!fetchingLink) doFetchLink(url); }}
                   onKeyDown={handleUrlKeyDown}
                   onPaste={handleUrlPaste}
                   placeholder={postType === "link" ? "Paste article URL..." : "Paste video URL..."}
-                  className="flex-1 px-3 py-2 text-sm bg-bg-elevated rounded-lg text-text-primary placeholder:text-text-muted/50 outline-none border border-bg-overlay focus:border-accent-secondary transition-colors"
+                  className={`flex-1 px-3 py-2 text-sm bg-bg-elevated rounded-lg text-text-primary placeholder:text-text-muted/50 outline-none border transition-colors ${
+                    attempted && errors.url
+                      ? "border-[oklch(55%_0.2_20)]"
+                      : "border-bg-overlay focus:border-accent-secondary"
+                  }`}
                 />
                 {fetchingLink ? (
                   <Loader2 size={16} className="animate-spin text-text-muted shrink-0" />
@@ -249,6 +297,9 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
                   </button>
                 ) : null}
               </div>
+              {attempted && errors.url ? (
+                <p className="text-xs text-[oklch(55%_0.2_20)]">{errors.url}</p>
+              ) : null}
 
               {/* Preview card */}
               {linkMeta ? (
@@ -296,12 +347,12 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
                 <input
                   value={image}
                   onChange={(e) => { setImage(e.target.value); setImageValid(null); }}
-                  onBlur={() => doValidateImage(image)}
+                  onBlur={() => { if (!imageChecking) doValidateImage(image); }}
                   onKeyDown={(e) => { if (e.key === "Enter") { e.preventDefault(); doValidateImage(image); } }}
                   onPaste={handleImagePaste}
                   placeholder="Paste image URL..."
                   className={`flex-1 px-3 py-2 text-sm bg-bg-elevated rounded-lg text-text-primary placeholder:text-text-muted/50 outline-none border transition-colors ${
-                    imageValid === false
+                    imageValid === false || (attempted && errors.image)
                       ? "border-[oklch(55%_0.2_20)]"
                       : "border-bg-overlay focus:border-accent-secondary"
                   }`}
@@ -310,9 +361,9 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
                   <Loader2 size={16} className="animate-spin text-text-muted shrink-0" />
                 ) : null}
               </div>
-              {imageValid === false ? (
+              {(imageValid === false || (attempted && errors.image)) ? (
                 <p className="text-xs text-[oklch(55%_0.2_20)]">
-                  URL doesn&apos;t point to a valid image
+                  {errors.image ?? "URL doesn\u2019t point to a valid image"}
                 </p>
               ) : null}
               {imageValid ? (
@@ -332,14 +383,21 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
             </div>
           ) : null}
 
-          <textarea
-            ref={titleRef}
-            value={title}
-            onChange={handleTitleChange}
-            placeholder="Post title"
-            rows={1}
-            className="w-full bg-transparent text-lg font-serif font-semibold text-text-primary placeholder:text-text-muted/50 resize-none outline-none overflow-hidden"
-          />
+          <div>
+            <textarea
+              ref={titleRef}
+              value={title}
+              onChange={handleTitleChange}
+              placeholder="Post title"
+              rows={1}
+              className={`w-full bg-transparent text-lg font-serif font-semibold text-text-primary placeholder:text-text-muted/50 resize-none outline-none overflow-hidden ${
+                attempted && errors.title ? "placeholder:text-[oklch(55%_0.2_20)]/50" : ""
+              }`}
+            />
+            {attempted && errors.title ? (
+              <p className="text-xs text-[oklch(55%_0.2_20)] -mt-1">{errors.title}</p>
+            ) : null}
+          </div>
           <textarea
             value={body}
             onChange={(e) => setBody(e.target.value)}
@@ -350,10 +408,13 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-end px-4 py-3 border-t border-bg-elevated">
+        <div className="flex items-center justify-between px-4 py-3 border-t border-bg-elevated">
+          {submitError ? (
+            <p className="text-xs text-[oklch(55%_0.2_20)]">{submitError}</p>
+          ) : <span />}
           <button
             onClick={handleSubmit}
-            disabled={!canSubmit}
+            disabled={submitting}
             className="relative px-4 py-2 rounded-lg text-sm font-medium text-white transition-all disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97] overflow-hidden"
             style={{ background: "linear-gradient(135deg, oklch(40% 0.08 259), oklch(45% 0.1 290), oklch(42% 0.07 259))" }}
           >

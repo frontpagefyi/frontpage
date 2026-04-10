@@ -200,10 +200,10 @@ export function FeedClient({ communities, activeCommunity: initialActiveCommunit
 
   const sorted = useMemo(() => sortPosts(posts, sortKey), [posts, sortKey]);
 
-  const handleCommunityClick = useCallback((communityId: string) => {
+  const handleCommunityClick = useCallback(async (communityId: string) => {
     // Same community — if viewing a thread go back to feed, otherwise no-op
     if (communityId === community.id) {
-      if (selectedPost) selectPost(null);
+      if (selectedPost) await selectPost(null);
       return;
     }
     setSortKey("hot");

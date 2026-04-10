@@ -105,14 +105,15 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       </h3>
 
       {post.image ? (
-        <div className="rounded-lg overflow-hidden">
+        <div className="rounded-lg overflow-hidden max-h-[480px] flex items-center bg-bg-elevated">
           <Image
             src={post.image}
             alt={post.title}
             width={600}
             height={400}
-            className="w-full aspect-video object-cover"
+            className="w-full object-contain max-h-[480px]"
             style={{ width: '100%', height: 'auto' }}
+            unoptimized
           />
         </div>
       ) : null}
@@ -132,6 +133,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
               height={315}
               className="w-full aspect-[1.91/1] object-cover"
               style={{ width: "100%", height: "auto" }}
+              unoptimized
             />
           ) : null}
           <div className="px-3 py-2.5">
@@ -158,6 +160,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
             height={400}
             className="w-full aspect-video object-cover"
             style={{ width: '100%', height: 'auto' }}
+            unoptimized
           />
           <div className="absolute inset-0 flex items-center justify-center bg-black/30">
             <div className="w-12 h-12 rounded-full bg-white/90 flex items-center justify-center">

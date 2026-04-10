@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Image from "next/image";
 import { useRouter } from "next/navigation";
 import {
@@ -214,8 +214,12 @@ function MobileBottomNav({
   });
   const { containerRef: navRef, setItemRef: setTabRef, pill } = useGooBlob(Math.max(0, activeTab));
 
+  // Sync tab highlight when community changes from outside (e.g. clicking a post's community badge)
+  useEffect(() => {
+    setActiveTab(activeCommunityId === "comm_home" ? 0 : -1);
+  }, [activeCommunityId]);
+
   const resetTab = () => {
-    // Return to Home highlight only if home community is active
     setActiveTab(activeCommunityId === "comm_home" ? 0 : -1);
   };
   const closeAll = () => { setSearchOpen(false); setNotifOpen(false); setDrawerOpen(false); setProfileOpen(false); };

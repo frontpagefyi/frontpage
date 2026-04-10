@@ -4,7 +4,8 @@ import { db } from "@/lib/db/store";
 import { buildCommentTree, toPost } from "./helpers";
 import { getActiveUsername } from "./auth";
 import type { CommentData, PostData } from "@/lib/db/schema";
-import type { Post, Comment } from "@/lib/types";
+import type { Post, Comment, PostType } from "@/lib/types";
+import { validateImageUrl, fetchLinkMeta } from "./links";
 
 async function currentUser() {
   return (await getActiveUsername()) ?? "will";
@@ -69,12 +70,13 @@ export async function addComment(
   parentId: string | null,
   body: string,
 ): Promise<Comment> {
-  const user = db.getUser(await currentUser());
+  const username = await currentUser();
+  const user = db.getUser(username);
   const data: CommentData = {
     id: `cmt_${Date.now().toString(36)}`,
     postId,
     parentId,
-    author: user?.username ?? await currentUser(),
+    author: user?.username ?? username,
     initials: user?.initials ?? "?",
     avatarBg: user?.avatarBg ?? "var(--color-indigo-600)",
     badges: user?.badges ?? [],
@@ -98,20 +100,57 @@ export async function addComment(
   };
 }
 
+/** Checks a field is present and is a parseable URL. */
+function requireUrl(value: string | undefined, label: string): string {
+  if (!value?.trim()) throw new Error(`${label} is required`);
+  try { new URL(value); } catch { throw new Error(`${label} is not a valid URL`); }
+  return value;
+}
+
+async function validatePost(
+  type: PostType,
+  opts: { image?: string; url?: string; linkPreview?: { image: string; title: string; domain: string } },
+) {
+  switch (type) {
+    case "image": {
+      const url = requireUrl(opts.image, "Image URL");
+      if (!await validateImageUrl(url)) throw new Error("Image URL does not point to a valid image");
+      break;
+    }
+    case "link":
+      requireUrl(opts.url, "Link URL");
+      break;
+    case "video": {
+      const url = requireUrl(opts.url, "Video URL");
+      // If client already fetched a link preview, trust it — skip the redundant fetch.
+      // Only re-fetch if no preview was provided (e.g. direct API call).
+      if (!opts.linkPreview) {
+        const meta = await fetchLinkMeta(url);
+        if (!meta?.isVideo) throw new Error("URL does not appear to contain video content");
+      }
+      break;
+    }
+  }
+}
+
 export async function createPost(opts: {
   communityId: string;
-  type: import("@/lib/types").PostType;
+  type: PostType;
   title: string;
   body?: string;
   image?: string;
   url?: string;
   linkPreview?: { image: string; title: string; domain: string };
 }): Promise<Post> {
-  const user = db.getUser(await currentUser());
+  if (!opts.title.trim()) throw new Error("Title is required");
+  await validatePost(opts.type, opts);
+
+  const username = await currentUser();
+  const user = db.getUser(username);
   const data: PostData = {
     id: `post_${Date.now().toString(36)}`,
     communityId: opts.communityId,
-    author: user?.username ?? await currentUser(),
+    author: user?.username ?? username,
     initials: user?.initials ?? "?",
     avatarBg: user?.avatarBg ?? "var(--color-indigo-600)",
     badges: user?.badges ?? [],
@@ -126,5 +165,5 @@ export async function createPost(opts: {
     commentCount: 0,
   };
   db.addPost(data);
-  return toPost(data, user?.username);
+  return toPost(data, username);
 }

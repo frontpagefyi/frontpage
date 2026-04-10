@@ -155,11 +155,13 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
   }, [post.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle browser back/forward for thread stack
+  const commentsRef = useRef(comments);
+  commentsRef.current = comments;
   useEffect(() => {
     const onPopState = () => {
       const threadId = new URLSearchParams(window.location.search).get("thread");
       if (threadId) {
-        const found = findComment(comments, threadId);
+        const found = findComment(commentsRef.current, threadId);
         setThreadStack(found ? [found] : []);
       } else {
         setThreadStack([]);
@@ -167,7 +169,7 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
     };
     window.addEventListener("popstate", onPopState);
     return () => window.removeEventListener("popstate", onPopState);
-  }, [comments]);
+  }, []);
 
   // Callback ref — scrolls element into view when React attaches it
   const scrollRef = useCallback((node: HTMLDivElement | null) => {
@@ -175,7 +177,6 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
       requestAnimationFrame(() => {
         node.scrollIntoView({ behavior: "smooth", block: "center" });
       });
-      setScrollToId(null);
     }
   }, []);
 
@@ -187,9 +188,9 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
     setReplyText("");
 
     startTransition(async () => {
-      // Optimistic comment shown immediately
-      const optimisticId = `optimistic_${Date.now()}`;
+      // Optimistic comment shown immediately (top-level only)
       if (!replyId) {
+        const optimisticId = `optimistic_${Date.now()}`;
         addOptimisticComment({
           id: optimisticId,
           author: CURRENT_USER.username,
@@ -207,13 +208,15 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
 
       const newComment = await addCommentAction(postId, replyId, body);
       if (replyId) {
+        // Nested reply — fetch full tree so the new reply appears in the right place
         const updated = await getThread(postId);
         setComments(updated);
         setActiveReplyId(null);
         setScrollToId(newComment.id);
       } else {
+        // Top-level — replace optimistic with confirmed. Don't re-scroll since
+        // the optimistic entry already scrolled into view at the same position.
         setComments((prev) => [...prev, newComment]);
-        setScrollToId(newComment.id);
       }
     });
   }, [replyText, post.id, activeReplyId, addOptimisticComment, startTransition]);
@@ -248,15 +251,16 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
       >
         {/* Post image */}
         {post.image ? (
-          <div className="relative h-48 md:h-72">
+          <div className="rounded-lg overflow-hidden max-h-[560px] flex items-center bg-bg-elevated">
             <Image
               src={post.image}
               alt={post.title}
-              fill
-              sizes="(max-width: 768px) 100vw, 672px"
-              className="object-cover"
+              width={672}
+              height={400}
+              className="w-full object-contain max-h-[560px]"
+              style={{ width: '100%', height: 'auto' }}
+              unoptimized
             />
-            <div className="absolute inset-0 bg-gradient-to-t from-bg-surface via-transparent to-transparent" />
           </div>
         ) : null}
 
@@ -268,6 +272,7 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
               fill
               sizes="(max-width: 768px) 100vw, 672px"
               className="object-cover"
+              unoptimized
             />
             <div className="absolute inset-0 flex items-center justify-center bg-black/30">
               <div className="w-14 h-14 rounded-full bg-white/90 flex items-center justify-center">
@@ -320,6 +325,7 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
                   height={315}
                   className="w-full aspect-[1.91/1] object-cover"
                   style={{ width: "100%", height: "auto" }}
+                  unoptimized
                 />
               ) : null}
               <div className="px-3 py-2.5">
