@@ -223,7 +223,7 @@ function MobileBottomNav({
   return (
     <>
       <SearchOverlay open={searchOpen} onClose={() => { setSearchOpen(false); resetTab(); }} posts={posts} onSelectPost={onSelectPost} />
-      <NotificationsPanel open={notifOpen} onClose={() => { setNotifOpen(false); resetTab(); }} />
+      <NotificationsPanel open={notifOpen} onClose={() => { setNotifOpen(false); resetTab(); }} posts={posts} onSelectPost={onSelectPost} />
       <ProfilePanel open={profileOpen} onClose={() => { setProfileOpen(false); resetTab(); }} avatarSrc={avatarSrc} />
 
       {/* Drawer backdrop + panel */}
@@ -376,7 +376,7 @@ export function Sidebar({
   return (
     <>
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} posts={posts} onSelectPost={onSelectPost} />
-      <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} />
+      <NotificationsPanel open={notifOpen} onClose={() => setNotifOpen(false)} posts={posts} onSelectPost={onSelectPost} />
       <ProfilePanel open={profileOpen} onClose={() => setProfileOpen(false)} avatarSrc={avatarSrc} />
 
       {/* ── Desktop sidebar ── */}

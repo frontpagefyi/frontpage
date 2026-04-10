@@ -4,7 +4,7 @@ import { db } from "@/lib/db/store";
 import { toCommunity, toPost } from "./helpers";
 import type { Post } from "@/lib/types";
 
-const DEMO_USER = "user_demo";
+const DEMO_USER = "will";
 
 export async function getCommunities() {
   return db.getCommunities().map(toCommunity);

@@ -64,6 +64,17 @@ function seed() {
   // Users
   const users: UserProfileData[] = [
     {
+      username: "will",
+      displayName: "Will",
+      initials: "wc",
+      avatarBg: "oklch(55% 0.15 259)",
+      avatarUrl: "https://i.pravatar.cc/200?u=frontpage-demo",
+      bio: "Building Frontpage. Exploring community design for the AT Protocol.",
+      handle: "will.frontpage.fyi",
+      joinedAt: timeAgoToDate("365d"),
+      badges: [],
+    },
+    {
       username: "pixelweaver",
       displayName: "Pixel Weaver",
       initials: "pw",

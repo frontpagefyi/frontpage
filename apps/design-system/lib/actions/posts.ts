@@ -5,7 +5,7 @@ import { buildCommentTree, toPost } from "./helpers";
 import type { CommentData } from "@/lib/db/schema";
 import type { Post, Comment } from "@/lib/types";
 
-const DEMO_USER = "user_demo";
+const DEMO_USER = "will";
 
 // ── Queries ──
 
@@ -58,14 +58,15 @@ export async function addComment(
   parentId: string | null,
   body: string,
 ): Promise<Comment> {
+  const user = db.getUser(DEMO_USER);
   const data: CommentData = {
     id: `cmt_${Date.now().toString(36)}`,
     postId,
     parentId,
-    author: "will",
-    initials: "wc",
-    avatarBg: "var(--color-indigo-600)",
-    badges: [],
+    author: user?.username ?? DEMO_USER,
+    initials: user?.initials ?? "?",
+    avatarBg: user?.avatarBg ?? "var(--color-indigo-600)",
+    badges: user?.badges ?? [],
     body,
     createdAt: new Date(),
     votes: 0,
@@ -75,9 +76,10 @@ export async function addComment(
   return {
     id: data.id,
     author: data.author,
-    initials: data.initials,
-    avatarBg: data.avatarBg,
-    badges: [],
+    initials: user?.initials ?? data.initials,
+    avatarBg: user?.avatarBg ?? data.avatarBg,
+    avatarUrl: user?.avatarUrl,
+    badges: (user?.badges ?? []) as import("@/lib/types").PostBadge[],
     body: data.body,
     time: "just now",
     votes: 0,

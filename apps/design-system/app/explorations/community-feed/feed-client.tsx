@@ -104,6 +104,7 @@ export function FeedClient({ communities, initialPosts, initialIndex = 0, initia
   const selectPost = useCallback((post: Post | null) => {
     if (post?.id) {
       scrollRef.current = mainRef.current?.scrollTop ?? 0;
+      setSelectedComments([]); // Clear stale comments before showing new thread
       getThread(post.id).then(setSelectedComments);
     } else {
       setSelectedComments([]);
@@ -137,7 +138,9 @@ export function FeedClient({ communities, initialPosts, initialIndex = 0, initia
             setLoading(false);
             if (postId) {
               const found = newPosts.find((p) => p.id === postId);
+              setSelectedComments([]);
               setSelectedPost(found ?? null);
+              if (found) getThread(postId).then(setSelectedComments);
             } else {
               setSelectedPost(null);
               // Restore scroll position
@@ -154,7 +157,9 @@ export function FeedClient({ communities, initialPosts, initialIndex = 0, initia
       // Same community, toggle post
       if (postId) {
         const found = posts.find((p) => p.id === postId);
+        setSelectedComments([]); // Clear stale comments
         setSelectedPost(found ?? null);
+        if (found) getThread(postId).then(setSelectedComments);
       } else {
         setSelectedPost(null);
         // Restore scroll position
