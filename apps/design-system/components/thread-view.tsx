@@ -65,7 +65,17 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
   const { saved, animKey: saveCount, toggle: toggleSave } = useSave();
   const [comments, setComments] = useState<Comment[]>(initialComments ?? []);
   const [replyText, setReplyText] = useState("");
-  const [activeReplyId, setActiveReplyId] = useState<string | null>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [activeReplyId, _setActiveReplyId] = useState<string | null>(null);
+  const setActiveReplyId = useCallback((id: string | null) => {
+    _setActiveReplyId(id);
+    if (id) {
+      requestAnimationFrame(() => {
+        inputRef.current?.focus();
+        inputRef.current?.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+    }
+  }, []);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [postMenuOpen, setPostMenuOpen] = useState(false);
   const [commentSort, setCommentSort] = useState<"top" | "new" | "old">("top");
@@ -83,7 +93,6 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
   const commentSortIndex = commentSortOptions.indexOf(commentSort);
   const { containerRef: sortRef, setItemRef: setSortItemRef, pill: sortPill } = useGooBlob(commentSortIndex);
   const [mentionQuery, setMentionQuery] = useState<string | null>(null);
-  const inputRef = useRef<HTMLInputElement>(null);
   const [threadStack, setThreadStack] = useState<Comment[]>([]);
 
   // Sync thread stack with URL (&thread=id)
