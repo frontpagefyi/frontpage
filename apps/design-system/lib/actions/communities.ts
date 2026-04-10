@@ -2,9 +2,12 @@
 
 import { db } from "@/lib/db/store";
 import { toCommunity, toPost } from "./helpers";
+import { getActiveUsername } from "./auth";
 import type { Post } from "@/lib/types";
 
-const DEMO_USER = "will";
+async function currentUser() {
+  return (await getActiveUsername()) ?? "will";
+}
 
 export async function getCommunities() {
   return db.getCommunities().map(toCommunity);
@@ -22,14 +25,20 @@ export async function getCommunityWithPosts(id: string): Promise<{
 } | null> {
   const data = db.getCommunity(id);
   if (!data) return null;
-  const posts = db.getPostsByCommunity(id).map(toPost);
+  const viewer = await currentUser();
+  const posts = db.getPostsByCommunity(id).map((p) => toPost(p, viewer));
   return { community: toCommunity(data), posts };
 }
 
 export async function toggleJoin(communityId: string): Promise<boolean> {
-  return db.toggleMembership({ userId: DEMO_USER, communityId });
+  return db.toggleMembership({ userId: await currentUser(), communityId });
 }
 
 export async function isJoined(communityId: string): Promise<boolean> {
-  return db.isMember(DEMO_USER, communityId);
+  return db.isMember(await currentUser(), communityId);
+}
+
+export async function getJoinedCommunities() {
+  const username = await currentUser();
+  return db.getJoinedCommunities(username).map(toCommunity);
 }

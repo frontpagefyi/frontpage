@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import Link from "next/link";
 import { ArrowLeft } from "lucide-react";
 import { LayoutPreview } from "@/components/layout-preview";
@@ -41,6 +42,10 @@ import { SpeedDateLayout } from "@/components/layouts/speed-date";
 import { EvidenceLayout } from "@/components/layouts/evidence";
 import { LinerNotesLayout } from "@/components/layouts/liner-notes";
 import { ObituariesLayout } from "@/components/layouts/obituaries";
+
+export const metadata: Metadata = {
+  title: "Layout Concepts • Frontpage Design System",
+};
 
 const layouts = [
   { number: 1, name: "Forum / Bulletin Board", vibe: "phpBB energy", description: "Dense table rows. Title, author, reply count, last activity. Zero cards, zero images by default. Scannable and information-rich.", component: ForumLayout },

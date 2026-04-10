@@ -1,3 +1,5 @@
+import Image from "next/image";
+
 interface AvatarProps {
   initials: string;
   bg: string;
@@ -7,22 +9,26 @@ interface AvatarProps {
 }
 
 export function Avatar({ bg, size = 32, src, className = "" }: AvatarProps) {
-  const style = {
-    width: size,
-    height: size,
-    fontSize: size * 0.4,
-    background: src ? undefined : bg,
-    backgroundImage: src ? `url(${src})` : undefined,
-    backgroundSize: "cover",
-    backgroundPosition: "center",
-  };
-
   return (
     <div
       className={`rounded-full flex items-center justify-center font-bold text-white shrink-0 ring-1 ring-bg-elevated overflow-hidden ${className}`}
-      style={style}
+      style={{
+        width: size,
+        height: size,
+        fontSize: size * 0.4,
+        background: src ? undefined : bg,
+      }}
     >
-      {!src && (
+      {src ? (
+        <Image
+          src={src}
+          alt=""
+          width={size}
+          height={size}
+          className="w-full h-full object-cover"
+          unoptimized
+        />
+      ) : (
         <svg
           viewBox="0 0 32 32"
           fill="none"

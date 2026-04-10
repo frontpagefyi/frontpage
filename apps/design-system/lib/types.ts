@@ -10,8 +10,12 @@ export interface LinkPreview {
   domain: string;
 }
 
+export type PostType = "text" | "image" | "link" | "video";
+
 export interface Post {
   id?: string;
+  type?: PostType;
+  communityId?: string;
   communityName?: string;
   communityIcon?: string;
   communityColor?: string;
@@ -25,10 +29,13 @@ export interface Post {
   title: string;
   image?: string;
   body?: string;
+  url?: string;
   linkPreview?: LinkPreview;
   video?: { thumbnail: string };
   votes: number;
   comments: number;
+  voted?: boolean;
+  saved?: boolean;
 }
 
 export interface CommunityTheme {
@@ -53,6 +60,7 @@ export interface Comment {
   body: string;
   time: string;
   votes: number;
+  voted?: boolean;
   replies?: Comment[];
 }
 

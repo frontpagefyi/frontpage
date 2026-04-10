@@ -1,7 +1,9 @@
 "use client";
 
-import { useState, useCallback, useRef, useEffect, useMemo } from "react";
+import { useState, useCallback, useRef, useEffect, useMemo, useOptimistic, useTransition } from "react";
 import Image from "next/image";
+import Link from "next/link";
+import { useRouter, usePathname } from "next/navigation";
 import {
   Heart,
   MessageCircle,
@@ -61,11 +63,19 @@ interface ThreadViewProps {
 }
 
 export function ThreadView({ post, initialComments, communityName, onBack }: ThreadViewProps) {
-  const { liked, count: likeCount, heartRef, toggle: toggleLike } = useLike(post.votes);
-  const { saved, animKey: saveCount, toggle: toggleSave } = useSave();
+  const router = useRouter();
+  const pathname = usePathname();
+  const [, startTransition] = useTransition();
+  const { liked, animating: likeAnimating, count: likeCount, heartRef, toggle: toggleLike } = useLike(post.id, post.votes, post.voted, "post");
+  const { saved, animKey: saveCount, toggle: toggleSave } = useSave(post.id, post.saved);
   const [comments, setComments] = useState<Comment[]>(initialComments ?? []);
+  const [optimisticComments, addOptimisticComment] = useOptimistic<Comment[], Comment>(
+    comments,
+    (state, newComment) => [...state, newComment],
+  );
   const [replyText, setReplyText] = useState("");
   const inputRef = useRef<HTMLInputElement>(null);
+  const [scrollToId, setScrollToId] = useState<string | null>(null);
   const [activeReplyId, _setActiveReplyId] = useState<string | null>(null);
   const setActiveReplyId = useCallback((id: string | null) => {
     _setActiveReplyId(id);
@@ -78,8 +88,19 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
   }, []);
   const [activeMenuId, setActiveMenuId] = useState<string | null>(null);
   const [postMenuOpen, setPostMenuOpen] = useState(false);
-  const [commentSort, setCommentSort] = useState<"top" | "new" | "old">("top");
-  const sortedComments = useMemo(() => sortComments(comments, commentSort), [comments, commentSort]);
+  const [commentSort, _setCommentSort] = useState<"top" | "new" | "old">(() => {
+    if (typeof window === "undefined") return "top";
+    const param = new URLSearchParams(window.location.search).get("csort");
+    return param === "new" || param === "old" ? param : "top";
+  });
+  const setCommentSort = useCallback((sort: "top" | "new" | "old") => {
+    _setCommentSort(sort);
+    const params = new URLSearchParams(window.location.search);
+    if (sort === "top") params.delete("csort");
+    else params.set("csort", sort);
+    router.replace(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [router, pathname]);
+  const sortedComments = useMemo(() => sortComments(optimisticComments, commentSort), [optimisticComments, commentSort]);
 
   // Memoized author set for @mention autocomplete
   const allAuthors = useMemo(() => {
@@ -97,14 +118,14 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
 
   // Sync thread stack with URL (&thread=id)
   const updateThreadUrl = useCallback((stack: Comment[]) => {
-    const url = new URL(window.location.href);
+    const params = new URLSearchParams(window.location.search);
     if (stack.length > 0) {
-      url.searchParams.set("thread", stack[stack.length - 1].id);
+      params.set("thread", stack[stack.length - 1].id);
     } else {
-      url.searchParams.delete("thread");
+      params.delete("thread");
     }
-    window.history.pushState({}, "", url.toString());
-  }, []);
+    router.push(`${pathname}?${params.toString()}`, { scroll: false });
+  }, [router, pathname]);
 
   // Sync comments when initialComments prop updates (from parent async fetch)
   useEffect(() => {
@@ -133,19 +154,69 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
     }
   }, [post.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const handleSubmitReply = useCallback(async () => {
-    if (!replyText.trim() || !post.id) return;
-    const newComment = await addCommentAction(post.id, activeReplyId, replyText.trim());
-    if (activeReplyId) {
-      // Replied to a comment — reload thread to show it nested
-      const updated = await getThread(post.id);
-      setComments(updated);
-      setActiveReplyId(null);
-    } else {
-      setComments((prev) => [...prev, newComment]);
+  // Handle browser back/forward for thread stack
+  useEffect(() => {
+    const onPopState = () => {
+      const threadId = new URLSearchParams(window.location.search).get("thread");
+      if (threadId) {
+        const found = findComment(comments, threadId);
+        setThreadStack(found ? [found] : []);
+      } else {
+        setThreadStack([]);
+      }
+    };
+    window.addEventListener("popstate", onPopState);
+    return () => window.removeEventListener("popstate", onPopState);
+  }, [comments]);
+
+  // Callback ref — scrolls element into view when React attaches it
+  const scrollRef = useCallback((node: HTMLDivElement | null) => {
+    if (node) {
+      requestAnimationFrame(() => {
+        node.scrollIntoView({ behavior: "smooth", block: "center" });
+      });
+      setScrollToId(null);
     }
+  }, []);
+
+  const handleSubmitReply = useCallback(() => {
+    if (!replyText.trim() || !post.id) return;
+    const body = replyText.trim();
+    const postId = post.id;
+    const replyId = activeReplyId;
     setReplyText("");
-  }, [replyText, post.id, activeReplyId]);
+
+    startTransition(async () => {
+      // Optimistic comment shown immediately
+      const optimisticId = `optimistic_${Date.now()}`;
+      if (!replyId) {
+        addOptimisticComment({
+          id: optimisticId,
+          author: CURRENT_USER.username,
+          initials: CURRENT_USER.initials,
+          avatarBg: CURRENT_USER.avatarBg,
+          avatarUrl: CURRENT_USER.avatarUrl,
+          badges: [],
+          body,
+          time: "just now",
+          votes: 0,
+          replies: [],
+        });
+        setScrollToId(optimisticId);
+      }
+
+      const newComment = await addCommentAction(postId, replyId, body);
+      if (replyId) {
+        const updated = await getThread(postId);
+        setComments(updated);
+        setActiveReplyId(null);
+        setScrollToId(newComment.id);
+      } else {
+        setComments((prev) => [...prev, newComment]);
+        setScrollToId(newComment.id);
+      }
+    });
+  }, [replyText, post.id, activeReplyId, addOptimisticComment, startTransition]);
 
 
   return (
@@ -153,13 +224,21 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
       className="max-w-2xl mx-auto px-4 py-4 md:py-6"
       style={{ animation: "thread-enter 0.3s cubic-bezier(0.05, 0.7, 0.1, 1) both" }}
     >
-      {/* Back button */}
+      {/* Back button — pops thread stack first, then exits thread view */}
       <button
-        onClick={onBack}
+        onClick={() => {
+          if (threadStack.length > 0) {
+            const next = threadStack.slice(0, -1);
+            setThreadStack(next);
+            updateThreadUrl(next);
+          } else {
+            onBack();
+          }
+        }}
         className="flex items-center gap-1.5 text-xs text-text-muted hover:text-text-secondary transition-colors mb-4 group"
       >
         <ArrowLeft size={14} className="group-hover:-translate-x-0.5 transition-transform" />
-        <span>{communityName}</span>
+        <span>{threadStack.length > 0 ? "Back to thread" : communityName}</span>
       </button>
 
       {/* ── Original Post ── */}
@@ -204,7 +283,7 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
             <Avatar initials={post.initials} bg={post.avatarBg} src={post.avatarUrl} size={36} />
             <div>
               <div className="flex items-center gap-1.5 text-sm">
-                <a href={routes.profile(post.author)} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
+                <Link href={routes.profile(post.author)} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</Link>
                 {post.badges?.map((b) => (
                   <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
                 ))}
@@ -225,34 +304,38 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
             {post.title}
           </h1>
 
-          {/* Body */}
-          {post.body ? (
-            <p className="text-sm text-text-secondary leading-relaxed mb-4">
-              {renderWithMentions(post.body)}
-            </p>
-          ) : null}
-
-          {/* Link preview */}
+          {/* Link preview — above body so the link is main content, body is commentary */}
           {post.linkPreview ? (
             <a
-              href="#"
-              className="flex gap-3 p-3 rounded-lg bg-bg-elevated border border-bg-overlay no-underline mb-4"
+              href={post.url ?? "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="block rounded-lg bg-bg-elevated border border-bg-overlay no-underline overflow-hidden mb-4"
             >
-              <Image
-                src={post.linkPreview.image}
-                alt={post.linkPreview.title}
-                width={96}
-                height={64}
-                className="rounded object-cover shrink-0"
-                style={{ width: 'auto', height: 'auto' }}
-              />
-              <div>
-                <div className="text-sm font-semibold">{post.linkPreview.title}</div>
+              {post.linkPreview.image ? (
+                <Image
+                  src={post.linkPreview.image}
+                  alt={post.linkPreview.title}
+                  width={600}
+                  height={315}
+                  className="w-full aspect-[1.91/1] object-cover"
+                  style={{ width: "100%", height: "auto" }}
+                />
+              ) : null}
+              <div className="px-3 py-2.5">
+                <div className="text-sm font-semibold leading-snug">{post.linkPreview.title}</div>
                 <div className="text-xs text-text-muted flex items-center gap-1 mt-1">
                   <ExternalLink size={10} /> {post.linkPreview.domain}
                 </div>
               </div>
             </a>
+          ) : null}
+
+          {/* Body */}
+          {post.body ? (
+            <p className="text-sm text-text-secondary leading-relaxed mb-4">
+              {renderWithMentions(post.body)}
+            </p>
           ) : null}
 
           {/* Action bar */}
@@ -270,7 +353,7 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
                 size={16}
                 strokeWidth={2.25}
                 fill={liked ? "currentColor" : "none"}
-                className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
+                className={likeAnimating ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
               />
               {likeCount}
             </button>
@@ -377,19 +460,28 @@ export function ThreadView({ post, initialComments, communityName, onBack }: Thr
         </>
       ) : (
         <div className="space-y-5 pb-24">
-          {sortedComments.map((comment, i) => (
-            <ThreadComment
-              key={comment.id}
-              comment={comment}
-              index={i}
-              parentDelay={0.05}
-              activeReplyId={activeReplyId}
-              onReplyToggle={setActiveReplyId}
-              activeMenuId={activeMenuId}
-              onMenuToggle={(id) => { setActiveMenuId(id); if (id) setPostMenuOpen(false); }}
-              onContinueThread={(c) => { const next = [...threadStack, c]; setThreadStack(next); updateThreadUrl(next); }}
-            />
-          ))}
+          {sortedComments.map((comment, i) => {
+            const isLast = i === sortedComments.length - 1;
+            const isOptimistic = comment.id.startsWith("optimistic_");
+            return (
+              <div
+                key={comment.id}
+                ref={comment.id === scrollToId ? scrollRef : undefined}
+                className={isOptimistic ? "opacity-60" : undefined}
+              >
+                <ThreadComment
+                  comment={comment}
+                  index={i}
+                  parentDelay={0.05}
+                  activeReplyId={activeReplyId}
+                  onReplyToggle={setActiveReplyId}
+                  activeMenuId={activeMenuId}
+                  onMenuToggle={(id) => { setActiveMenuId(id); if (id) setPostMenuOpen(false); }}
+                  onContinueThread={(c) => { const next = [...threadStack, c]; setThreadStack(next); updateThreadUrl(next); }}
+                />
+              </div>
+            );
+          })}
         </div>
       )}
 

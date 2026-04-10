@@ -2,6 +2,7 @@
 
 import { db } from "@/lib/db/store";
 import { toPost, toCommunity } from "./helpers";
+import { getActiveUsername } from "./auth";
 import type { Post, PostBadge } from "@/lib/types";
 
 export interface UserProfile {
@@ -60,7 +61,8 @@ export async function getProfile(username: string): Promise<UserProfile | null> 
 }
 
 export async function getProfilePosts(username: string): Promise<Post[]> {
-  return db.getPostsByAuthor(username).map(toPost);
+  const viewer = await getActiveUsername() ?? "will";
+  return db.getPostsByAuthor(username).map((p) => toPost(p, viewer));
 }
 
 export async function getProfileCommunities(username: string) {

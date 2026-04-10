@@ -1,6 +1,7 @@
 "use client";
 
 import Image from "next/image";
+import Link from "next/link";
 import {
   Heart,
   MessageCircle,
@@ -32,8 +33,8 @@ interface FeedPostProps {
 }
 
 export function FeedPost({ post, showCommunity, onCommunityClick, style, onCommentClick }: FeedPostProps) {
-  const { liked, count: likeCount, heartRef, toggle: toggleLike } = useLike(post.votes);
-  const { saved, animKey: saveCount, toggle: toggleSave } = useSave();
+  const { liked, animating: likeAnimating, count: likeCount, heartRef, toggle: toggleLike } = useLike(post.id, post.votes, post.voted, "post");
+  const { saved, animKey: saveCount, toggle: toggleSave } = useSave(post.id, post.saved);
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -41,7 +42,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
       className="bg-bg-surface rounded-xl border border-bg-elevated p-4 space-y-4 motion-safe:transition-[transform,border-color,box-shadow] motion-safe:duration-200 hover:translate-y-[-2px] hover:border-[oklch(100%_0_0_/_0.12)] hover:shadow-[0_4px_20px_oklch(0%_0_0_/_0.15)]"
       style={style}
     >
-      <div className="flex items-start gap-2 text-xs text-text-muted">
+      <div className={`flex gap-2 text-xs text-text-muted ${showCommunity ? "items-start" : "items-center"}`}>
         {/* Stacked avatar: community icon + user avatar overlay (dev.to pattern) */}
         {showCommunity && post.communityIcon ? (
           <button
@@ -79,7 +80,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
         )}
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-1.5">
-            <a href={routes.profile(post.author)} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</a>
+            <Link href={routes.profile(post.author)} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">{post.author}</Link>
             {post.badges?.map((b) => (
               <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
             ))}
@@ -96,7 +97,10 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
         </div>
       </div>
 
-      <h3 className="font-serif text-lg font-semibold leading-snug">
+      <h3
+        onClick={onCommentClick}
+        className="font-serif text-lg font-semibold leading-snug cursor-pointer hover:text-accent-secondary transition-colors"
+      >
         {post.title}
       </h3>
 
@@ -112,26 +116,26 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
           />
         </div>
       ) : null}
-      {post.body ? (
-        <p className="text-sm text-text-secondary leading-relaxed">
-          {renderWithMentions(post.body)}
-        </p>
-      ) : null}
+      {/* Link preview — above body so the link is the main content, body is commentary */}
       {post.linkPreview ? (
         <a
-          href="#"
-          className="flex gap-3 p-3 rounded-lg bg-bg-elevated border border-bg-overlay no-underline"
+          href={post.url ?? "#"}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="block rounded-lg bg-bg-elevated border border-bg-overlay no-underline overflow-hidden"
         >
-          <Image
-            src={post.linkPreview.image}
-            alt={post.linkPreview.title}
-            width={96}
-            height={64}
-            className="rounded object-cover shrink-0"
-            style={{ width: 96, height: 64 }}
-          />
-          <div>
-            <div className="text-sm font-semibold">
+          {post.linkPreview.image ? (
+            <Image
+              src={post.linkPreview.image}
+              alt={post.linkPreview.title}
+              width={600}
+              height={315}
+              className="w-full aspect-[1.91/1] object-cover"
+              style={{ width: "100%", height: "auto" }}
+            />
+          ) : null}
+          <div className="px-3 py-2.5">
+            <div className="text-sm font-semibold leading-snug">
               {post.linkPreview.title}
             </div>
             <div className="text-xs text-text-muted flex items-center gap-1 mt-1">
@@ -139,6 +143,11 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
             </div>
           </div>
         </a>
+      ) : null}
+      {post.body ? (
+        <p className="text-sm text-text-secondary leading-relaxed">
+          {renderWithMentions(post.body)}
+        </p>
       ) : null}
       {post.video ? (
         <div className="rounded-lg overflow-hidden relative cursor-pointer">
@@ -172,7 +181,7 @@ export function FeedPost({ post, showCommunity, onCommunityClick, style, onComme
             size={16}
             strokeWidth={2.25}
             fill={liked ? "currentColor" : "none"}
-            className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
+            className={likeAnimating ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
           />
           {likeCount}
         </button>

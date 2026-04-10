@@ -9,7 +9,7 @@ export const CURRENT_USER = {
   username: "will",
   initials: "wc",
   avatarBg: "var(--color-indigo-600)",
-  avatarUrl: "https://i.pravatar.cc/80?u=frontpage-demo",
+  avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/tender-heart.png",
 } as const;
 
 /** Animation class constants to avoid repeated magic strings. */

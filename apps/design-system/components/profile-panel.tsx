@@ -1,14 +1,17 @@
 "use client";
 
 import Image from "next/image";
-import { Settings, LogOut, Moon, BookOpen, Star, ChevronRight, Users } from "lucide-react";
+import { useRouter } from "next/navigation";
+import { Settings, LogOut, Moon, BookOpen, Star, ChevronRight, Users, Bookmark } from "lucide-react";
 import { Avatar } from "./avatar";
 import { DraggableDrawer } from "./draggable-drawer";
+import { clearActiveUser } from "@/lib/actions/auth";
+import { CURRENT_USER } from "@/lib/constants";
 
 const menuItems = [
-  { icon: BookOpen, label: "My posts", color: "oklch(64.8% 0.147 259)" },
-  { icon: Star, label: "Saved", color: "oklch(75% 0.18 75)" },
-  { icon: Users, label: "Communities", color: "oklch(72% 0.16 145)" },
+  { icon: BookOpen, label: "My posts", color: "oklch(64.8% 0.147 259)", href: `/explorations/profile/${CURRENT_USER.username}` },
+  { icon: Bookmark, label: "Saved", color: "oklch(75% 0.18 75)", href: `/explorations/profile/${CURRENT_USER.username}?tab=saved` },
+  { icon: Users, label: "Communities", color: "oklch(72% 0.16 145)", href: "/explorations/discover" },
   { icon: Moon, label: "Dark mode", color: "oklch(70% 0.15 290)", toggle: true },
   { icon: Settings, label: "Settings", color: "oklch(55% 0.04 259)" },
 ];
@@ -64,6 +67,7 @@ function PanelContent({
   open: boolean;
   mobile?: boolean;
 }) {
+  const router = useRouter();
   return (
     <div className="flex flex-col overflow-y-auto">
       {/* Banner */}
@@ -126,6 +130,7 @@ function PanelContent({
         {menuItems.map((item, i) => (
           <button
             key={item.label}
+            onClick={() => { if (item.href) { onClose(); router.push(item.href); } }}
             className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm text-text-secondary hover:bg-bg-elevated/60 hover:text-text-primary transition-colors"
             style={{
               animation: open ? `post-enter 0.3s ease ${0.05 + i * 0.04}s both` : "none",
@@ -148,7 +153,10 @@ function PanelContent({
 
       <div className="px-3 py-2 pb-6">
         <button
-          onClick={onClose}
+          onClick={async () => {
+            await clearActiveUser();
+            window.location.href = "/login";
+          }}
           className="flex items-center gap-3 w-full px-3 py-3 rounded-xl text-sm text-accent-destructive hover:bg-accent-destructive/10 transition-colors"
         >
           <LogOut size={18} />

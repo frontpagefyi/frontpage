@@ -14,6 +14,10 @@ export const linkPreviewSchema = z.object({
   domain: z.string(),
 });
 
+// ── Post types ──
+
+export const postTypeSchema = z.enum(["text", "image", "link", "video"]);
+
 // ── Posts ──
 
 export const postSchema = z.object({
@@ -24,9 +28,11 @@ export const postSchema = z.object({
   avatarBg: z.string(),
   createdAt: z.date(),
   badges: z.array(postBadgeSchema).default([]),
+  type: postTypeSchema.optional(),
   title: z.string().min(1).max(300),
   image: z.string().optional(),
   body: z.string().optional(),
+  url: z.string().url().optional(),
   linkPreview: linkPreviewSchema.optional(),
   video: z.object({ thumbnail: z.string() }).optional(),
   votes: z.number().int().default(0),
@@ -63,6 +69,7 @@ export const communityBannerSchema = z.object({
 export const communitySchema = z.object({
   id: z.string(),
   name: z.string(),
+  description: z.string().optional(),
   icon: z.string().optional(),
   theme: communityThemeSchema.optional(),
   banner: communityBannerSchema,

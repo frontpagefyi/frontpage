@@ -215,9 +215,9 @@ export default function ThreadedForumPage() {
   const [selectedThread, setSelectedThread] = useState<number | null>(null);
 
   const sidebarCommunities = communities.map((c, i) => ({
+    id: `comm_${i}`,
     name: c.name,
     icon: c.icon,
-    active: i === activeCommunity,
     notif: i === 0 ? 3 : undefined,
   }));
 
@@ -232,10 +232,11 @@ export default function ThreadedForumPage() {
     >
       {/* Sidebar */}
       <Sidebar
+        activeCommunityId={`comm_${activeCommunity}`}
         communities={sidebarCommunities}
-        onCommunityClick={(i) => {
-          setActiveCommunity(i);
-          setSelectedThread(null);
+        onCommunityClick={(id) => {
+          const i = sidebarCommunities.findIndex((c) => c.id === id);
+          if (i >= 0) { setActiveCommunity(i); setSelectedThread(null); }
         }}
       />
 

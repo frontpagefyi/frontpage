@@ -8,7 +8,7 @@ import {
   Calendar,
   AtSign,
   MessageSquare,
-  Star,
+  Bookmark,
   Users,
   FileText,
 } from "lucide-react";
@@ -18,19 +18,23 @@ import { FeedPost } from "@/components/feed-post";
 import type { UserProfile } from "@/lib/actions/users";
 import type { Post } from "@/lib/types";
 
-type Tab = "posts" | "comments" | "communities";
+type Tab = "posts" | "comments" | "saved" | "communities";
 
 interface ProfileClientProps {
   profile: UserProfile;
   posts: Post[];
+  savedPosts?: Post[];
+  isOwnProfile?: boolean;
+  initialTab?: Tab;
 }
 
-export function ProfileClient({ profile, posts }: ProfileClientProps) {
-  const [activeTab, setActiveTab] = useState<Tab>("posts");
+export function ProfileClient({ profile, posts, savedPosts = [], isOwnProfile, initialTab }: ProfileClientProps) {
+  const [activeTab, setActiveTab] = useState<Tab>(initialTab ?? "posts");
 
   const tabs: { key: Tab; label: string; count: number; icon: React.ReactNode }[] = [
     { key: "posts", label: "Posts", count: profile.stats.posts, icon: <FileText size={14} /> },
     { key: "comments", label: "Comments", count: profile.stats.comments, icon: <MessageSquare size={14} /> },
+    ...(isOwnProfile ? [{ key: "saved" as Tab, label: "Saved", count: savedPosts.length, icon: <Bookmark size={14} /> }] : []),
     { key: "communities", label: "Communities", count: profile.stats.communities, icon: <Users size={14} /> },
   ];
 
@@ -182,6 +186,23 @@ export function ProfileClient({ profile, posts }: ProfileClientProps) {
               </div>
             ) : (
               <EmptyState icon={<FileText size={24} />} text="No posts yet" />
+            )
+          ) : activeTab === "saved" ? (
+            savedPosts.length > 0 ? (
+              <div className="space-y-4">
+                {savedPosts.map((post, i) => (
+                  <FeedPost
+                    key={post.id ?? `${post.author}-${post.title}`}
+                    post={post}
+                    showCommunity
+                    style={{
+                      animation: `post-enter 0.35s cubic-bezier(0.25, 0.46, 0.45, 0.94) ${i * 0.06}s both`,
+                    }}
+                  />
+                ))}
+              </div>
+            ) : (
+              <EmptyState icon={<Bookmark size={24} />} text="No saved posts yet" />
             )
           ) : activeTab === "comments" ? (
             profile.stats.comments > 0 ? (

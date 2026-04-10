@@ -133,6 +133,12 @@ h1, h2, h3, h4, h5, h6 {
   to   { opacity: 1; }
 }
 
+/* New post composer entry */
+@keyframes composer-enter {
+  from { opacity: 0; transform: translateY(24px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0) scale(1); }
+}
+
 /* Thread/detail view entry — subtle rise for spatial context */
 @keyframes thread-enter {
   from { opacity: 0; transform: translateY(12px); }

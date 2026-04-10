@@ -1,6 +1,7 @@
 "use client";
 
-import { useState, useCallback, useRef } from "react";
+import { useState, useCallback } from "react";
+import Link from "next/link";
 import { Heart, MessageCircle, Share2, Link2, Flag, ChevronRight } from "lucide-react";
 import { MoreMenu } from "./more-menu";
 import { Avatar } from "./avatar";
@@ -9,7 +10,7 @@ import type { Comment } from "@/lib/types";
 import { toast } from "@/lib/toast";
 import { renderWithMentions } from "@/lib/mention";
 import { routes } from "@/lib/constants";
-import { spawnHeartParticles } from "@/lib/particles";
+import { useLike } from "@/lib/use-like";
 
 function countAllReplies(comment: Comment): number {
   if (!comment.replies) return 0;
@@ -50,9 +51,7 @@ export function ThreadComment({
   onContinueThread,
 }: ThreadCommentProps) {
   const [collapsed, setCollapsed] = useState(false);
-  const [liked, setLiked] = useState(false);
-  const [voteCount, setVoteCount] = useState(comment.votes);
-  const heartRef = useRef<HTMLButtonElement>(null);
+  const { liked, animating: likeAnimating, count: voteCount, heartRef, toggle: handleLike } = useLike(comment.id, comment.votes, comment.voted, "comment", "sm");
 
   const threadColor = THREAD_COLORS[depth % THREAD_COLORS.length];
   const entryDelay = parentDelay + index * 0.03;
@@ -60,15 +59,6 @@ export function ThreadComment({
   const isReplying = activeReplyId === comment.id;
   const isMenuOpen = activeMenuId === comment.id;
   const totalReplies = hasReplies ? countAllReplies(comment) : 0;
-
-  const handleLike = useCallback(() => {
-    const next = !liked;
-    setLiked(next);
-    setVoteCount(comment.votes + (next ? 1 : 0));
-    if (next && heartRef.current) {
-      spawnHeartParticles(heartRef.current, "sm");
-    }
-  }, [liked, comment.votes]);
 
   const handleCopyLink = useCallback(() => {
     const url = new URL(window.location.href);
@@ -124,12 +114,12 @@ export function ThreadComment({
             <div className="flex-1 min-w-0">
               {/* Author line */}
               <div className="flex items-center gap-1.5 text-xs">
-                <a
+                <Link
                   href={routes.profile(comment.author)}
                   className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors"
                 >
                   {comment.author}
-                </a>
+                </Link>
                 {comment.badges?.map((b) => (
                   <Badge key={b.label} variant={b.variant} label={b.label} icon={b.icon} />
                 ))}
@@ -161,7 +151,7 @@ export function ThreadComment({
                     size={14}
                     strokeWidth={2.25}
                     fill={liked ? "currentColor" : "none"}
-                    className={liked ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
+                    className={likeAnimating ? "motion-safe:animate-[heart-pop_0.7s_cubic-bezier(0.17,0.89,0.32,1.49)]" : ""}
                   />
                   {voteCount}
                 </button>

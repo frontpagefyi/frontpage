@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import Image from "next/image";
+import { useRouter } from "next/navigation";
 import {
   ChevronRight,
   ChevronLeft,
@@ -28,19 +29,21 @@ import { CURRENT_USER } from "@/lib/constants";
 const EASE = "var(--ease-sidebar)";
 
 interface SidebarCommunity {
+  id: string;
   name: string;
   icon?: string;
-  active?: boolean;
   notif?: number;
 }
 
 interface SidebarProps {
+  activeCommunityId?: string;
   communities: SidebarCommunity[];
   avatarSrc?: string;
   posts?: import("@/lib/types").Post[];
-  onCommunityClick?: (index: number) => void;
+  onCommunityClick?: (communityId: string) => void;
   onMobileTab?: (tab: string) => void;
   onSelectPost?: (post: import("@/lib/types").Post) => void;
+  onNewPost?: () => void;
 }
 
 function SidebarLabel({
@@ -182,38 +185,43 @@ export function MobileHeader({
 
 /* ── Mobile bottom tab bar + actions drawer ── */
 function MobileBottomNav({
+  activeCommunityId,
   avatarSrc,
   communities,
   posts,
   onCommunityClick,
   onMobileTab,
   onSelectPost,
+  onNewPost,
 }: {
+  activeCommunityId?: string;
   avatarSrc: string;
   communities: SidebarCommunity[];
   posts: import("@/lib/types").Post[];
-  onCommunityClick?: (index: number) => void;
+  onCommunityClick?: (communityId: string) => void;
   onMobileTab?: (tab: string) => void;
   onSelectPost?: (post: import("@/lib/types").Post) => void;
+  onNewPost?: () => void;
 }) {
+  const router = useRouter();
   const [drawerOpen, setDrawerOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [activeTab, setActiveTab] = useState(() => {
     // Only highlight Home if the first community (Frontpage) is active
-    return communities[0]?.active ? 0 : -1;
+    return activeCommunityId === "comm_home" ? 0 : -1;
   });
   const { containerRef: navRef, setItemRef: setTabRef, pill } = useGooBlob(Math.max(0, activeTab));
 
   const resetTab = () => {
     // Return to Home highlight only if home community is active
-    setActiveTab(communities[0]?.active ? 0 : -1);
+    setActiveTab(activeCommunityId === "comm_home" ? 0 : -1);
   };
   const closeAll = () => { setSearchOpen(false); setNotifOpen(false); setDrawerOpen(false); setProfileOpen(false); };
 
   const tabs = [
-    { icon: <Home size={20} />, label: "Home", action: () => { closeAll(); setActiveTab(0); onCommunityClick?.(0); } },
+    { icon: <Home size={20} />, label: "Home", action: () => { closeAll(); setActiveTab(0); onCommunityClick?.("comm_home"); } },
     { icon: <Search size={20} />, label: "Search", action: () => { closeAll(); setActiveTab(1); setSearchOpen(!searchOpen); } },
     { icon: <Layers size={20} />, label: "Actions", action: () => { closeAll(); setActiveTab(2); setDrawerOpen(!drawerOpen); } },
     { icon: <Bell size={20} />, label: "Alerts", action: () => { closeAll(); setActiveTab(3); setNotifOpen(!notifOpen); } },
@@ -250,7 +258,7 @@ function MobileBottomNav({
             </p>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); resetTab(); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); onNewPost?.(); }}
             >
               <Plus size={18} className="text-accent-secondary" />
               New post
@@ -259,15 +267,13 @@ function MobileBottomNav({
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
               onClick={() => { setDrawerOpen(false); resetTab(); }}
             >
-              <Users size={18} className="text-text-muted" />
+              <span className="relative">
+                <Users size={18} className="text-text-muted" />
+                <span className="absolute top-1/2 -translate-y-1/2 -right-1.5 w-3 h-3 rounded-full bg-bg-surface flex items-center justify-center">
+                  <Plus size={8} strokeWidth={3} className="text-text-muted" />
+                </span>
+              </span>
               New community
-            </button>
-            <button
-              className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); resetTab(); }}
-            >
-              <Compass size={18} className="text-text-muted" />
-              Discover
             </button>
           </div>
           <div className="border-t border-bg-elevated mx-4 my-1" />
@@ -292,13 +298,13 @@ function MobileBottomNav({
           </div>
           <div className="border-t border-bg-elevated mx-4 my-1" />
           <div className="px-4 pb-4">
-            {communities.length > 0 && communities[0].name === "Frontpage" ? (
+            {communities.length > 0 && communities[0].id === "comm_home" ? (
               <>
                 <button
                   key="frontpage-home"
-                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); setActiveTab(0); /* Home = tab 0 */ }}
+                  onClick={() => { onCommunityClick?.("comm_home"); setDrawerOpen(false); setActiveTab(0); }}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
-                    communities[0].active
+                    activeCommunityId === "comm_home"
                       ? "bg-accent-secondary/10 text-text-primary font-semibold"
                       : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
                   }`}
@@ -312,14 +318,24 @@ function MobileBottomNav({
             <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
               Communities
             </p>
-            {communities.map((comm, i) => {
-              if (i === 0 && comm.name === "Frontpage") return null;
+            <button
+              onClick={() => { setDrawerOpen(false); resetTab(); router.push("/explorations/discover"); }}
+              className="flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm font-medium text-accent-secondary hover:bg-accent-secondary/10 transition-colors mb-1"
+            >
+              <div className="w-7 h-7 rounded-lg border-2 border-dashed border-accent-secondary/40 flex items-center justify-center shrink-0">
+                <Plus size={14} />
+              </div>
+              Discover
+            </button>
+            {communities.map((comm) => {
+              if (comm.id === "comm_home") return null;
+              const isActive = comm.id === activeCommunityId;
               return (
                 <button
-                  key={comm.name}
-                  onClick={() => { onCommunityClick?.(i); setDrawerOpen(false); setActiveTab(-1); }}
+                  key={comm.id}
+                  onClick={() => { onCommunityClick?.(comm.id); setDrawerOpen(false); setActiveTab(-1); }}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
-                    comm.active
+                    isActive
                       ? "bg-accent-secondary/10 text-text-primary font-semibold"
                       : "text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated"
                   }`}
@@ -360,15 +376,17 @@ function MobileBottomNav({
 }
 
 export function Sidebar({
+  activeCommunityId,
   communities,
   avatarSrc = CURRENT_USER.avatarUrl,
   posts = [],
   onCommunityClick,
   onMobileTab,
   onSelectPost,
+  onNewPost,
 }: SidebarProps) {
+  const router = useRouter();
   const [expanded, setExpanded] = useState(false);
-  const [createOpen, setCreateOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
@@ -395,11 +413,11 @@ export function Sidebar({
         >
           {/* ── Logo = Home button ── */}
           {(() => {
-            const isHome = communities[0]?.name === "Frontpage" && communities[0]?.active;
+            const isHome = activeCommunityId === "comm_home";
             return (
               <div className="shrink-0 px-2 pt-3 pb-1">
                 <button
-                  onClick={() => onCommunityClick?.(0)}
+                  onClick={() => onCommunityClick?.("comm_home")}
                   className={`group relative flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-left ${
                     isHome
                       ? "bg-accent-secondary/10 text-text-primary"
@@ -442,15 +460,15 @@ export function Sidebar({
               Communities
             </div>
             <div className="space-y-1">
-              {communities.map((comm, i) => {
-                if (i === 0 && comm.name === "Frontpage") return null;
-                const originalIndex = i;
+              {communities.map((comm) => {
+                if (comm.id === "comm_home") return null;
+                const isActive = comm.id === activeCommunityId;
                 return (
                 <button
-                  key={comm.name}
-                  onClick={() => onCommunityClick?.(originalIndex)}
+                  key={comm.id}
+                  onClick={() => onCommunityClick?.(comm.id)}
                   className={`group relative flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-left ${
-                    comm.active
+                    isActive
                       ? "bg-accent-secondary/10 text-text-primary"
                       : "text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
                   }`}
@@ -470,7 +488,7 @@ export function Sidebar({
                     ) : null}
                   </div>
                   <SidebarLabel expanded={expanded}>
-                    <span className={comm.active ? "font-semibold" : ""}>
+                    <span className={isActive ? "font-semibold" : ""}>
                       {comm.name}
                     </span>
                   </SidebarLabel>
@@ -484,61 +502,37 @@ export function Sidebar({
                       {comm.notif}
                     </span>
                   ) : null}
-                  {/* Active right bar */}
-                  {comm.active ? (
+                  {isActive ? (
                     <div className="absolute right-0 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-full bg-accent-secondary" />
                   ) : null}
                 </button>
                 );
               })}
             </div>
-            <div className="border-t border-bg-elevated mx-1 my-2" />
-            <div className="space-y-0.5">
-              {/* New — popout menu */}
-              <div className="relative">
-                <button
-                  onClick={() => setCreateOpen(!createOpen)}
-                  className="flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-accent-secondary hover:bg-accent-secondary/10 font-medium"
-                  title="New"
-                >
-                  <div className="w-10 h-10 flex items-center justify-center shrink-0">
-                    <Plus size={20} />
-                  </div>
-                  <SidebarLabel expanded={expanded}>New</SidebarLabel>
-                </button>
-                {createOpen ? (
-                  <>
-                    <div
-                      className="fixed inset-0 z-30"
-                      onClick={() => setCreateOpen(false)}
-                    />
-                    <div className="absolute left-full top-0 ml-2 z-40 bg-bg-surface border border-bg-elevated rounded-lg shadow-[0_4px_16px_oklch(0%_0_0_/_0.3)] py-1 min-w-[160px]">
-                      <button
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
-                        onClick={() => setCreateOpen(false)}
-                      >
-                        <Plus size={14} />
-                        New post
-                      </button>
-                      <button
-                        className="flex items-center gap-2 w-full px-3 py-2 text-sm text-text-secondary hover:bg-bg-elevated hover:text-text-primary transition-colors"
-                        onClick={() => setCreateOpen(false)}
-                      >
-                        <Users size={14} />
-                        New community
-                      </button>
-                    </div>
-                  </>
-                ) : null}
+
+            {/* Discover — join more communities */}
+            <button
+              onClick={() => { router.push("/explorations/discover"); }}
+              className="flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-text-muted hover:text-accent-secondary group"
+              title="Discover communities"
+            >
+              <div className="w-10 h-10 rounded-xl border-2 border-dashed border-bg-elevated flex items-center justify-center shrink-0 group-hover:border-accent-secondary/50 transition-colors">
+                <Plus size={18} />
               </div>
-              <SidebarItem
-                icon={<Compass size={20} />}
-                label="Discover"
-                expanded={expanded}
-                title="Discover communities"
-                className="text-text-muted hover:bg-bg-elevated hover:text-text-secondary"
-              />
-            </div>
+              <SidebarLabel expanded={expanded}>Discover</SidebarLabel>
+            </button>
+            <button
+              className="flex items-center gap-3 w-full rounded-lg py-1.5 px-3 motion-safe:transition-colors text-text-muted hover:text-text-secondary hover:bg-bg-elevated group"
+              title="New community"
+            >
+              <div className="relative w-10 h-10 flex items-center justify-center shrink-0">
+                <Users size={18} />
+                <span className="absolute top-1/2 -translate-y-1/2 -right-0.5 w-4 h-4 rounded-full bg-bg-surface flex items-center justify-center">
+                  <Plus size={10} strokeWidth={3} />
+                </span>
+              </div>
+              <SidebarLabel expanded={expanded}>New community</SidebarLabel>
+            </button>
           </div>
 
           {/* ── Bottom ── */}
@@ -582,12 +576,14 @@ export function Sidebar({
 
       {/* ── Mobile bottom nav ── */}
       <MobileBottomNav
+        activeCommunityId={activeCommunityId}
         avatarSrc={avatarSrc}
         communities={communities}
         posts={posts}
         onCommunityClick={onCommunityClick}
         onMobileTab={onMobileTab}
         onSelectPost={onSelectPost}
+        onNewPost={onNewPost}
       />
     </>
   );

@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { ArrowRight, Play, LayoutGrid } from "lucide-react";
 
+export const metadata = {
+  title: "Explorations • Frontpage Design System",
+};
+
 const demos = [
   {
     href: "/explorations/community-feed",

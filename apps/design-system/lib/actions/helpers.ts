@@ -4,7 +4,7 @@ import type { PostData, CommunityData } from "@/lib/db/schema";
 import { db } from "@/lib/db/store";
 
 /** Build a nested comment tree from flat comments. */
-export function buildCommentTree(flat: CommentData[]): Comment[] {
+export function buildCommentTree(flat: CommentData[], viewerUsername?: string): Comment[] {
   const map = new Map<string, Comment>();
   const roots: Comment[] = [];
 
@@ -21,6 +21,7 @@ export function buildCommentTree(flat: CommentData[]): Comment[] {
       body: c.body,
       time: formatTimeAgo(c.createdAt),
       votes: c.votes,
+      voted: viewerUsername ? db.hasVoted(viewerUsername, c.id) : undefined,
       replies: [],
     });
   }
@@ -45,11 +46,13 @@ export function buildCommentTree(flat: CommentData[]): Comment[] {
 }
 
 /** Convert a PostData to the frontend Post type. Resolves author from user store. */
-export function toPost(data: PostData): Post {
+export function toPost(data: PostData, viewerUsername?: string): Post {
   const community = db.getCommunity(data.communityId);
   const user = db.getUser(data.author);
   return {
     id: data.id,
+    type: data.type ?? "text",
+    communityId: data.communityId,
     communityName: community?.name,
     communityIcon: community?.icon,
     communityColor: community?.theme?.["--accent-primary"],
@@ -63,10 +66,13 @@ export function toPost(data: PostData): Post {
     title: data.title,
     image: data.image,
     body: data.body,
+    url: data.url,
     linkPreview: data.linkPreview,
     video: data.video,
     votes: data.votes,
     comments: data.commentCount,
+    voted: viewerUsername ? db.hasVoted(viewerUsername, data.id) : undefined,
+    saved: viewerUsername ? db.hasSaved(viewerUsername, data.id) : undefined,
   };
 }
 
@@ -75,6 +81,7 @@ export function toCommunity(data: CommunityData) {
   return {
     id: data.id,
     name: data.name,
+    description: data.description,
     icon: data.icon,
     theme: data.theme,
     banner: data.banner,

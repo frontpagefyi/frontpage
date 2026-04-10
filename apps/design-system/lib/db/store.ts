@@ -68,10 +68,54 @@ function seed() {
       displayName: "Will",
       initials: "wc",
       avatarBg: "oklch(55% 0.15 259)",
-      avatarUrl: "https://i.pravatar.cc/200?u=frontpage-demo",
+      avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/tender-heart.png",
       bio: "Building Frontpage. Exploring community design for the AT Protocol.",
       handle: "will.frontpage.fyi",
       joinedAt: timeAgoToDate("365d"),
+      badges: [],
+    },
+    {
+      username: "tim",
+      displayName: "Tim",
+      initials: "tm",
+      avatarBg: "oklch(55% 0.18 180)",
+      avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/Cheer-bear.png",
+      bio: "Engineering at Frontpage. Systems thinker.",
+      handle: "tim.frontpage.fyi",
+      joinedAt: timeAgoToDate("300d"),
+      badges: [],
+    },
+    {
+      username: "tom",
+      displayName: "Tom",
+      initials: "to",
+      avatarBg: "oklch(55% 0.18 30)",
+      avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/grumpy-bear.png",
+      bio: "Design at Frontpage. Pixels and polish.",
+      handle: "tom.frontpage.fyi",
+      joinedAt: timeAgoToDate("300d"),
+      badges: [],
+    },
+    {
+      username: "jake",
+      displayName: "Jake",
+      initials: "jk",
+      avatarBg: "oklch(55% 0.18 145)",
+      avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/funshine-bear.png",
+      bio: "Product at Frontpage. Community-first.",
+      handle: "jake.frontpage.fyi",
+      joinedAt: timeAgoToDate("300d"),
+      badges: [],
+    },
+    {
+      username: "damien",
+      displayName: "Damien",
+      initials: "dm",
+      avatarBg: "oklch(55% 0.18 310)",
+      avatarUrl: "https://www.carebears.com/wp-content/uploads/2025/12/bedtime-bear.png",
+      bio: "Engineering at Frontpage. AT Protocol enthusiast.",
+      handle: "damien.frontpage.fyi",
+      joinedAt: timeAgoToDate("300d"),
       badges: [],
     },
     {
@@ -219,6 +263,7 @@ function seed() {
     {
       id: "comm_home",
       name: "Frontpage",
+      description: "The front page of the AT Protocol. A place for communities to share, discuss, and connect across the atmosphere.",
       icon: "/frontpage-logo.svg",
       banner: {
         name: "Frontpage",
@@ -231,6 +276,7 @@ function seed() {
     {
       id: "comm_creative",
       name: "Creative Coding",
+      description: "Generative art, shaders, creative tools, and algorithmic experiments. Share your sketches, tutorials, and works in progress.",
       icon: "https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=56&h=56&q=80",
       banner: {
         name: "Creative Coding",
@@ -243,6 +289,7 @@ function seed() {
     {
       id: "comm_garden",
       name: "Home Gardening",
+      description: "Growing food, flowers, and community. Tips on companion planting, raised beds, composting, and everything from balcony pots to backyard plots.",
       icon: "https://images.unsplash.com/photo-1416879595882-3373a0480b5b?auto=format&fit=crop&w=56&h=56&q=80",
       theme: {
         "--bg-base": "oklch(95% 0.02 145)",
@@ -267,6 +314,7 @@ function seed() {
     {
       id: "comm_retro",
       name: "Retro Gaming",
+      description: "Classic consoles, CRT monitors, game jams, and pixel art. Celebrating the games and hardware that started it all.",
       icon: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=56&h=56&q=80",
       theme: {
         "--bg-base": "oklch(10% 0.02 350)",
@@ -291,6 +339,7 @@ function seed() {
     {
       id: "comm_photo",
       name: "Photography",
+      description: "From golden hour landscapes to dark room experiments. Weekly challenges, gear talk, and constructive critique.",
       icon: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=56&h=56&q=80",
       theme: {
         "--bg-base": "oklch(12% 0.005 60)",
@@ -322,6 +371,7 @@ function seed() {
       author: "pixelweaver", initials: "pw", avatarBg: "var(--color-indigo-600)",
       createdAt: timeAgoToDate("3h"),
       badges: [{ variant: "artist", icon: "Sparkles", label: "Artist" }],
+      type: "image",
       title: "Just finished this isometric city \u2014 6 months of pixel work",
       image: "https://images.unsplash.com/photo-1633356122102-3fe601e05bd2?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 48, commentCount: 94,
@@ -340,6 +390,8 @@ function seed() {
       author: "genart_weaver", initials: "gw", avatarBg: "oklch(55% 0.15 145)",
       createdAt: timeAgoToDate("8h"),
       badges: [],
+      type: "link",
+      url: "https://generativeart.org/history-of-algorithmic-art",
       title: "A History of Algorithmic Art \u2014 deep dive into generative origins",
       linkPreview: {
         image: "https://images.unsplash.com/photo-1555949963-aa79dcee981c?auto=format&fit=crop&w=200&h=140&q=80",
@@ -353,6 +405,7 @@ function seed() {
       author: "synthwave", initials: "sy", avatarBg: "oklch(60% 0.2 30)",
       createdAt: timeAgoToDate("12h"),
       badges: [{ variant: "og", icon: "Star", label: "OG" }, { variant: "live", icon: "Radio", label: "Live" }],
+      type: "video",
       title: "Live coding session: building a particle system from scratch",
       video: { thumbnail: "https://images.unsplash.com/photo-1550745165-9bc0b252726f?auto=format&fit=crop&w=800&h=400&q=80" },
       votes: 203, commentCount: 67,
@@ -373,6 +426,7 @@ function seed() {
       author: "greenthumb", initials: "gt", avatarBg: "oklch(55% 0.15 145)",
       createdAt: timeAgoToDate("2h"),
       badges: [],
+      type: "image",
       title: "Companion planting guide for small raised beds",
       image: "https://images.unsplash.com/photo-1592150621744-aca64f48394a?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 312, commentCount: 67,
@@ -391,6 +445,7 @@ function seed() {
       author: "rootbound", initials: "rb", avatarBg: "oklch(50% 0.18 200)",
       createdAt: timeAgoToDate("8h"),
       badges: [],
+      type: "image",
       title: "Built a self-watering wicking bed from an old IBC tote",
       image: "https://images.unsplash.com/photo-1585320806297-9794b3e4eeae?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 458, commentCount: 93,
@@ -411,6 +466,7 @@ function seed() {
       author: "crt_enjoyer", initials: "ct", avatarBg: "oklch(60% 0.15 200)",
       createdAt: timeAgoToDate("4h"),
       badges: [],
+      type: "image",
       title: "Found a Sony PVM-20M4U at a thrift store for $15",
       image: "https://images.unsplash.com/photo-1600080972464-8e5f35f63d08?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 1200, commentCount: 203,
@@ -431,6 +487,7 @@ function seed() {
       author: "lenscraft", initials: "lc", avatarBg: "oklch(55% 0.1 60)",
       createdAt: timeAgoToDate("4h"),
       badges: [],
+      type: "image",
       title: "Golden hour at the abandoned observatory",
       image: "https://images.unsplash.com/photo-1495616811223-4d98c6e9c869?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 743, commentCount: 94,
@@ -449,6 +506,7 @@ function seed() {
       author: "nightmode", initials: "nm", avatarBg: "oklch(55% 0.15 300)",
       createdAt: timeAgoToDate("10h"),
       badges: [],
+      type: "image",
       title: "Milky Way over Death Valley \u2014 45 stacked exposures",
       image: "https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=800&h=400&q=80",
       votes: 1800, commentCount: 187,
@@ -1156,6 +1214,7 @@ function seed() {
   store.comments = comments;
   store.votes = [];
   store.saves = [];
+  // Everyone starts fresh — discover communities to join them
   store.memberships = [];
 
   // Sync commentCount from actual comment data
@@ -1173,6 +1232,9 @@ export const db = {
   // Communities
   // Users
   getUser: (username: string) => store.users.find((u) => u.username === username),
+  getTeamUsers: () => store.users.filter((u) =>
+    ["will", "tim", "tom", "jake", "damien"].includes(u.username),
+  ),
   getPostsByAuthor: (username: string) => store.posts.filter((p) => p.author === username),
   getCommentsByAuthor: (username: string) => store.comments.filter((c) => c.author === username),
   getCommunitiesForUser: (username: string) => {
@@ -1180,6 +1242,12 @@ export const db = {
       store.posts.filter((p) => p.author === username).map((p) => p.communityId),
     );
     return store.communities.filter((c) => communityIds.has(c.id));
+  },
+  getJoinedCommunities: (username: string) => {
+    const ids = store.memberships
+      .filter((m) => m.userId === username)
+      .map((m) => m.communityId);
+    return store.communities.filter((c) => ids.includes(c.id));
   },
 
   // Communities
@@ -1201,6 +1269,10 @@ export const db = {
     const comment = store.comments.find((c) => c.id === commentId);
     return comment?.votes ?? 0;
   },
+  addPost: (post: PostData) => {
+    store.posts.unshift(post);
+  },
+
   addComment: (comment: CommentData) => {
     store.comments.push(comment);
     const post = store.posts.find((p) => p.id === comment.postId);
@@ -1241,6 +1313,10 @@ export const db = {
   // Saves
   hasSaved: (userId: string, postId: string) =>
     store.saves.some((s) => s.userId === userId && s.postId === postId),
+  getSavedPosts: (userId: string) => {
+    const postIds = store.saves.filter((s) => s.userId === userId).map((s) => s.postId);
+    return store.posts.filter((p) => postIds.includes(p.id));
+  },
   toggleSave: (save: SaveData): boolean => {
     const idx = store.saves.findIndex(
       (s) => s.userId === save.userId && s.postId === save.postId,

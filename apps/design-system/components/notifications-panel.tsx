@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import Link from "next/link";
 import { Heart, MessageCircle, UserPlus, Star, AtSign, type LucideIcon } from "lucide-react";
 import { Avatar } from "./avatar";
 import { DraggableDrawer } from "./draggable-drawer";
@@ -228,9 +229,9 @@ function PanelContent({
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm leading-snug">
-                  <a href={routes.profile(n.username)} onClick={(e) => e.stopPropagation()} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">
+                  <Link href={routes.profile(n.username)} onClick={(e) => e.stopPropagation()} className="font-bold text-text-primary hover:text-accent-secondary hover:underline transition-colors">
                     {n.username}
-                  </a>{" "}
+                  </Link>{" "}
                   <span className="text-text-secondary">{n.action}</span>
                   {n.target ? (
                     <span className="text-text-primary font-medium"> {n.target}</span>
