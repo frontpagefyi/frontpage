@@ -36,6 +36,7 @@ interface FeedClientProps {
   initialIndex?: number;
   initialPostId?: string;
   initialComments?: Comment[];
+  initialSort?: SortKey;
 }
 
 function parseTime(t: string): number {
@@ -67,11 +68,11 @@ function sortPosts(posts: Post[], sort: SortKey): Post[] {
   }
 }
 
-export function FeedClient({ communities, initialPosts, initialIndex = 0, initialPostId, initialComments = [] }: FeedClientProps) {
+export function FeedClient({ communities, initialPosts, initialIndex = 0, initialPostId, initialComments = [], initialSort = "hot" }: FeedClientProps) {
   const [activeIndex, _setActiveIndex] = useState(initialIndex);
   const activeIndexRef = useRef(initialIndex);
   const setActiveIndex = useCallback((i: number) => { _setActiveIndex(i); activeIndexRef.current = i; }, []);
-  const [sortKey, setSortKey] = useState<SortKey>("hot");
+  const [sortKey, setSortKey] = useState<SortKey>(initialSort);
   const [joinedSet, setJoinedSet] = useState<Set<string>>(new Set());
   const [mobileTab, setMobileTab] = useState<MobileTab>("posts");
   const [feedKey, setFeedKey] = useState(0);
@@ -179,7 +180,12 @@ export function FeedClient({ communities, initialPosts, initialIndex = 0, initia
   const sorted = useMemo(() => sortPosts(posts, sortKey), [posts, sortKey]);
 
   const handleCommunityClick = useCallback((i: number) => {
-    if (i === activeIndex) return;
+    // If same community but viewing a thread, just go back to feed
+    if (i === activeIndex && !selectedPost) return;
+    if (i === activeIndex && selectedPost) {
+      selectPost(null);
+      return;
+    }
     setActiveIndex(i);
     setSortKey("hot");
     setMobileTab("posts");
@@ -193,10 +199,17 @@ export function FeedClient({ communities, initialPosts, initialIndex = 0, initia
       setPosts(newPosts);
       setLoading(false);
     });
-  }, [activeIndex, communities, startTransition, buildUrl]);
+  }, [activeIndex, selectedPost, communities, startTransition, buildUrl, selectPost]);
 
   const handleSort = (key: SortKey) => {
     setSortKey(key);
+    const url = new URL(window.location.href);
+    if (key === "hot") {
+      url.searchParams.delete("sort");
+    } else {
+      url.searchParams.set("sort", key);
+    }
+    window.history.replaceState({}, "", url.toString());
   };
 
   const handleJoinToggle = () => {

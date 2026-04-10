@@ -5,7 +5,7 @@ import { FeedClient } from "./feed-client";
 export default async function CommunityFeedPage({
   searchParams,
 }: {
-  searchParams: Promise<{ community?: string; post?: string }>;
+  searchParams: Promise<{ community?: string; post?: string; sort?: string }>;
 }) {
   const params = await searchParams;
   const communities = await getCommunities();
@@ -25,6 +25,7 @@ export default async function CommunityFeedPage({
       initialIndex={initialIndex}
       initialPostId={params.post}
       initialComments={initialComments}
+      initialSort={(params.sort as "hot" | "new" | "top") ?? "hot"}
     />
   );
 }
