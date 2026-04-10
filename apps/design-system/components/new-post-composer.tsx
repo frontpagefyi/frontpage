@@ -76,6 +76,7 @@ export function NewPostComposer({ open, onClose, communityName, user, onSubmit }
         if (!url.trim()) e.url = "Video URL is required";
         else if (fetchingLink) e.url = "Fetching preview...";
         else if (!linkMeta) e.url = "Press Enter or click the arrow to fetch the preview";
+        else if (!linkMeta.isVideo) e.url = "URL doesn\u2019t appear to be a video";
         break;
     }
     return e;
