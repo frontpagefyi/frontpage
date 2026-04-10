@@ -33,6 +33,9 @@ export interface ClientCommunity {
 interface FeedClientProps {
   communities: ClientCommunity[];
   initialPosts: Post[];
+  initialIndex?: number;
+  initialPostId?: string;
+  initialComments?: Comment[];
 }
 
 function parseTime(t: string): number {
@@ -64,9 +67,9 @@ function sortPosts(posts: Post[], sort: SortKey): Post[] {
   }
 }
 
-export function FeedClient({ communities, initialPosts }: FeedClientProps) {
-  const [activeIndex, _setActiveIndex] = useState(0);
-  const activeIndexRef = useRef(0);
+export function FeedClient({ communities, initialPosts, initialIndex = 0, initialPostId, initialComments = [] }: FeedClientProps) {
+  const [activeIndex, _setActiveIndex] = useState(initialIndex);
+  const activeIndexRef = useRef(initialIndex);
   const setActiveIndex = useCallback((i: number) => { _setActiveIndex(i); activeIndexRef.current = i; }, []);
   const [sortKey, setSortKey] = useState<SortKey>("hot");
   const [joinedSet, setJoinedSet] = useState<Set<string>>(new Set());
@@ -74,8 +77,10 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
   const [feedKey, setFeedKey] = useState(0);
   const [showAnimation, setShowAnimation] = useState(false);
   const [loading, setLoading] = useState(false);
-  const [selectedPost, setSelectedPost] = useState<Post | null>(null);
-  const [selectedComments, setSelectedComments] = useState<Comment[]>([]);
+  const [selectedPost, setSelectedPost] = useState<Post | null>(
+    initialPostId ? initialPosts.find((p) => p.id === initialPostId) ?? null : null,
+  );
+  const [selectedComments, setSelectedComments] = useState<Comment[]>(initialComments);
   const [posts, setPosts] = useState<Post[]>(initialPosts);
   const [, startTransition] = useTransition();
 
@@ -111,33 +116,6 @@ export function FeedClient({ communities, initialPosts }: FeedClientProps) {
     );
   }, [activeIndex, communities, buildUrl]);
 
-  // Restore from URL on mount
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const communityParam = params.get("community");
-    const postId = params.get("post");
-
-    if (communityParam) {
-      const idx = communities.findIndex((c) => c.id === communityParam);
-      if (idx >= 0 && idx !== activeIndex) {
-        setActiveIndex(idx);
-        startTransition(async () => {
-          const newPosts = await getPostsByCommunity(communityParam);
-          setPosts(newPosts);
-          if (postId) {
-            const found = newPosts.find((p) => p.id === postId);
-            if (found) setSelectedPost(found);
-          }
-        });
-        return;
-      }
-    }
-
-    if (postId) {
-      const found = initialPosts.find((p) => p.id === postId);
-      if (found) setSelectedPost(found);
-    }
-  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Handle browser back/forward
   useEffect(() => {

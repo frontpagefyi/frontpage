@@ -200,9 +200,16 @@ function MobileBottomNav({
   const [searchOpen, setSearchOpen] = useState(false);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
-  const [activeTab, setActiveTab] = useState(0);
-  const { containerRef: navRef, setItemRef: setTabRef, pill } = useGooBlob(activeTab);
+  const [activeTab, setActiveTab] = useState(() => {
+    // Only highlight Home if the first community (Frontpage) is active
+    return communities[0]?.active ? 0 : -1;
+  });
+  const { containerRef: navRef, setItemRef: setTabRef, pill } = useGooBlob(Math.max(0, activeTab));
 
+  const resetTab = () => {
+    // Return to Home highlight only if home community is active
+    setActiveTab(communities[0]?.active ? 0 : -1);
+  };
   const closeAll = () => { setSearchOpen(false); setNotifOpen(false); setDrawerOpen(false); setProfileOpen(false); };
 
   const tabs = [
@@ -215,9 +222,9 @@ function MobileBottomNav({
 
   return (
     <>
-      <SearchOverlay open={searchOpen} onClose={() => { setSearchOpen(false); setActiveTab(0); }} posts={posts} onSelectPost={onSelectPost} />
-      <NotificationsPanel open={notifOpen} onClose={() => { setNotifOpen(false); setActiveTab(0); }} />
-      <ProfilePanel open={profileOpen} onClose={() => { setProfileOpen(false); setActiveTab(0); }} avatarSrc={avatarSrc} />
+      <SearchOverlay open={searchOpen} onClose={() => { setSearchOpen(false); resetTab(); }} posts={posts} onSelectPost={onSelectPost} />
+      <NotificationsPanel open={notifOpen} onClose={() => { setNotifOpen(false); resetTab(); }} />
+      <ProfilePanel open={profileOpen} onClose={() => { setProfileOpen(false); resetTab(); }} avatarSrc={avatarSrc} />
 
       {/* Drawer backdrop + panel */}
       <div
@@ -233,9 +240,9 @@ function MobileBottomNav({
               ? "opacity 0.25s ease"
               : "opacity 0.35s ease 0.1s",
           }}
-          onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
+          onClick={() => { setDrawerOpen(false); resetTab(); }}
         />
-        <DraggableDrawer open={drawerOpen} onClose={() => { setDrawerOpen(false); setActiveTab(0); }} className="max-h-[70vh] overflow-y-auto">
+        <DraggableDrawer open={drawerOpen} onClose={() => { setDrawerOpen(false); resetTab(); }} className="max-h-[70vh] overflow-y-auto">
           <div className="w-10 h-1 rounded-full bg-bg-elevated mx-auto mt-3 mb-2" />
           <div className="px-4 pb-2">
             <p className="text-xs uppercase tracking-widest text-text-muted mb-2">
@@ -243,21 +250,21 @@ function MobileBottomNav({
             </p>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); }}
             >
               <Plus size={18} className="text-accent-secondary" />
               New post
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); }}
             >
               <Users size={18} className="text-text-muted" />
               New community
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); setActiveTab(0); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); }}
             >
               <Compass size={18} className="text-text-muted" />
               Discover
@@ -270,14 +277,14 @@ function MobileBottomNav({
             </p>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); setActiveTab(0); onMobileTab?.("atmo"); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); onMobileTab?.("atmo"); }}
             >
               <AtSign size={18} className="text-text-muted" />
               Atmosphere
             </button>
             <button
               className="flex items-center gap-3 w-full px-3 py-3 rounded-lg text-sm text-text-secondary hover:bg-bg-elevated active:bg-bg-elevated transition-colors"
-              onClick={() => { setDrawerOpen(false); setActiveTab(0); onMobileTab?.("wiki"); }}
+              onClick={() => { setDrawerOpen(false); resetTab(); onMobileTab?.("wiki"); }}
             >
               <BookOpen size={18} className="text-text-muted" />
               Wiki
@@ -289,7 +296,7 @@ function MobileBottomNav({
               <>
                 <button
                   key="frontpage-home"
-                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); setActiveTab(0); }}
+                  onClick={() => { onCommunityClick?.(0); setDrawerOpen(false); setActiveTab(0); /* Home = tab 0 */ }}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors mb-1 ${
                     communities[0].active
                       ? "bg-accent-secondary/10 text-text-primary font-semibold"
@@ -310,7 +317,7 @@ function MobileBottomNav({
               return (
                 <button
                   key={comm.name}
-                  onClick={() => { onCommunityClick?.(i); setDrawerOpen(false); setActiveTab(0); }}
+                  onClick={() => { onCommunityClick?.(i); setDrawerOpen(false); setActiveTab(-1); }}
                   className={`flex items-center gap-3 w-full px-3 py-2.5 rounded-lg text-sm transition-colors ${
                     comm.active
                       ? "bg-accent-secondary/10 text-text-primary font-semibold"
@@ -332,7 +339,7 @@ function MobileBottomNav({
         aria-label="Navigation"
       >
         <div ref={navRef as React.RefObject<HTMLDivElement>} className="relative flex justify-around">
-          <GooBlobs filterId="goo-nav" pill={pill} height="h-10" className="rounded-xl" stdDeviation={5} />
+          {activeTab >= 0 ? <GooBlobs filterId="goo-nav" pill={pill} height="h-10" className="rounded-xl" stdDeviation={5} /> : null}
           {tabs.map((tab, i) => (
             <button
               key={tab.label}

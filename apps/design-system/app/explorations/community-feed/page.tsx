@@ -1,17 +1,30 @@
 import { getCommunities } from "@/lib/actions/communities";
-import { getPostsByCommunity } from "@/lib/actions/posts";
+import { getPostsByCommunity, getThread } from "@/lib/actions/posts";
 import { FeedClient } from "./feed-client";
 
-export default async function CommunityFeedPage() {
+export default async function CommunityFeedPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ community?: string; post?: string }>;
+}) {
+  const params = await searchParams;
   const communities = await getCommunities();
-  const initialPosts = communities.length > 0
-    ? await getPostsByCommunity(communities[0].id)
+
+  const communityId = params.community ?? communities[0]?.id ?? "comm_home";
+  const initialIndex = Math.max(0, communities.findIndex((c) => c.id === communityId));
+
+  const initialPosts = await getPostsByCommunity(communityId);
+  const initialComments = params.post
+    ? await getThread(params.post)
     : [];
 
   return (
     <FeedClient
       communities={communities}
       initialPosts={initialPosts}
+      initialIndex={initialIndex}
+      initialPostId={params.post}
+      initialComments={initialComments}
     />
   );
 }
