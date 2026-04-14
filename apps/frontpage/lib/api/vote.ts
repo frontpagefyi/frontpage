@@ -11,7 +11,7 @@ import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
 
-// TODO: Should use a strongRef
+// TODO: Should use the strong ref type instead of creating our own. This matches the data layer conventions that we have, where the api accepts generic input
 export type ApiCreateVoteInput = {
   rkey: string;
   cid: string;
