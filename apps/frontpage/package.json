@@ -23,6 +23,7 @@
     "@atcute/identity": "catalog:",
     "@atcute/identity-resolver": "catalog:",
     "@atproto/common-web": "^0.3.2",
+    "@atproto/lex": "catalog:",
     "@atproto/oauth-types": "^0.1.5",
     "@atproto/syntax": "catalog:",
     "@flags-sdk/vercel": "^1.2.1",

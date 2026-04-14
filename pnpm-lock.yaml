@@ -201,6 +201,9 @@ importers:
       '@atproto/common-web':
         specifier: ^0.3.2
         version: 0.3.2
+      '@atproto/lex':
+        specifier: 'catalog:'
+        version: 0.0.24
       '@atproto/oauth-types':
         specifier: ^0.1.5
         version: 0.1.5
