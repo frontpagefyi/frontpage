@@ -2,8 +2,11 @@
   "$schema": "https://turbo.build/schema.json",
   "extends": ["//"],
   "tasks": {
+    "type-check": {
+      "dependsOn": ["build"]
+    },
     "build": {
-      "outputs": ["dist/**"]
+      "outputs": ["src/**", "dist/**"]
     }
   }
 }

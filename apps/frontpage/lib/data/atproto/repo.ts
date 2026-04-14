@@ -1,21 +1,12 @@
-import {
-  AtpBaseClient,
-  type FyiFrontpageFeedComment,
-  type FyiFrontpageFeedPost,
-  type FyiFrontpageFeedVote,
-  type FyiUnravelFrontpageComment,
-  type FyiUnravelFrontpagePost,
-  type FyiUnravelFrontpageVote,
-} from "@repo/frontpage-atproto-client";
 import { getUser } from "../user";
 import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { cache } from "react";
-
-export { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
+import type * as fyi from "@repo/frontpage-atproto-client/fyi";
+import { Client } from "@atproto/lex";
 
 export const getAtprotoClient = cache(
   (service?: string) =>
-    new AtpBaseClient(async (url: string, init: RequestInit) => {
+    new Client(async (url: string, init: RequestInit) => {
       const user = await getUser();
       if (service && user) {
         console.warn(
@@ -38,13 +29,13 @@ export const getAtprotoClient = cache(
 );
 
 export type PostCollectionType =
-  | FyiFrontpageFeedPost.Record["$type"]
-  | FyiUnravelFrontpagePost.Record["$type"];
+  | typeof fyi.unravel.frontpage.post.$type
+  | typeof fyi.frontpage.feed.post.$type;
 
 export type CommentCollectionType =
-  | FyiUnravelFrontpageComment.Record["$type"]
-  | FyiFrontpageFeedComment.Record["$type"];
+  | typeof fyi.unravel.frontpage.comment.$type
+  | typeof fyi.frontpage.feed.comment.$type;
 
 export type VoteCollectionType =
-  | FyiUnravelFrontpageVote.Record["$type"]
-  | FyiFrontpageFeedVote.Record["$type"];
+  | typeof fyi.unravel.frontpage.vote.$type
+  | typeof fyi.frontpage.feed.vote.$type;

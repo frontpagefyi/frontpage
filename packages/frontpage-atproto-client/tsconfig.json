@@ -1,9 +1,11 @@
 {
   "extends": "@repo/typescript-config/base.json",
-  "include": ["src/**/*.ts", "fetch-lexicons.mts"],
+  "include": ["src/**/*.ts"],
   "compilerOptions": {
     "module": "Preserve",
     "moduleResolution": "Bundler",
-    "outDir": "dist"
+    "outDir": "dist",
+    "sourceMap": true,
+    "declarationMap": true
   }
 }
