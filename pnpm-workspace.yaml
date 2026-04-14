@@ -32,7 +32,6 @@ catalog:
   '@atproto/api': ^0.18.8
   '@atproto/lexicon': ^0.6.0
   '@atproto/lex': ^0.0.24
-  '@atproto/xrpc': ^0.7.7
 
 onlyBuiltDependencies:
   - '@vercel/speed-insights'
