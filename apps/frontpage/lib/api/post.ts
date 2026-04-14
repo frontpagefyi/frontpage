@@ -28,13 +28,12 @@ export async function createPost({
   }
 
   const rkey = TID.next().toString();
+  if (!l.isUriString(url)) {
+    throw new DataLayerError("Invalid URL");
+  }
   try {
-    const normalizedUrl = new URL(
-      url,
-    ).toString() as fyi.unravel.frontpage.post.Main["url"];
-
     const dbCreatedPost = await db.createPost({
-      post: { title, url: normalizedUrl, createdAt: new Date() },
+      post: { title, url, createdAt: new Date() },
       rkey,
       authorDid: user.did,
       status: "pending",
@@ -45,7 +44,7 @@ export async function createPost({
     const atproto = getAtprotoClient();
     const record = fyi.unravel.frontpage.post.$build({
       title,
-      url: normalizedUrl,
+      url,
       createdAt: l.currentDatetimeString(),
     });
     after(() =>
