@@ -6,9 +6,7 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": [
-            "records"
-          ],
+          "required": ["records"],
           "properties": {
             "cursor": {
               "type": "string"
@@ -26,10 +24,7 @@
       },
       "parameters": {
         "type": "params",
-        "required": [
-          "repo",
-          "collection"
-        ],
+        "required": ["repo", "collection"],
         "properties": {
           "repo": {
             "type": "string",
@@ -61,11 +56,7 @@
     },
     "record": {
       "type": "object",
-      "required": [
-        "uri",
-        "cid",
-        "value"
-      ],
+      "required": ["uri", "cid", "value"],
       "properties": {
         "cid": {
           "type": "string",

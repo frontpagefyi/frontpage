@@ -6,15 +6,8 @@
       "input": {
         "schema": {
           "type": "object",
-          "nullable": [
-            "swapRecord"
-          ],
-          "required": [
-            "repo",
-            "collection",
-            "rkey",
-            "record"
-          ],
+          "nullable": ["swapRecord"],
+          "required": ["repo", "collection", "rkey", "record"],
           "properties": {
             "repo": {
               "type": "string",
@@ -62,10 +55,7 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": [
-            "uri",
-            "cid"
-          ],
+          "required": ["uri", "cid"],
           "properties": {
             "cid": {
               "type": "string",
@@ -81,10 +71,7 @@
             },
             "validationStatus": {
               "type": "string",
-              "knownValues": [
-                "valid",
-                "unknown"
-              ]
+              "knownValues": ["valid", "unknown"]
             }
           }
         },

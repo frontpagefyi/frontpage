@@ -11,10 +11,7 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": [
-            "uri",
-            "value"
-          ],
+          "required": ["uri", "value"],
           "properties": {
             "cid": {
               "type": "string",
@@ -33,11 +30,7 @@
       },
       "parameters": {
         "type": "params",
-        "required": [
-          "repo",
-          "collection",
-          "rkey"
-        ],
+        "required": ["repo", "collection", "rkey"],
         "properties": {
           "cid": {
             "type": "string",

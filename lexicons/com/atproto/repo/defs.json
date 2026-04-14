@@ -3,10 +3,7 @@
   "defs": {
     "commitMeta": {
       "type": "object",
-      "required": [
-        "cid",
-        "rev"
-      ],
+      "required": ["cid", "rev"],
       "properties": {
         "cid": {
           "type": "string",

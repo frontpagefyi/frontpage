@@ -6,9 +6,7 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": [
-            "blobs"
-          ],
+          "required": ["blobs"],
           "properties": {
             "blobs": {
               "type": "array",
@@ -42,10 +40,7 @@
     },
     "recordBlob": {
       "type": "object",
-      "required": [
-        "cid",
-        "recordUri"
-      ],
+      "required": ["cid", "recordUri"],
       "properties": {
         "cid": {
           "type": "string",

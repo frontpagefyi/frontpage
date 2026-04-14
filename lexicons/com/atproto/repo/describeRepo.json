@@ -44,9 +44,7 @@
       },
       "parameters": {
         "type": "params",
-        "required": [
-          "repo"
-        ],
+        "required": ["repo"],
         "properties": {
           "repo": {
             "type": "string",

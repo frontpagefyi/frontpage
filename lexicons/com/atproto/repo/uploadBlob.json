@@ -9,9 +9,7 @@
       "output": {
         "schema": {
           "type": "object",
-          "required": [
-            "blob"
-          ],
+          "required": ["blob"],
           "properties": {
             "blob": {
               "type": "blob"
