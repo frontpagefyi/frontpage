@@ -54,34 +54,34 @@ async function hydratePost(
       repo,
       rkey,
     });
-    const value = fyi.unravel.frontpage.post.$validate(record.value);
     const cid = record.cid;
     invariant(
       cid,
       `Missing CID for frontpage post at://${repo}/${collection}/${rkey}`,
     );
     return {
-      title: value.title,
-      url: value.url,
-      createdAt: new Date(value.createdAt),
+      title: record.value.title,
+      url: record.value.url,
+      createdAt: new Date(record.value.createdAt),
       cid,
-      $type: value.$type,
+      $type: record.value.$type,
     };
   } else if (collection === fyi.frontpage.feed.post.$type) {
     const record = await atproto.get(fyi.frontpage.feed.post, { repo, rkey });
-    const value = fyi.frontpage.feed.post.$validate(record.value);
-    const subject = fyi.frontpage.feed.post.urlSubject.$validate(value.subject);
+    const subject = fyi.frontpage.feed.post.urlSubject.$validate(
+      record.value.subject,
+    );
     const cid = record.cid;
     invariant(
       cid,
       `Missing CID for frontpage feed post at://${repo}/${collection}/${rkey}`,
     );
     return {
-      title: value.title,
+      title: record.value.title,
       url: subject.url,
-      createdAt: new Date(value.createdAt),
+      createdAt: new Date(record.value.createdAt),
       cid,
-      $type: value.$type,
+      $type: record.value.$type,
     };
   } else {
     throw new Error(`Unknown collection for post hydration: ${collection}`);
@@ -167,14 +167,15 @@ async function hydrateComment(
       cid,
       `Missing CID for comment at://${repo}/${collection}/${rkey}`,
     );
-    const value = fyi.unravel.frontpage.comment.$validate(record.value);
     return {
       cid,
-      content: value.content,
-      createdAt: new Date(value.createdAt),
-      parentUri: value.parent ? new AtUri(value.parent.uri) : null,
-      postUri: new AtUri(value.post.uri),
-      $type: value.$type,
+      content: record.value.content,
+      createdAt: new Date(record.value.createdAt),
+      parentUri: record.value.parent
+        ? new AtUri(record.value.parent.uri)
+        : null,
+      postUri: new AtUri(record.value.post.uri),
+      $type: record.value.$type,
     };
   } else if (collection === fyi.frontpage.feed.comment.$type) {
     const record = await atproto.get(fyi.frontpage.feed.comment, {
@@ -186,22 +187,26 @@ async function hydrateComment(
       cid,
       `Missing CID for comment at://${repo}/${collection}/${rkey}`,
     );
-    const value = fyi.frontpage.feed.comment.$validate(record.value);
+
+    const blockContents = record.value.blocks.flatMap((block) => {
+      if (
+        fyi.frontpage.richtext.block.plaintextParagraph.matches(block.content)
+      ) {
+        return [block.content.text];
+      } else {
+        return [];
+      }
+    });
 
     return {
       cid,
-      content: value.blocks
-        .map(
-          (block) =>
-            fyi.frontpage.richtext.block.plaintextParagraph.$validate(
-              block.content,
-            ).text,
-        )
-        .join("\n\n"),
-      createdAt: new Date(value.createdAt),
-      parentUri: value.parent ? new AtUri(value.parent.uri) : null,
-      postUri: new AtUri(value.post.uri),
-      $type: value.$type,
+      content: blockContents.join("\n\n"),
+      createdAt: new Date(record.value.createdAt),
+      parentUri: record.value.parent
+        ? new AtUri(record.value.parent.uri)
+        : null,
+      postUri: new AtUri(record.value.post.uri),
+      $type: record.value.$type,
     };
   } else {
     throw new Error(`Unknown collection for comment hydration: ${collection}`);
@@ -319,21 +324,16 @@ async function hydrateVote(
     throw new Error(`Unknown collection for vote hydration: ${collection}`);
   }
 
-  const value =
-    collection === fyi.unravel.frontpage.vote.$type
-      ? fyi.unravel.frontpage.vote.$validate(record.value)
-      : fyi.frontpage.feed.vote.$validate(record.value);
-
   const cid = record.cid;
   invariant(cid, `Missing CID for vote at://${repo}/${collection}/${rkey}`);
   return {
     cid,
-    createdAt: new Date(value.createdAt),
+    createdAt: new Date(record.value.createdAt),
     subject: {
-      uri: new AtUri(value.subject.uri),
-      cid: value.subject.cid,
+      uri: new AtUri(record.value.subject.uri),
+      cid: record.value.subject.cid,
     },
-    $type: value.$type,
+    $type: record.value.$type,
   };
 }
 
