@@ -4,7 +4,7 @@ import { Commit } from "@/lib/data/atproto/event";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
-import { nsids } from "@/lib/data/atproto/repo";
+import { nsids } from "@/lib/data/atproto/nsids";
 import { timingSafeEqual } from "node:crypto";
 import { serverConfig } from "@/lib/config/server-config";
 

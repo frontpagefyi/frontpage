@@ -3,6 +3,7 @@ import { fetchAuthenticatedAtproto } from "@/lib/auth";
 import { cache } from "react";
 import type * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { Client } from "@atproto/lex";
+export { nsids } from "./nsids";
 
 export const getAtprotoClient = cache(
   (service?: string) =>

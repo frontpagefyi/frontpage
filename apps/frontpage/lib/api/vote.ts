@@ -5,8 +5,12 @@ import { ensureUser } from "../data/user";
 import { type DID } from "../data/atproto/did";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
+import { l } from "@atproto/lex";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
-import { getAtprotoClient, nsids } from "../data/atproto/repo";
+import { getAtprotoClient } from "../data/atproto/repo";
+import { nsids } from "../data/atproto/nsids";
+import { buildStrongRef } from "../data/atproto/records";
 
 // TODO: Should use a strongRef
 export type ApiCreateVoteInput = {
@@ -52,22 +56,18 @@ export async function createVote(subject: ApiCreateVoteInput) {
 
       invariant(dbCreatedVote, "Failed to insert comment vote in database");
     }
-
     const atproto = getAtprotoClient();
+    const record = fyi.unravel.frontpage.vote.$build({
+      subject: buildStrongRef(subject),
+      createdAt: l.currentDatetimeString(),
+    });
     after(() =>
-      atproto.fyi.unravel.frontpage.vote.create(
-        {
-          rkey,
-          repo: user.did,
-        },
-        {
-          subject: {
-            uri: `at://${subject.authorDid}/${subject.collection}/${subject.rkey}`,
-            cid: subject.cid,
-          },
-          createdAt: new Date().toISOString(),
-        },
-      ),
+      atproto.create(fyi.unravel.frontpage.vote, record, {
+        rkey,
+        repo: user.did,
+        validate: true,
+        validateRequest: true,
+      }),
     );
   } catch (e) {
     await db.deleteVote({ authorDid: user.did, rkey });
@@ -85,7 +85,7 @@ export async function deleteVote({ authorDid, rkey }: db.DeleteVoteInput) {
   try {
     const atproto = getAtprotoClient();
     after(() =>
-      atproto.fyi.unravel.frontpage.vote.delete({
+      atproto.delete(fyi.unravel.frontpage.vote, {
         repo: user.did,
         rkey,
       }),

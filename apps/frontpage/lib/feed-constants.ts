@@ -1,6 +1,5 @@
 import { publicConfig } from "./config/public-config";
-// TODO: we should import this from @/lib/data/atproto/repo but can't because it currently imports server stuff, and this module needs to be available on the client as well.
-import { ids as nsids } from "@repo/frontpage-atproto-client/lexicons";
+import { nsids } from "./data/atproto/nsids";
 import { invariant } from "./utils";
 import { AtUri } from "@atproto/syntax";
 

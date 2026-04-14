@@ -6,15 +6,14 @@ import { getLocalFeedSkeleton } from "@/lib/data/db/feed-skeleton";
 import { hydratePosts, type HydratedPost } from "@/lib/data/db/post";
 import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
-import {
-  FyiFrontpageFeedGenerator,
-  type FyiFrontpageFeedGetFeedSkeleton,
-} from "@repo/frontpage-atproto-client";
-import { lexicons } from "@repo/frontpage-atproto-client/lexicons";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { FEED_REGISTRY, type FeedSlug } from "@/lib/feed-constants";
-import { getAtprotoClient, nsids } from "@/lib/data/atproto/repo";
+import { getAtprotoClient } from "@/lib/data/atproto/repo";
+import { nsids } from "@/lib/data/atproto/nsids";
 import { publicConfig } from "../config/public-config";
 import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
+
+type FeedSkeletonOutput = fyi.frontpage.feed.getFeedSkeleton.$OutputBody;
 
 export type FeedError =
   | { code: "InvalidCollection"; message: string }
@@ -23,7 +22,7 @@ export type FeedError =
   | { code: "InvalidResponse"; message: string };
 
 export type FeedSkeletonResult =
-  | { ok: true; data: FyiFrontpageFeedGetFeedSkeleton.OutputSchema }
+  | { ok: true; data: FeedSkeletonOutput }
   | { ok: false; error: FeedError };
 
 export type FeedResult =
@@ -143,7 +142,7 @@ async function getExternalSkeleton(
 
   const json: unknown = await response.json();
   try {
-    lexicons.assertValidXrpcOutput(nsids.FyiFrontpageFeedGetFeedSkeleton, json);
+    fyi.frontpage.feed.getFeedSkeleton.$output.schema.assert(json);
   } catch (err) {
     return {
       ok: false,
@@ -156,23 +155,21 @@ async function getExternalSkeleton(
 
   return {
     ok: true,
-    data: json as FyiFrontpageFeedGetFeedSkeleton.OutputSchema,
+    data: json as FeedSkeletonOutput,
   };
 }
 
 async function fetchGeneratorRecord(feedUri: AtUri): Promise<{ did: string }> {
   const client = getAtprotoClient();
 
-  const result = await client.com.atproto.repo.getRecord({
+  const result = await client.get(fyi.frontpage.feed.generator, {
     repo: feedUri.host,
-    collection: feedUri.collection,
     rkey: feedUri.rkey,
   });
 
-  const validated = FyiFrontpageFeedGenerator.validateRecord(result.data.value);
-  invariant(validated.success, "Invalid generator record");
+  const validated = fyi.frontpage.feed.generator.$validate(result.value);
 
-  return { did: validated.value.did };
+  return { did: validated.did };
 }
 
 async function resolveServiceEndpoint(did: DID): Promise<string> {

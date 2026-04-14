@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { type DID } from "./data/atproto/did";
-import { nsids } from "./data/atproto/repo";
+import { nsids } from "./data/atproto/nsids";
 import { getPostFromComment } from "./data/db/post";
 import { serverConfig } from "./config/server-config";
 
