@@ -11,7 +11,6 @@ import * as com from "@repo/frontpage-atproto-client/com";
 import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
-import { nsids } from "../data/atproto/nsids";
 
 export type ApiCreateCommentInput = {
   // TODO: Use strongRef type for parent and post
@@ -41,7 +40,7 @@ export async function createComment({
       parent,
       post,
       status: "pending",
-      collection: nsids.FyiUnravelFrontpageComment,
+      collection: fyi.unravel.frontpage.comment.$type,
     });
 
     invariant(dbCreatedComment, "Failed to insert comment in database");
@@ -49,12 +48,12 @@ export async function createComment({
     const record = fyi.unravel.frontpage.comment.$build({
       parent: parent
         ? com.atproto.repo.strongRef.$build({
-            uri: `at://${parent.authorDid}/${nsids.FyiUnravelFrontpageComment}/${parent.rkey}`,
+            uri: `at://${parent.authorDid}/${fyi.unravel.frontpage.comment.$type}/${parent.rkey}`,
             cid: parent.cid,
           })
         : undefined,
       post: com.atproto.repo.strongRef.$build({
-        uri: `at://${post.authorDid}/${nsids.FyiUnravelFrontpagePost}/${post.rkey}`,
+        uri: `at://${post.authorDid}/${fyi.unravel.frontpage.post.$type}/${post.rkey}`,
         cid: post.cid,
       }),
       content: sanitizedContent,

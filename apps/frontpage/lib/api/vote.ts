@@ -10,7 +10,6 @@ import * as com from "@repo/frontpage-atproto-client/com";
 import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
-import { nsids } from "../data/atproto/nsids";
 
 // TODO: Should use a strongRef
 export type ApiCreateVoteInput = {
@@ -18,8 +17,8 @@ export type ApiCreateVoteInput = {
   cid: string;
   authorDid: DID;
   collection:
-    | typeof nsids.FyiUnravelFrontpagePost
-    | typeof nsids.FyiUnravelFrontpageComment;
+    | typeof fyi.unravel.frontpage.post.$type
+    | typeof fyi.unravel.frontpage.comment.$type;
 };
 
 export async function createVote(subject: ApiCreateVoteInput) {
@@ -27,7 +26,7 @@ export async function createVote(subject: ApiCreateVoteInput) {
 
   const rkey = TID.next().toString();
   try {
-    if (subject.collection == nsids.FyiUnravelFrontpagePost) {
+    if (subject.collection == fyi.unravel.frontpage.post.$type) {
       const dbCreatedVote = await db.createPostVote({
         repo: user.did,
         rkey,
@@ -37,11 +36,11 @@ export async function createVote(subject: ApiCreateVoteInput) {
           cid: subject.cid,
         },
         status: "pending",
-        collection: nsids.FyiUnravelFrontpageVote,
+        collection: fyi.unravel.frontpage.vote.$type,
       });
 
       invariant(dbCreatedVote, "Failed to insert post vote in database");
-    } else if (subject.collection == nsids.FyiUnravelFrontpageComment) {
+    } else if (subject.collection == fyi.unravel.frontpage.comment.$type) {
       const dbCreatedVote = await db.createCommentVote({
         repo: user.did,
         rkey,
@@ -51,7 +50,7 @@ export async function createVote(subject: ApiCreateVoteInput) {
           cid: subject.cid,
         },
         status: "pending",
-        collection: nsids.FyiUnravelFrontpageVote,
+        collection: fyi.unravel.frontpage.vote.$type,
       });
 
       invariant(dbCreatedVote, "Failed to insert comment vote in database");

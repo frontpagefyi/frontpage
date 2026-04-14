@@ -12,7 +12,6 @@ import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { getPostFromComment, moderatePost } from "@/lib/data/db/post";
 import { getCommentLink, getPostLink } from "@/lib/navigation";
-import { nsids } from "@/lib/data/atproto/repo";
 import { ensureUser } from "@/lib/data/user";
 import {
   createModerationEvent,
@@ -21,6 +20,7 @@ import {
 import { moderateComment } from "@/lib/data/db/comment";
 import { moderateUser } from "@/lib/data/db/user";
 import { revalidatePath } from "next/cache";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 
 async function performModerationAction(
   input: { reportId: number; status: "accepted" | "rejected" },
@@ -44,10 +44,12 @@ async function performModerationAction(
   };
 
   if (report.subjectCollection) {
-    if (report.subjectCollection === nsids.FyiUnravelFrontpagePost) {
-      newModEvent.subjectCollection = nsids.FyiUnravelFrontpagePost;
-    } else if (report.subjectCollection === nsids.FyiUnravelFrontpageComment) {
-      newModEvent.subjectCollection = nsids.FyiUnravelFrontpageComment;
+    if (report.subjectCollection === fyi.unravel.frontpage.post.$type) {
+      newModEvent.subjectCollection = fyi.unravel.frontpage.post.$type;
+    } else if (
+      report.subjectCollection === fyi.unravel.frontpage.comment.$type
+    ) {
+      newModEvent.subjectCollection = fyi.unravel.frontpage.comment.$type;
     }
 
     newModEvent.subjectRkey = report.subjectRkey;
@@ -56,7 +58,7 @@ async function performModerationAction(
 
   const modAction = async () => {
     switch (report.subjectCollection) {
-      case nsids.FyiUnravelFrontpagePost:
+      case fyi.unravel.frontpage.post.$type:
         return await moderatePost({
           rkey: report.subjectRkey!,
           authorDid: report.subjectDid,
@@ -64,7 +66,7 @@ async function performModerationAction(
           hide: input.status === "accepted",
         });
 
-      case nsids.FyiUnravelFrontpageComment:
+      case fyi.unravel.frontpage.comment.$type:
         return await moderateComment({
           rkey: report.subjectRkey!,
           authorDid: report.subjectDid,
@@ -97,10 +99,10 @@ const createLink = async (
   rkey?: string | null,
 ) => {
   switch (collection) {
-    case nsids.FyiUnravelFrontpagePost:
+    case fyi.unravel.frontpage.post.$type:
       return getPostLink({ handleOrDid: author!, rkey: rkey! });
 
-    case nsids.FyiUnravelFrontpageComment: {
+    case fyi.unravel.frontpage.comment.$type: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: author!,

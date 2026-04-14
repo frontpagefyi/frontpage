@@ -1,6 +1,6 @@
 import { headers } from "next/headers";
 import { type DID } from "./data/atproto/did";
-import { nsids } from "./data/atproto/nsids";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { getPostFromComment } from "./data/db/post";
 import { serverConfig } from "./config/server-config";
 
@@ -38,10 +38,10 @@ export async function getFrontPageLink({
   rkey,
 }: GetFrontpageLinkInput) {
   switch (collection) {
-    case nsids.FyiUnravelFrontpagePost:
+    case fyi.unravel.frontpage.post.$type:
       return `/post/${identity}/${rkey}/`;
 
-    case nsids.FyiUnravelFrontpageComment: {
+    case fyi.unravel.frontpage.comment.$type: {
       const { postAuthor, postRkey } = (await getPostFromComment({
         rkey: rkey!,
         did: identity,

@@ -8,10 +8,9 @@ import { assertPublicHostname } from "@/lib/data/ssrf";
 import { invariant } from "@/lib/utils";
 import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { FEED_REGISTRY, type FeedSlug } from "@/lib/feed-constants";
-import { getAtprotoClient } from "@/lib/data/atproto/repo";
-import { nsids } from "@/lib/data/atproto/nsids";
 import { publicConfig } from "../config/public-config";
 import { FRONTPAGE_ATPROTO_HANDLE } from "../constants";
+import { getAtprotoClient } from "@/lib/data/atproto/repo";
 
 type FeedSkeletonOutput = fyi.frontpage.feed.getFeedSkeleton.$OutputBody;
 
@@ -50,12 +49,12 @@ async function getFeedSkeleton(
   cursor?: string,
   limit = 20,
 ): Promise<FeedSkeletonResult> {
-  if (feedUri.collection !== nsids.FyiFrontpageFeedGenerator) {
+  if (feedUri.collection !== fyi.frontpage.feed.generator.$type) {
     return {
       ok: false,
       error: {
         code: "InvalidCollection",
-        message: `Expected collection ${nsids.FyiFrontpageFeedGenerator}, got ${feedUri.collection}`,
+        message: `Expected collection ${fyi.frontpage.feed.generator.$type}, got ${feedUri.collection}`,
       },
     };
   }
@@ -81,7 +80,7 @@ export function parseLocalFeed(feedUri: AtUri): null | {
     return null;
   }
 
-  if (feedUri.collection !== nsids.FyiFrontpageFeedGenerator) {
+  if (feedUri.collection !== fyi.frontpage.feed.generator.$type) {
     return null;
   }
 
@@ -114,7 +113,7 @@ async function getExternalSkeleton(
   const serviceEndpoint = await resolveServiceEndpoint(serviceDid);
 
   const url = new URL(
-    `/xrpc/${nsids.FyiFrontpageFeedGetFeedSkeleton}`,
+    `/xrpc/${fyi.frontpage.feed.getFeedSkeleton.$nsid}`,
     serviceEndpoint,
   );
   url.searchParams.set("feed", feedUri.toString());

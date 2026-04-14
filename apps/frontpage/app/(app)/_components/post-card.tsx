@@ -16,7 +16,7 @@ import { ShareDropdownButton } from "./share-button";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { deletePost } from "@/lib/api/post";
 import { invariant } from "@/lib/utils";
-import { nsids } from "@/lib/data/atproto/repo";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 
 type PostProps = {
   id: number;
@@ -63,7 +63,7 @@ export async function PostCard({
               rkey,
               cid,
               authorDid: author,
-              collection: nsids.FyiUnravelFrontpagePost,
+              collection: fyi.unravel.frontpage.post.$type,
             });
           }}
           unvoteAction={async () => {
@@ -168,9 +168,9 @@ export async function reportPostAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.author}/${nsids.FyiUnravelFrontpagePost}/${input.rkey}`,
+    subjectUri: `at://${input.author}/${fyi.unravel.frontpage.post.$type}/${input.rkey}`,
     subjectDid: input.author,
-    subjectCollection: nsids.FyiUnravelFrontpagePost,
+    subjectCollection: fyi.unravel.frontpage.post.$type,
     subjectRkey: input.rkey,
     subjectCid: input.cid ?? undefined,
   });

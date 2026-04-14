@@ -26,6 +26,8 @@ const nsids = {
   FyiUnravelFrontpageComment: "fyi.unravel.frontpage.comment",
   FyiFrontpageFeedVote: "fyi.frontpage.feed.vote",
   FyiUnravelFrontpageVote: "fyi.unravel.frontpage.vote",
+  FyiFrontpageFeedGenerator: "fyi.frontpage.feed.generator",
+  FyiFrontpageFeedGetFeedSkeleton: "fyi.frontpage.feed.getFeedSkeleton",
 } as const;
 
 const did = customType<{ data: DID }>({

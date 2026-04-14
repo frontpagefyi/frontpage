@@ -9,7 +9,6 @@ import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { type DID } from "../data/atproto/did";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
-import { nsids } from "../data/atproto/nsids";
 
 export type ApiCreatePostInput = {
   authorDid: DID;
@@ -39,7 +38,7 @@ export async function createPost({
       rkey,
       authorDid: user.did,
       status: "pending",
-      collection: nsids.FyiUnravelFrontpagePost,
+      collection: fyi.unravel.frontpage.post.$type,
     });
     invariant(dbCreatedPost, "Failed to insert post in database");
 

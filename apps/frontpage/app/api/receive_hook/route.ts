@@ -4,17 +4,17 @@ import { Commit } from "@/lib/data/atproto/event";
 import { getPdsUrl } from "@/lib/data/atproto/did";
 import { handleComment, handlePost, handleVote } from "./handlers";
 import { eq } from "drizzle-orm";
-import { nsids } from "@/lib/data/atproto/nsids";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { timingSafeEqual } from "node:crypto";
 import { serverConfig } from "@/lib/config/server-config";
 
 const knownCollections = [
-  nsids.FyiUnravelFrontpagePost,
-  nsids.FyiFrontpageFeedPost,
-  nsids.FyiUnravelFrontpageComment,
-  nsids.FyiFrontpageFeedComment,
-  nsids.FyiUnravelFrontpageVote,
-  nsids.FyiFrontpageFeedVote,
+  fyi.unravel.frontpage.post.$type,
+  fyi.frontpage.feed.post.$type,
+  fyi.unravel.frontpage.comment.$type,
+  fyi.frontpage.feed.comment.$type,
+  fyi.unravel.frontpage.vote.$type,
+  fyi.frontpage.feed.vote.$type,
 ] as const;
 
 export async function POST(request: Request) {
@@ -58,20 +58,20 @@ export async function POST(request: Request) {
     console.log("Processing", collection, rkey, op.action);
 
     switch (collection) {
-      case nsids.FyiFrontpageFeedPost:
-      case nsids.FyiUnravelFrontpagePost: {
+      case fyi.frontpage.feed.post.$type:
+      case fyi.unravel.frontpage.post.$type: {
         await handlePost({ op, repo, rkey });
         break;
       }
 
-      case nsids.FyiFrontpageFeedComment:
-      case nsids.FyiUnravelFrontpageComment: {
+      case fyi.frontpage.feed.comment.$type:
+      case fyi.unravel.frontpage.comment.$type: {
         await handleComment({ op, repo, rkey });
         break;
       }
 
-      case nsids.FyiFrontpageFeedVote:
-      case nsids.FyiUnravelFrontpageVote: {
+      case fyi.frontpage.feed.vote.$type:
+      case fyi.unravel.frontpage.vote.$type: {
         await handleVote({ op, repo, rkey });
         break;
       }

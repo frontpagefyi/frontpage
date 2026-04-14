@@ -7,7 +7,6 @@ import {
   type VoteCollectionType,
   type PostCollectionType,
 } from "@/lib/data/atproto/repo";
-import { nsids } from "@/lib/data/atproto/nsids";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
 import * as dbPost from "@/lib/data/db/post";
@@ -50,7 +49,7 @@ async function hydratePost(
   $type: PostCollectionType;
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
-  if (collection === nsids.FyiUnravelFrontpagePost) {
+  if (collection === fyi.unravel.frontpage.post.$type) {
     const record = await atproto.get(fyi.unravel.frontpage.post, {
       repo,
       rkey,
@@ -68,7 +67,7 @@ async function hydratePost(
       cid,
       $type: value.$type,
     };
-  } else if (collection === nsids.FyiFrontpageFeedPost) {
+  } else if (collection === fyi.frontpage.feed.post.$type) {
     const record = await atproto.get(fyi.frontpage.feed.post, { repo, rkey });
     const value = fyi.frontpage.feed.post.$validate(record.value);
     const subject = fyi.frontpage.feed.post.urlSubject.$validate(value.subject);
@@ -158,7 +157,7 @@ async function hydrateComment(
   $type: CommentCollectionType;
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
-  if (collection === nsids.FyiUnravelFrontpageComment) {
+  if (collection === fyi.unravel.frontpage.comment.$type) {
     const record = await atproto.get(fyi.unravel.frontpage.comment, {
       repo,
       rkey,
@@ -177,7 +176,7 @@ async function hydrateComment(
       postUri: new AtUri(value.post.uri),
       $type: value.$type,
     };
-  } else if (collection === nsids.FyiFrontpageFeedComment) {
+  } else if (collection === fyi.frontpage.feed.comment.$type) {
     const record = await atproto.get(fyi.frontpage.feed.comment, {
       repo,
       rkey,
@@ -312,16 +311,16 @@ async function hydrateVote(
 }> {
   const atproto = await getAtprotoClientFromRepo(repo);
   let record;
-  if (collection === nsids.FyiUnravelFrontpageVote) {
+  if (collection === fyi.unravel.frontpage.vote.$type) {
     record = await atproto.get(fyi.unravel.frontpage.vote, { repo, rkey });
-  } else if (collection === nsids.FyiFrontpageFeedVote) {
+  } else if (collection === fyi.frontpage.feed.vote.$type) {
     record = await atproto.get(fyi.frontpage.feed.vote, { repo, rkey });
   } else {
     throw new Error(`Unknown collection for vote hydration: ${collection}`);
   }
 
   const value =
-    collection === nsids.FyiUnravelFrontpageVote
+    collection === fyi.unravel.frontpage.vote.$type
       ? fyi.unravel.frontpage.vote.$validate(record.value)
       : fyi.frontpage.feed.vote.$validate(record.value);
 
@@ -343,8 +342,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
     const vote = await hydrateVote(repo, op.path.collection, rkey);
 
     switch (vote.subject.uri.collection) {
-      case nsids.FyiUnravelFrontpagePost:
-      case nsids.FyiFrontpageFeedPost: {
+      case fyi.unravel.frontpage.post.$type:
+      case fyi.frontpage.feed.post.$type: {
         if (await dbVote.uncached_doesPostVoteExist(repo, rkey)) {
           await dbVote.updatePostVote({
             authorDid: repo,
@@ -374,8 +373,8 @@ export async function handleVote({ op, repo, rkey }: HandlerInput) {
         }
         break;
       }
-      case nsids.FyiUnravelFrontpageComment:
-      case nsids.FyiFrontpageFeedComment: {
+      case fyi.unravel.frontpage.comment.$type:
+      case fyi.frontpage.feed.comment.$type: {
         if (await dbVote.uncached_doesCommentVoteExist(repo, rkey)) {
           await dbVote.updateCommentVote({
             authorDid: repo,

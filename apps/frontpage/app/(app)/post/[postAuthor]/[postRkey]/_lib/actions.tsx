@@ -11,7 +11,7 @@ import { revalidatePath } from "next/cache";
 import { createComment, deleteComment } from "@/lib/api/comment";
 import { createVote, deleteVote } from "@/lib/api/vote";
 import { invariant } from "@/lib/utils";
-import { nsids } from "@/lib/data/atproto/repo";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 
 export async function createCommentAction(
   input: {
@@ -83,9 +83,9 @@ export async function reportCommentAction(
 
   await createReport({
     ...formResult.data,
-    subjectUri: `at://${input.authorDid}/${nsids.FyiUnravelFrontpageComment}/${input.rkey}`,
+    subjectUri: `at://${input.authorDid}/${fyi.unravel.frontpage.comment.$type}/${input.rkey}`,
     subjectDid: input.authorDid,
-    subjectCollection: nsids.FyiUnravelFrontpageComment,
+    subjectCollection: fyi.unravel.frontpage.comment.$type,
     subjectRkey: input.rkey,
     subjectCid: input.cid,
   });
@@ -101,7 +101,7 @@ export async function commentVoteAction(input: {
     rkey: input.rkey,
     cid: input.cid,
     authorDid: input.authorDid,
-    collection: nsids.FyiUnravelFrontpageComment,
+    collection: fyi.unravel.frontpage.comment.$type,
   });
 }
 

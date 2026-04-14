@@ -1,5 +1,5 @@
 import { publicConfig } from "./config/public-config";
-import { nsids } from "./data/atproto/nsids";
+import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { invariant } from "./utils";
 import { AtUri } from "@atproto/syntax";
 
@@ -40,7 +40,7 @@ export const DEFAULT_FEED_SLUG: FeedSlug = "hot";
 
 function feedUri(slug: string) {
   return new AtUri(
-    `at://${publicConfig.NEXT_PUBLIC_FRONTPAGE_DID}/${nsids.FyiFrontpageFeedGenerator}/${slug}`,
+    `at://${publicConfig.NEXT_PUBLIC_FRONTPAGE_DID}/${fyi.frontpage.feed.generator.$type}/${slug}`,
   );
 }
 
