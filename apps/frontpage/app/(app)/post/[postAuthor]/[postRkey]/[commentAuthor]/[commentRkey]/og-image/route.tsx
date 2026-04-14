@@ -69,7 +69,8 @@ export async function GET(
       <OgBottomBar>
         {profile ? (
           <img
-            src={profile.avatar}
+            // next/og doesn't support webp, append @jpeg to get a jpeg from the bsky CDN
+            src={profile.avatar + "@jpeg"}
             width={48}
             height={48}
             style={{
