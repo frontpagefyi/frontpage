@@ -198,6 +198,11 @@ async function hydrateComment(
       }
     });
 
+    invariant(
+      blockContents.length === record.value.blocks.length,
+      `Received non plaintext blocks in frontpage feed comment: at://${repo}/${collection}/${rkey}#${record.cid}`,
+    );
+
     return {
       cid,
       content: blockContents.join("\n\n"),
