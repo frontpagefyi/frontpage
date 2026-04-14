@@ -45,6 +45,8 @@ export async function createComment({
 
     invariant(dbCreatedComment, "Failed to insert comment in database");
 
+    // TODO: We should create this up front to take advantage of validation, but it requires some refactors that relate to fixing bugs with handling both lexicon types.
+    // Will be handled in #327
     const record = fyi.unravel.frontpage.comment.$build({
       parent: parent
         ? com.atproto.repo.strongRef.$build({

@@ -56,6 +56,8 @@ export async function createVote(subject: ApiCreateVoteInput) {
       invariant(dbCreatedVote, "Failed to insert comment vote in database");
     }
     const atproto = getAtprotoClient();
+    // TODO: We should create this up front to take advantage of validation, but it requires some refactors that relate to fixing bugs with handling both lexicon types.
+    // Will be handled in #327
     const record = fyi.unravel.frontpage.vote.$build({
       subject: com.atproto.repo.strongRef.$build({
         uri: `at://${subject.authorDid}/${subject.collection}/${subject.rkey}`,

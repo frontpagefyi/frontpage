@@ -42,6 +42,8 @@ export async function createPost({
     invariant(dbCreatedPost, "Failed to insert post in database");
 
     const atproto = getAtprotoClient();
+    // TODO: We should create this up front to take advantage of validation, but it requires some refactors that relate to fixing bugs with handling both lexicon types.
+    // Will be handled in #327
     const record = fyi.unravel.frontpage.post.$build({
       title,
       url,
