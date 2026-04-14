@@ -52,8 +52,6 @@ export async function createPost({
       atproto.create(fyi.unravel.frontpage.post, record, {
         repo: user.did,
         rkey,
-        validate: true,
-        validateRequest: true,
       }),
     );
 

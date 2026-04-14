@@ -64,8 +64,6 @@ export async function createComment({
       getAtprotoClient().create(fyi.unravel.frontpage.comment, record, {
         repo: user.did,
         rkey,
-        validate: true,
-        validateRequest: true,
       }),
     );
 

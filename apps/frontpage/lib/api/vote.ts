@@ -67,8 +67,6 @@ export async function createVote(subject: ApiCreateVoteInput) {
       atproto.create(fyi.unravel.frontpage.vote, record, {
         rkey,
         repo: user.did,
-        validate: true,
-        validateRequest: true,
       }),
     );
   } catch (e) {
