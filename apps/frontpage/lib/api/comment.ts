@@ -7,11 +7,11 @@ import { createNotification } from "../data/db/notification";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { l } from "@atproto/lex";
+import * as com from "@repo/frontpage-atproto-client/com";
 import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
 import { nsids } from "../data/atproto/nsids";
-import { buildStrongRef } from "../data/atproto/records";
 
 export type ApiCreateCommentInput = {
   // TODO: Use strongRef type for parent and post
@@ -48,17 +48,13 @@ export async function createComment({
 
     const record = fyi.unravel.frontpage.comment.$build({
       parent: parent
-        ? buildStrongRef({
-            authorDid: parent.authorDid,
-            collection: nsids.FyiUnravelFrontpageComment,
-            rkey: parent.rkey,
+        ? com.atproto.repo.strongRef.$build({
+            uri: `at://${parent.authorDid}/${nsids.FyiUnravelFrontpageComment}/${parent.rkey}`,
             cid: parent.cid,
           })
         : undefined,
-      post: buildStrongRef({
-        authorDid: post.authorDid,
-        collection: nsids.FyiUnravelFrontpagePost,
-        rkey: post.rkey,
+      post: com.atproto.repo.strongRef.$build({
+        uri: `at://${post.authorDid}/${nsids.FyiUnravelFrontpagePost}/${post.rkey}`,
         cid: post.cid,
       }),
       content: sanitizedContent,

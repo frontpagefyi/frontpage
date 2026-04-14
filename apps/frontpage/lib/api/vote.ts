@@ -6,11 +6,11 @@ import { type DID } from "../data/atproto/did";
 import { invariant } from "../utils";
 import { TID } from "@atproto/common-web";
 import { l } from "@atproto/lex";
+import * as com from "@repo/frontpage-atproto-client/com";
 import * as fyi from "@repo/frontpage-atproto-client/fyi";
 import { after } from "next/server";
 import { getAtprotoClient } from "../data/atproto/repo";
 import { nsids } from "../data/atproto/nsids";
-import { buildStrongRef } from "../data/atproto/records";
 
 // TODO: Should use a strongRef
 export type ApiCreateVoteInput = {
@@ -58,7 +58,10 @@ export async function createVote(subject: ApiCreateVoteInput) {
     }
     const atproto = getAtprotoClient();
     const record = fyi.unravel.frontpage.vote.$build({
-      subject: buildStrongRef(subject),
+      subject: com.atproto.repo.strongRef.$build({
+        uri: `at://${subject.authorDid}/${subject.collection}/${subject.rkey}`,
+        cid: subject.cid,
+      }),
       createdAt: l.currentDatetimeString(),
     });
     after(() =>

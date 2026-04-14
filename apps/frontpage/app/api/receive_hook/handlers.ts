@@ -8,7 +8,6 @@ import {
   type PostCollectionType,
 } from "@/lib/data/atproto/repo";
 import { nsids } from "@/lib/data/atproto/nsids";
-import { extractPlaintextCommentContent } from "@/lib/data/atproto/records";
 import * as dbComment from "@/lib/data/db/comment";
 import * as dbNotification from "@/lib/data/db/notification";
 import * as dbPost from "@/lib/data/db/post";
@@ -192,7 +191,14 @@ async function hydrateComment(
 
     return {
       cid,
-      content: extractPlaintextCommentContent(value.blocks),
+      content: value.blocks
+        .map(
+          (block) =>
+            fyi.frontpage.richtext.block.plaintextParagraph.$validate(
+              block.content,
+            ).text,
+        )
+        .join("\n\n"),
       createdAt: new Date(value.createdAt),
       parentUri: value.parent ? new AtUri(value.parent.uri) : null,
       postUri: new AtUri(value.post.uri),

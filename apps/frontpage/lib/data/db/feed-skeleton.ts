@@ -5,9 +5,9 @@ import { eq, desc, and, or, lt, type SQL } from "drizzle-orm";
 import * as schema from "@/lib/schema";
 import { bannedUserSubQuery, postVisibilityFilters } from "./visibility";
 import { type FeedSlug } from "@/lib/feed-constants";
-import { buildAtUriString } from "@/lib/data/atproto/records";
 import { exhaustiveCheck, invariant } from "@/lib/utils";
-import * as fyi from "@repo/frontpage-atproto-client/fyi";
+import type * as fyi from "@repo/frontpage-atproto-client/fyi";
+import { type PostCollectionType } from "../atproto/repo";
 
 type FeedSkeletonOutput = fyi.frontpage.feed.getFeedSkeleton.$OutputBody;
 
@@ -52,7 +52,7 @@ function toSkeletonResult<
   TRow extends {
     id: number;
     authorDid: string;
-    collection: string;
+    collection: PostCollectionType;
     rkey: string;
   },
 >(
@@ -61,7 +61,7 @@ function toSkeletonResult<
   serializeCursorValue: (row: TRow) => string,
 ): FeedSkeletonOutput {
   const feed: FeedSkeletonOutput["feed"] = rows.map((row) => ({
-    post: buildAtUriString(row.authorDid, row.collection, row.rkey),
+    post: `at://${row.authorDid}/${row.collection}/${row.rkey}`,
   }));
 
   // Only return a cursor if we got a full page — fewer rows means we're at the end.
