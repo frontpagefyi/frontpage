@@ -11,7 +11,7 @@ catalog:
   react-dom: ^19.2.3
   '@types/react': ^19.2.13
   '@types/react-dom': ^19.2.3
-  typescript: ^5.9.3
+  typescript: ^6.0.0
   eslint: ^9.37.0
   '@types/node': ^24.10.4
   babel-plugin-react-compiler: ^1.0.0
