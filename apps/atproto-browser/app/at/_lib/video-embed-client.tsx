@@ -45,7 +45,7 @@ export function VideoEmbedClient({
       hls.detachMedia();
       hls.destroy();
     };
-  }, [source, sessionId]);
+  }, [source]);
 
   return <VideoEmbedWrapper videoRef={ref} />;
 }
