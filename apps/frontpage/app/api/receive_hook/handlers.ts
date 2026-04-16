@@ -68,8 +68,12 @@ async function hydratePost(
     };
   } else if (collection === fyi.frontpage.feed.post.$type) {
     const record = await atproto.get(fyi.frontpage.feed.post, { repo, rkey });
-    const subject = fyi.frontpage.feed.post.urlSubject.$validate(
+    const subjectResult = fyi.frontpage.feed.post.urlSubject.$safeValidate(
       record.value.subject,
+    );
+    invariant(
+      subjectResult.success,
+      `Received non-url subject in frontpage feed post: at://${repo}/${collection}/${rkey}#${record.cid}`,
     );
     const cid = record.cid;
     invariant(
@@ -78,7 +82,7 @@ async function hydratePost(
     );
     return {
       title: record.value.title,
-      url: subject.url,
+      url: subjectResult.value.url,
       createdAt: new Date(record.value.createdAt),
       cid,
       $type: record.value.$type,
