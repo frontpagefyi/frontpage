@@ -37,8 +37,22 @@ function prettyPrintReport(report: ESLint.LintResult[]): void {
   console.log(`\nTotal: ${totalErrors} errors, ${totalWarnings} warnings`);
 }
 
+console.log(`Expanding globs:\n ${process.argv.slice(2).join("\n")}`);
+
+const paths = (
+  await Promise.all(
+    process.argv
+      .slice(2)
+      .map(async (glob) => Array.fromAsync(fs.glob(glob.trim()))),
+  )
+).flat();
+
+console.log(
+  `Found ${paths.length} report files to process. Paths:\n${paths.join("\n")}`,
+);
+
 const reports = await Promise.all(
-  process.argv.slice(2).map(async (path) => ({
+  paths.map(async (path) => ({
     contents: await readReportFile(path),
     filePath: path,
   })),
