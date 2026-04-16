@@ -4,12 +4,12 @@
   "type": "module",
   "exports": {
     "./com": {
-      "import": "./dist/com.js",
-      "types": "./dist/com.d.ts"
+      "import": "./dist/lexicons/com.js",
+      "types": "./dist/lexicons/com.d.ts"
     },
     "./fyi": {
-      "import": "./dist/fyi.js",
-      "types": "./dist/fyi.d.ts"
+      "import": "./dist/lexicons/fyi.js",
+      "types": "./dist/lexicons/fyi.d.ts"
     }
   },
   "scripts": {
