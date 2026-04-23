@@ -520,18 +520,20 @@ export async function fetchAuthenticatedAtproto(
     publicJwk: session.dpopPublicJwk,
   });
 
-  // We create a request up front to normalize the input but also to be able to clone it for retries, since the body can only be consumed once when it's a stream
-  const request = new Request(input, init);
-
   const makeRequest = (dpopNonce: string) => {
-    const clonedRequest = request.clone();
+    const url =
+      typeof input === "string"
+        ? new URL(input)
+        : input instanceof URL
+          ? input
+          : new URL(input.url);
 
     return protectedResourceRequest(
       session.accessToken,
-      clonedRequest.method,
-      new URL(clonedRequest.url),
-      clonedRequest.headers,
-      clonedRequest.body,
+      init?.method ?? "GET",
+      url,
+      new Headers(init?.headers),
+      init?.body,
       {
         // We need a customFetch so that we can set the duplex option
         // Duplex option is needed because we're passing request.body which is a ReadableStream, trying to fetch this without the duplex option will result in a "TypeError: RequestInit: duplex option is required when sending a body." in prod (not in dev!).
