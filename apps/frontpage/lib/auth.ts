@@ -40,6 +40,7 @@ import { getRootHost } from "./navigation";
 import { invariant } from "./utils";
 import { FRONTPAGE_APPVIEW_USER_AGENT } from "./constants";
 import { serverConfig } from "./config/server-config";
+import { fetch as undiciFetch } from "undici";
 
 export const getPrivateJwk = cache(() =>
   importJWK(
@@ -521,30 +522,26 @@ export async function fetchAuthenticatedAtproto(
   });
 
   const makeRequest = (dpopNonce: string) => {
-    const url =
-      typeof input === "string"
-        ? new URL(input)
-        : input instanceof URL
-          ? input
-          : new URL(input.url);
+    // It's important to reconstruct the request because we can't send the same body readable stream twice
+    const request = new Request(input, init);
 
     return protectedResourceRequest(
       session.accessToken,
-      init?.method ?? "GET",
-      url,
-      new Headers(init?.headers),
-      init?.body,
+      request.method,
+      new URL(request.url),
+      request.headers,
+      request.body,
       {
         // We need a customFetch so that we can set the duplex option
-        // Duplex option is needed because we're passing input.body which may be a ReadableStream, trying to fetch this without the duplex option will result in a "TypeError: RequestInit: duplex option is required when sending a body." in prod (not in dev!).
+        // Duplex option is needed because we're passing request.body which is a ReadableStream, trying to fetch this without the duplex option will result in a "TypeError: RequestInit: duplex option is required when sending a body." in prod (not in dev!).
         [oauth4webapiCustomFetchSymbol]: (
           input: RequestInfo | URL,
           init?: RequestInit,
         ) => {
           console.log("Making authenticated request with: ", input, init?.body);
-          return fetch(input, {
+          return undiciFetch(input, {
             ...init,
-            // @ts-expect-error https://github.com/node-fetch/node-fetch/issues/1769
+            // @ts-expect-error Undici types are wrong, they don't include the duplex option
             duplex: "half",
           });
         },
