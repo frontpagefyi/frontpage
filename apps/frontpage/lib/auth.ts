@@ -530,18 +530,6 @@ export async function fetchAuthenticatedAtproto(
       request.headers,
       request.body,
       {
-        // We need a customFetch so that we can set the duplex option
-        // Duplex option is needed because we're passing request.body which is a ReadableStream, trying to fetch this without the duplex option will result in a "TypeError: RequestInit: duplex option is required when sending a body." in prod (not in dev!).
-        [oauth4webapiCustomFetchSymbol]: (
-          input: RequestInfo | URL,
-          init?: RequestInit,
-        ) => {
-          return fetch(input, {
-            ...init,
-            // @ts-expect-error https://github.com/node-fetch/node-fetch/issues/1769
-            duplex: "half",
-          });
-        },
         DPoP: {
           privateKey: privateDpopKey,
           publicKey: publicDpopKey,
