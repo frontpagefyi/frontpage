@@ -574,6 +574,8 @@ export async function fetchAuthenticatedAtproto(
       throw new Error("Missing DPoP nonce");
     }
 
+    console.log("Retrying authenticated request with new DPoP nonce");
+
     response = await makeRequest(dpopNonce2);
   }
 
