@@ -40,4 +40,9 @@ next-env.d.ts
 .turbo
 target
 
-packages/**/eslint_report.json
+**/eslint_report.json
+
+.superpowers/
+
+# claude code local settings
+.claude/settings.local.json

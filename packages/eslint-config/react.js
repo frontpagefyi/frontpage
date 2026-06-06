@@ -5,8 +5,7 @@ import react from "eslint-plugin-react";
 import { version as reactVersion } from "react";
 
 export default defineConfig(
-  // @ts-expect-error
-  reactHooks.configs["recommended-latest"],
+  reactHooks.configs.flat["recommended-latest"],
   // @ts-expect-error
   react.configs.flat.recommended,
   jsxA11y.flatConfigs.recommended,

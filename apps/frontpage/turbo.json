@@ -1,0 +1,28 @@
+{
+  "$schema": "https://turbo.build/schema.json",
+  "extends": ["//"],
+  "tasks": {
+    "build": {
+      "outputs": [".next/**", "!.next/cache/**"],
+      "env": [
+        "NODE_ENV",
+        "DRAINPIPE_CONSUMER_SECRET",
+        "DISCORD_WEBHOOK_URL",
+        "TURSO_CONNECTION_URL",
+        "TURSO_AUTH_TOKEN",
+        "VERCEL_PROJECT_PRODUCTION_URL",
+        "PRIVATE_JWK",
+        "PUBLIC_JWK",
+        "VERCEL_URL",
+        "VERCEL_BRANCH_URL",
+        "VERCEL_ENV",
+        "CRON_SECRET",
+        "PLC_DIRECTORY_URL",
+        "FLAGS",
+        "FLAGS_SECRET",
+        "NEXT_PUBLIC_FRONTPAGE_DID",
+        "NEXT_PUBLIC_FEED_SERVICE_DID"
+      ]
+    }
+  }
+}

@@ -1,16 +1,23 @@
 atproto-browser:
   - changed-files:
-      - any-glob-to-any-file: packages/atproto-browser/**
+      - any-glob-to-any-file: apps/atproto-browser/**
 
 frontpage:
   - changed-files:
-      - any-glob-to-any-file: packages/frontpage/**
+      - any-glob-to-any-file: apps/frontpage/**
 
 drainpipe:
   - changed-files:
-      - any-glob-to-any-file: packages-rs/**
+      - any-glob-to-any-file:
+          - "{apps,packages}/drainpipe*/**"
+          - packages/jetstream/**
 
-# Add 'documentation' label to any change to .md files within the entire repository
+infra:
+  - changed-files:
+      - any-glob-to-any-file:
+          - .github/**
+          - apps/frontpage/local-infra/**
+
 documentation:
   - changed-files:
       - any-glob-to-any-file: "**/*.md"

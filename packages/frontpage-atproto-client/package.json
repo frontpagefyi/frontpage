@@ -3,32 +3,25 @@
   "name": "@repo/frontpage-atproto-client",
   "type": "module",
   "exports": {
-    ".": {
-      "import": "./dist/src/index.js",
-      "types": "./dist/src/index.d.ts"
+    "./com": {
+      "import": "./dist/lexicons/com.js",
+      "types": "./dist/lexicons/com.d.ts"
     },
-    "./lexicons": {
-      "import": "./dist/src/lexicons.js",
-      "types": "./dist/src/lexicons.d.ts"
+    "./fyi": {
+      "import": "./dist/lexicons/fyi.js",
+      "types": "./dist/lexicons/fyi.d.ts"
     }
   },
   "scripts": {
-    "format:write": "prettier --write src",
-    "fetch-lexicons": "node ./fetch-lexicons.mts",
     "type-check": "tsc --noEmit",
-    "build": "tsc"
+    "build": "lex build --lexicons=../../lexicons --pure-annotations --clear && tsc"
   },
   "dependencies": {
-    "@atproto/lexicon": "catalog:",
-    "@atproto/xrpc": "^0.6.12",
-    "multiformats": "^13.3.7"
+    "@atproto/lex": "catalog:"
   },
   "devDependencies": {
-    "@atproto/lex-cli": "^0.8.3",
     "@repo/typescript-config": "workspace:*",
-    "@types/adm-zip": "^0.5.7",
     "@types/node": "catalog:",
-    "adm-zip": "^0.5.16",
     "typescript": "catalog:"
   }
 }

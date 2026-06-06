@@ -3,6 +3,7 @@
   "private": true,
   "packageManager": "pnpm@10.12.0",
   "devDependencies": {
+    "@atproto/lex": "catalog:",
     "prettier": "^3.6.2",
     "turbo": "2.7.2",
     "typescript": "catalog:"

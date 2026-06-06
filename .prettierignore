@@ -1,6 +1,6 @@
 pnpm-lock.yaml
 pnpm-workspace.yaml
-packages/frontpage/drizzle/meta
+apps/frontpage/drizzle/meta
 **/dist/**
 
 # Ignoring llm instructions to preserve any formatting inserted for the benefit of the model

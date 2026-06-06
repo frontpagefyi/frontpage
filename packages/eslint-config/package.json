@@ -14,16 +14,16 @@
     "@types/eslint-plugin-jsx-a11y": "^6.10.0",
     "@types/node": "catalog:",
     "@types/react": "catalog:",
-    "@typescript-eslint/utils": "^8.37.0",
+    "@typescript-eslint/utils": "^8.58.2",
     "eslint": "catalog:",
     "eslint-config-next": "catalog:",
     "eslint-config-turbo": "^2.5.4",
     "eslint-plugin-jsx-a11y": "^6.10.2",
     "eslint-plugin-react": "^7.37.5",
-    "eslint-plugin-react-hooks": "^6.0.0",
+    "eslint-plugin-react-hooks": "^7.0.1",
     "react": "catalog:",
     "typescript": "catalog:",
-    "typescript-eslint": "^8.37.0"
+    "typescript-eslint": "^8.58.2"
   },
   "peerDependencies": {
     "eslint": "catalog:"

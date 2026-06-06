@@ -1,10 +1,13 @@
 {
   "extends": "@repo/typescript-config/base.json",
-  "include": ["next.js", "typescript.js", "react.js"],
+  "include": ["next.js", "typescript.js", "react.js", "pretty-print-report.ts"],
   "compilerOptions": {
     "checkJs": true,
     "module": "NodeNext",
     "moduleResolution": "NodeNext",
-    "noEmit": true
+    "noEmit": true,
+    "strict": true,
+    "lib": ["ESNext"],
+    "types": ["node"]
   }
 }
