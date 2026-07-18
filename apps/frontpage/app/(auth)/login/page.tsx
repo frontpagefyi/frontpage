@@ -4,8 +4,9 @@ import { getUser } from "@/lib/data/user";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate block: reads cookies via getUser() and searchParams to redirect
+// logged-in users before rendering the form. Moving these into Suspense would
+// flash the login form at users who are already authenticated.
 export const instant = false;
 
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {

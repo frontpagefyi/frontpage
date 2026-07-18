@@ -29,25 +29,17 @@ import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 import { redirect } from "next/navigation";
 import { NewPostForm } from "@/lib/components/new-post-form/new-post-form";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
-
-export default async function Layout({
+export default function Layout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  const session = await getSession();
-
-  // If the current session has different scopes than the AUTH_SCOPES, redirect to reauthenticate
-  // Don't redirect if the request is for the reauthenticate page or oauth callback
-  if (session && session.scope !== AUTH_SCOPES) {
-    redirect("/reauthenticate");
-  }
-
   return (
     <div className="container mx-auto px-4 md:px-6 pt-4 pb-8 md:py-12 max-w-3xl">
+      {/* Scope guard: redirects to /reauthenticate if OAuth scopes are outdated */}
+      <Suspense>
+        <ScopeGuard />
+      </Suspense>
       <div className="flex place-content-between items-center mb-8">
         <Link href="/">
           {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -55,19 +47,6 @@ export default async function Layout({
         </Link>
 
         <div className="flex items-center gap-4">
-          {session ? (
-            <Dialog>
-              <DialogTrigger asChild>
-                <Button>New</Button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>New post</DialogTitle>
-                </DialogHeader>
-                <NewPostForm />
-              </DialogContent>
-            </Dialog>
-          ) : null}
           <Suspense>
             <LoginOrLogout />
           </Suspense>
@@ -77,6 +56,16 @@ export default async function Layout({
       <div className="mb-6">{children}</div>
     </div>
   );
+}
+
+async function ScopeGuard() {
+  const session = await getSession();
+  // If the current session has different scopes than AUTH_SCOPES, redirect to reauthenticate.
+  // Don't redirect if the request is for the reauthenticate page or oauth callback.
+  if (session && session.scope !== AUTH_SCOPES) {
+    redirect("/reauthenticate");
+  }
+  return null;
 }
 
 async function LoginOrLogout() {
@@ -90,10 +79,27 @@ async function LoginOrLogout() {
     );
   }
 
+  // "New post" button is rendered here (session-gated) rather than in the layout
+  // function so the nav bar static shell has no blocking session reads.
+  const newPostButton = (
+    <Dialog>
+      <DialogTrigger asChild>
+        <Button>New</Button>
+      </DialogTrigger>
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>New post</DialogTitle>
+        </DialogHeader>
+        <NewPostForm />
+      </DialogContent>
+    </Dialog>
+  );
+
   const handle = await getVerifiedHandle(session.did);
 
   return (
     <>
+      {newPostButton}
       <NotificationIndicator>
         <Button asChild variant="outline" size="icon">
           <Link href="/notifications" aria-label="Notifications">

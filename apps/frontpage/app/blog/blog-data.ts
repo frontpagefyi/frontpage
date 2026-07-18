@@ -3,6 +3,7 @@ import { didSchema } from "@/lib/data/atproto/did";
 import { AtUri } from "@atproto/syntax";
 import slugify from "slugify";
 import { z } from "zod";
+import { cacheLife } from "next/cache";
 
 const AtUriSchema = z.string().transform((value, ctx) => {
   try {
@@ -108,6 +109,8 @@ async function getMeta(rkey: string) {
 }
 
 export async function getBlog(rkey: string) {
+  "use cache";
+  cacheLife("minutes");
   const metaPromise = getMeta(rkey).catch(() => null);
   const queryParams = new URLSearchParams({
     repo: publicConfig.NEXT_PUBLIC_FRONTPAGE_DID,

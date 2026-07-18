@@ -4,19 +4,22 @@ import Markdown, { type ComponentConfig } from "./markdown";
 import { getBlog } from "../blog-data";
 import { notFound } from "next/navigation";
 import { AuthorAvatar, BackLink } from "../_components";
-
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
+import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-// TODO: Cache Components adoption — restore revalidate = 60. Add cacheLife('minutes') to getBlog() when adopting this route.
+export default function BlogPost(props: Props) {
+  return (
+    <Suspense>
+      <BlogPostContent params={props.params} />
+    </Suspense>
+  );
+}
 
-export default async function BlogPost(props: Props) {
-  const { slug } = await props.params;
+async function BlogPostContent({ params: paramsPromise }: Props) {
+  const { slug } = await paramsPromise;
   const rkey = slug.split("-")[0];
   if (!rkey) notFound();
   const blog = await getBlog(rkey);

@@ -2,8 +2,7 @@ import { getFeed } from "@/lib/data/feed-resolver";
 import { AtUri } from "@atproto/syntax";
 import { redirect } from "next/navigation";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate block: reads searchParams to redirect or fetch a feed by URI.
 export const instant = false;
 
 export default async function FeedPage({ searchParams }: PageProps<"/feed">) {

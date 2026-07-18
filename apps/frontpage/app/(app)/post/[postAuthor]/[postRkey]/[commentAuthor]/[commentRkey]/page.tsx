@@ -1,14 +1,11 @@
 import { Comment } from "../../_lib/comment";
 import Link from "next/link";
+import { Suspense } from "react";
 import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type CommentPageParams, getCommentPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { PrefetchOgImage } from "@/lib/og-client";
-
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
-export const instant = false;
 
 function truncateText(text: string, maxLength: number) {
   if (text.length > maxLength) {
@@ -60,10 +57,22 @@ export async function generateMetadata(
   };
 }
 
-export default async function CommentPage(
+export default function CommentPage(
   props: PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">,
 ) {
-  const params = await props.params;
+  return (
+    <Suspense>
+      <CommentContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function CommentContent({
+  params: paramsPromise,
+}: {
+  params: PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">["params"];
+}) {
+  const params = await paramsPromise;
   const { comment, post } = await getCommentPageData(params);
 
   return (

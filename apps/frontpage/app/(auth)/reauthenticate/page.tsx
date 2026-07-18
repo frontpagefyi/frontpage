@@ -6,8 +6,8 @@ import { Button } from "@/lib/components/ui/button";
 import { revalidatePath } from "next/cache";
 import { UserAvatar } from "@/lib/components/user-avatar";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate block: reads cookies via getSession() and searchParams to redirect
+// users who already have the required auth scope before rendering the form.
 export const instant = false;
 
 export default async function LoginPage({

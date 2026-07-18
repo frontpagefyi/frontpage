@@ -11,8 +11,8 @@ import { getModeratorReportStats, getReports } from "@/lib/data/db/report";
 import Link from "next/link";
 import { ReportCard } from "./_components/report-card";
 
-// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
-// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+// Deliberate block: reads cookies via isAdmin() and searchParams. Redirects
+// non-admins before rendering. Moving to Suspense would flash the dashboard.
 export const instant = false;
 
 type StatusTypes = "pending" | "accepted" | "rejected";
