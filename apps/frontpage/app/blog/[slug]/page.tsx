@@ -4,15 +4,22 @@ import Markdown, { type ComponentConfig } from "./markdown";
 import { getBlog } from "../blog-data";
 import { notFound } from "next/navigation";
 import { AuthorAvatar, BackLink } from "../_components";
+import { Suspense } from "react";
 
 interface Props {
   params: Promise<{ slug: string }>;
 }
 
-export const revalidate = 60;
+export default function BlogPost(props: Props) {
+  return (
+    <Suspense>
+      <BlogPostContent params={props.params} />
+    </Suspense>
+  );
+}
 
-export default async function BlogPost(props: Props) {
-  const { slug } = await props.params;
+async function BlogPostContent({ params: paramsPromise }: Props) {
+  const { slug } = await paramsPromise;
   const rkey = slug.split("-")[0];
   if (!rkey) notFound();
   const blog = await getBlog(rkey);

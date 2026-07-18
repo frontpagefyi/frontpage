@@ -11,6 +11,10 @@ import { getModeratorReportStats, getReports } from "@/lib/data/db/report";
 import Link from "next/link";
 import { ReportCard } from "./_components/report-card";
 
+// Deliberate block: reads cookies via isAdmin() and searchParams. Redirects
+// non-admins before rendering. Moving to Suspense would flash the dashboard.
+export const instant = false;
+
 type StatusTypes = "pending" | "accepted" | "rejected";
 
 export default async function Moderation(props: {

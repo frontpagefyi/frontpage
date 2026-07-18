@@ -6,6 +6,10 @@ import { Button } from "@/lib/components/ui/button";
 import { revalidatePath } from "next/cache";
 import { UserAvatar } from "@/lib/components/user-avatar";
 
+// Deliberate block: reads cookies via getSession() and searchParams to redirect
+// users who already have the required auth scope before rendering the form.
+export const instant = false;
+
 export default async function LoginPage({
   searchParams,
 }: {

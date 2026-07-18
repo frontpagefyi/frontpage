@@ -7,13 +7,30 @@ import { Alert, AlertTitle, AlertDescription } from "@/lib/components/ui/alert";
 import { Spinner } from "@/lib/components/ui/spinner";
 import { NewComment } from "./_lib/comment-client";
 import { SuperHackyScrollToTop } from "./scroller";
+import { Suspense } from "react";
 
-export default async function PostLayout(
+export default function PostLayout(
   props: LayoutProps<"/post/[postAuthor]/[postRkey]">,
 ) {
-  const params = await props.params;
-
   const { children } = props;
+  return (
+    <main className="mx-auto max-w-4xl space-y-6">
+      {/* This is needed to work around some next.js weirdness where sometimes you're not scrolled to the top of the page when navigating to the comments page. */}
+      <SuperHackyScrollToTop />
+      <Suspense>
+        <PostHeader params={props.params} />
+      </Suspense>
+      {children}
+    </main>
+  );
+}
+
+async function PostHeader({
+  params: paramsPromise,
+}: {
+  params: LayoutProps<"/post/[postAuthor]/[postRkey]">["params"];
+}) {
+  const params = await paramsPromise;
 
   void getUser(); // Prefetch user
   const didParam = await getDidFromHandleOrDid(params.postAuthor);
@@ -26,9 +43,7 @@ export default async function PostLayout(
   }
 
   return (
-    <main className="mx-auto max-w-4xl space-y-6">
-      {/* This is needed to work around some next.js weirdness where sometimes you're not scrolled to the top of the page when navigating to the comments page. */}
-      <SuperHackyScrollToTop />
+    <>
       <PostCard
         author={post.authorDid}
         createdAt={post.createdAt}
@@ -43,7 +58,7 @@ export default async function PostLayout(
       />
       {post.status === "pending" ? (
         // TODO: This should have a spinner and refresh on an interval
-        <Alert>
+        (<Alert>
           <AlertTitle className="flex items-center gap-2">
             <Spinner /> Posting...
           </AlertTitle>
@@ -51,7 +66,7 @@ export default async function PostLayout(
             This post is traversing the atmosphere. Check back in a few seconds
             to see if it has landed and is ready to be discussed.
           </AlertDescription>
-        </Alert>
+        </Alert>)
       ) : post.status !== "live" ? (
         <Alert>
           <AlertTitle>This post has been deleted</AlertTitle>
@@ -63,7 +78,6 @@ export default async function PostLayout(
       {post.status === "live" ? (
         <NewComment postRkey={post.rkey} postAuthorDid={post.authorDid} />
       ) : null}
-      {children}
-    </main>
+    </>
   );
 }

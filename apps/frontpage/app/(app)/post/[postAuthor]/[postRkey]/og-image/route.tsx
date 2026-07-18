@@ -10,17 +10,22 @@ import {
   OgWrapper,
   OgBottomBar,
 } from "@/lib/og";
-import { getPostPageData } from "../_lib/page-data";
+import { getPostPageData, type PostPageParams } from "../_lib/page-data";
+import { cacheLife } from "next/cache";
 
-export const dynamic = "force-static";
-export const revalidate = 3600; // 1 hour
+async function getPostOgData(params: PostPageParams) {
+  "use cache";
+  cacheLife("hours");
+  const { post } = await getPostPageData(params);
+  const profile = await getBlueskyProfile(post.authorDid);
+  return { post, profile };
+}
 
 export async function GET(
   _req: Request,
   { params }: RouteContext<"/post/[postAuthor]/[postRkey]/og-image">,
 ) {
-  const { post } = await getPostPageData(await params);
-  const profile = await getBlueskyProfile(post.authorDid);
+  const { post, profile } = await getPostOgData(await params);
 
   return frontpageOgImageResponse(
     <OgWrapper

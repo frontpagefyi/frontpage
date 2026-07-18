@@ -4,6 +4,11 @@ import { getUser } from "@/lib/data/user";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 
+// Deliberate block: reads cookies via getUser() and searchParams to redirect
+// logged-in users before rendering the form. Moving these into Suspense would
+// flash the login form at users who are already authenticated.
+export const instant = false;
+
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const user = await getUser();
 

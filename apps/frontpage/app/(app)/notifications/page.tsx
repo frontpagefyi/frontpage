@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { TimeAgo } from "@/lib/components/time-ago";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import {
@@ -27,17 +28,25 @@ export default async function NotificationsPage() {
         <MarkAllAsReadButton />
       </div>
 
-      <InfiniteList
-        cacheKey={NOTIFICATIONS_CACHE_KEY}
-        emptyMessage="There are no more notifications."
-        getMoreItemsAction={getMoreNotifications}
-        fallback={await getMoreNotifications(null)}
-        // We're revalidating all pages whenever any page in the list is revalidated for convenience.
-        // This means that if someone scrolls back a bunch and then causes revalidation, it'll trigger loads of _sequential_ server action calls.
-        // TODO: Possible fix this with a virtualised list that only keeps 3-5 pages mounted at a time
-        revalidateAll
-      />
+      <Suspense>
+        <NotificationsList />
+      </Suspense>
     </div>
+  );
+}
+
+async function NotificationsList() {
+  return (
+    <InfiniteList
+      cacheKey={NOTIFICATIONS_CACHE_KEY}
+      emptyMessage="There are no more notifications."
+      getMoreItemsAction={getMoreNotifications}
+      fallback={await getMoreNotifications(null)}
+      // We're revalidating all pages whenever any page in the list is revalidated for convenience.
+      // This means that if someone scrolls back a bunch and then causes revalidation, it'll trigger loads of _sequential_ server action calls.
+      // TODO: Possible fix this with a virtualised list that only keeps 3-5 pages mounted at a time
+      revalidateAll
+    />
   );
 }
 

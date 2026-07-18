@@ -1,4 +1,4 @@
-import { connection } from "next/server";
+import { Suspense } from "react";
 import { notFound, redirect } from "next/navigation";
 import { InfiniteList } from "@/lib/infinite-list";
 import { getMoreFeedPostsAction } from "@/lib/feed-action";
@@ -10,6 +10,7 @@ import {
 } from "@/lib/feed-constants";
 import type { Metadata } from "next";
 import { isFeedSlug } from "@/lib/data/feed-resolver";
+import { FeedLoadingSkeleton } from "../_components/feed-skeleton";
 
 export async function generateMetadata(
   props: PageProps<"/feed/[slug]">,
@@ -21,9 +22,20 @@ export async function generateMetadata(
   return { title: `${feed.label} - Frontpage`, description: feed.description };
 }
 
-export default async function FeedSlugPage(props: PageProps<"/feed/[slug]">) {
-  await connection();
-  const { slug } = await props.params;
+export default function FeedSlugPage(props: PageProps<"/feed/[slug]">) {
+  return (
+    <Suspense fallback={<FeedLoadingSkeleton />}>
+      <FeedContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function FeedContent({
+  params: paramsPromise,
+}: {
+  params: PageProps<"/feed/[slug]">["params"];
+}) {
+  const { slug } = await paramsPromise;
 
   if (slug === DEFAULT_FEED_SLUG) {
     redirect("/");
@@ -34,7 +46,6 @@ export default async function FeedSlugPage(props: PageProps<"/feed/[slug]">) {
   }
 
   const uri = FEED_URIS[slug];
-
   const initialData = await getMoreFeedPostsAction(uri.toString(), null);
 
   return (

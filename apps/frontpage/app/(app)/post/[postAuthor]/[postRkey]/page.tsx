@@ -1,5 +1,6 @@
 import { Comment } from "./_lib/comment";
 import { getCommentsForPost } from "@/lib/data/db/comment";
+import { Suspense } from "react";
 import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type PostPageParams, getPostPageData } from "./_lib/page-data";
@@ -41,10 +42,22 @@ export async function generateMetadata(
   };
 }
 
-export default async function PostPage(
+export default function PostPage(
   props: PageProps<"/post/[postAuthor]/[postRkey]">,
 ) {
-  const params = await props.params;
+  return (
+    <Suspense>
+      <PostContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function PostContent({
+  params: paramsPromise,
+}: {
+  params: PageProps<"/post/[postAuthor]/[postRkey]">["params"];
+}) {
+  const params = await paramsPromise;
   const { post, authorDid } = await getPostPageData(params);
   const comments = await getCommentsForPost(post.id);
 

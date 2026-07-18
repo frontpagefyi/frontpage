@@ -8,14 +8,22 @@ import {
   OgWrapper,
   frontpageOgImageResponse,
 } from "@/lib/og";
-import { getCommentPageData } from "../_lib/page-data";
+import { getCommentPageData, type CommentPageParams } from "../_lib/page-data";
 import { getBlueskyProfile } from "@/lib/data/user";
-import { shouldHideComment } from "@/lib/data/db/comment";
 import { notFound } from "next/navigation";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
+import { cacheLife } from "next/cache";
 
-export const dynamic = "force-static";
-export const revalidate = 3600; // 1 hour
+async function getCommentOgData(params: CommentPageParams) {
+  "use cache";
+  cacheLife("hours");
+  const { comment } = await getCommentPageData(params);
+  const [handle, profile] = await Promise.all([
+    getVerifiedHandle(comment.authorDid),
+    getBlueskyProfile(comment.authorDid),
+  ]);
+  return { comment, handle, profile };
+}
 
 export async function GET(
   _req: Request,
@@ -23,15 +31,10 @@ export async function GET(
     params,
   }: RouteContext<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]/og-image">,
 ) {
-  const { comment } = await getCommentPageData(await params);
-  if ((await shouldHideComment(comment)) || comment.status !== "live") {
+  const { comment, handle, profile } = await getCommentOgData(await params);
+  if (comment.status !== "live") {
     notFound();
   }
-
-  const [handle, profile] = await Promise.all([
-    getVerifiedHandle(comment.authorDid),
-    getBlueskyProfile(comment.authorDid),
-  ]);
 
   return frontpageOgImageResponse(
     <OgWrapper

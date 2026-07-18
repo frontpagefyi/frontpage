@@ -1,6 +1,5 @@
 import type { DID } from "@/lib/data/atproto/did";
 import { getUserPosts } from "@/lib/data/db/post";
-import { connection } from "next/server";
 import { notFound } from "next/navigation";
 import { PostCard } from "../../_components/post-card";
 import { UserAvatar } from "@/lib/components/user-avatar";
@@ -54,9 +53,20 @@ export async function generateMetadata(
   };
 }
 
-export default async function Profile(props: PageProps<"/profile/[user]">) {
-  await connection();
-  const params = await props.params;
+export default function Profile(props: PageProps<"/profile/[user]">) {
+  return (
+    <Suspense>
+      <ProfileContent params={props.params} />
+    </Suspense>
+  );
+}
+
+async function ProfileContent({
+  params: paramsPromise,
+}: {
+  params: PageProps<"/profile/[user]">["params"];
+}) {
+  const params = await paramsPromise;
   const did = await getDidFromHandleOrDid(params.user);
   if (!did) {
     notFound();
@@ -136,44 +146,40 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
           </div>
         </TabsContent>
         <TabsContent value="posts">
-          <Suspense>
-            <div className="flex flex-col gap-4">
-              {userPosts.map((post) => {
-                return (
-                  <PostCard
-                    key={post.id}
-                    author={post.authorDid}
-                    createdAt={post.createdAt}
-                    id={post.id}
-                    title={post.title}
-                    url={post.url}
-                    votes={post.voteCount}
-                    commentCount={post.commentCount}
-                    cid={post.cid}
-                    rkey={post.rkey}
-                    isUpvoted={post.userHasVoted}
-                  />
-                );
-              })}
-            </div>
-          </Suspense>
+          <div className="flex flex-col gap-4">
+            {userPosts.map((post) => {
+              return (
+                <PostCard
+                  key={post.id}
+                  author={post.authorDid}
+                  createdAt={post.createdAt}
+                  id={post.id}
+                  title={post.title}
+                  url={post.url}
+                  votes={post.voteCount}
+                  commentCount={post.commentCount}
+                  cid={post.cid}
+                  rkey={post.rkey}
+                  isUpvoted={post.userHasVoted}
+                />
+              );
+            })}
+          </div>
         </TabsContent>
         <TabsContent value="comments">
-          <Suspense>
-            <div className="flex flex-col gap-4">
-              {userComments.map((comment) => {
-                return (
-                  <Comment
-                    key={comment.id}
-                    comment={comment}
-                    postAuthorParam={comment.postAuthorDid as DID}
-                    postRkey={comment.postRkey as string}
-                    allowReply={false}
-                  />
-                );
-              })}
-            </div>
-          </Suspense>
+          <div className="flex flex-col gap-4">
+            {userComments.map((comment) => {
+              return (
+                <Comment
+                  key={comment.id}
+                  comment={comment}
+                  postAuthorParam={comment.postAuthorDid as DID}
+                  postRkey={comment.postRkey as string}
+                  allowReply={false}
+                />
+              );
+            })}
+          </div>
         </TabsContent>
       </Tabs>
     </>
