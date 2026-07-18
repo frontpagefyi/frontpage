@@ -29,6 +29,10 @@ import { AUTH_SCOPES } from "@repo/frontpage-oauth";
 import { redirect } from "next/navigation";
 import { NewPostForm } from "@/lib/components/new-post-form/new-post-form";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function Layout({
   children,
 }: {

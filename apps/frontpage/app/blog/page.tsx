@@ -5,11 +5,16 @@ import { Card, CardFooter, CardHeader } from "@/lib/components/ui/card";
 import { Badge } from "@/lib/components/ui/badge";
 import { UserAvatar } from "@/lib/components/user-avatar";
 import { TimeAgo } from "@/lib/components/time-ago";
+import { cacheLife } from "next/cache";
 import { publicConfig } from "@/lib/config/public-config";
 
-export const revalidate = 120;
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
 
 export default async function Blog() {
+  "use cache";
+  cacheLife("minutes");
   const blogList = await listBlogs();
   return (
     <>

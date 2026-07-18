@@ -7,6 +7,10 @@ import { Analytics } from "@vercel/analytics/next";
 import { type Metadata } from "next";
 import { ThemeProvider } from "@/lib/components/theme-provider";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 const sourceSerif = Source_Serif_4({
   subsets: ["latin"],
   display: "swap",

@@ -14,8 +14,7 @@ import { shouldHideComment } from "@/lib/data/db/comment";
 import { notFound } from "next/navigation";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 
-export const dynamic = "force-static";
-export const revalidate = 3600; // 1 hour
+// TODO: Cache Components adoption — restore revalidate = 3600. Add cacheLife('hours') to getCommentPageData() and getBlueskyProfile() when adopting this route.
 
 export async function GET(
   _req: Request,

@@ -17,6 +17,10 @@ import { NotificationLinkCard } from "./_lib/notification-link";
 import { NOTIFICATIONS_CACHE_KEY } from "./_lib/constants";
 import { CommentBody } from "../post/[postAuthor]/[postRkey]/_lib/comment";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function NotificationsPage() {
   return (
     <div className="flex flex-col gap-y-4">

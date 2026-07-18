@@ -4,6 +4,10 @@ import { getUser } from "@/lib/data/user";
 import { Alert, AlertDescription, AlertTitle } from "@/lib/components/ui/alert";
 import { CrossCircledIcon } from "@radix-ui/react-icons";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function LoginPage({ searchParams }: PageProps<"/login">) {
   const user = await getUser();
 

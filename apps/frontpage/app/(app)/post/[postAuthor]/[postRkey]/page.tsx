@@ -6,6 +6,10 @@ import { type PostPageParams, getPostPageData } from "./_lib/page-data";
 import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
 import { PrefetchOgImage } from "@/lib/og-client";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 function getPagePath(params: PostPageParams) {
   return `/post/${params.postAuthor}/${params.postRkey}`;
 }

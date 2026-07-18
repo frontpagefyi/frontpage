@@ -8,6 +8,10 @@ import { Spinner } from "@/lib/components/ui/spinner";
 import { NewComment } from "./_lib/comment-client";
 import { SuperHackyScrollToTop } from "./scroller";
 
+// TODO: Cache Components adoption. Refactor this route so this opt-out can be removed.
+// See: https://nextjs.org/docs/app/guides/migrating-to-cache-components
+export const instant = false;
+
 export default async function PostLayout(
   props: LayoutProps<"/post/[postAuthor]/[postRkey]">,
 ) {
@@ -43,7 +47,7 @@ export default async function PostLayout(
       />
       {post.status === "pending" ? (
         // TODO: This should have a spinner and refresh on an interval
-        <Alert>
+        (<Alert>
           <AlertTitle className="flex items-center gap-2">
             <Spinner /> Posting...
           </AlertTitle>
@@ -51,7 +55,7 @@ export default async function PostLayout(
             This post is traversing the atmosphere. Check back in a few seconds
             to see if it has landed and is ready to be discussed.
           </AlertDescription>
-        </Alert>
+        </Alert>)
       ) : post.status !== "live" ? (
         <Alert>
           <AlertTitle>This post has been deleted</AlertTitle>

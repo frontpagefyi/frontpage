@@ -12,8 +12,7 @@ import {
 } from "@/lib/og";
 import { getPostPageData } from "../_lib/page-data";
 
-export const dynamic = "force-static";
-export const revalidate = 3600; // 1 hour
+// TODO: Cache Components adoption — restore revalidate = 3600. Add cacheLife('hours') to getPostPageData() and getBlueskyProfile() when adopting this route.
 
 export async function GET(
   _req: Request,
