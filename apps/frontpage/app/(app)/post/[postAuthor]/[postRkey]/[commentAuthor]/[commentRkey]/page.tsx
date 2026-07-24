@@ -3,7 +3,11 @@ import Link from "next/link";
 import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type CommentPageParams, getCommentPageData } from "./_lib/page-data";
-import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import {
+  AtCanonical,
+  AtAlternate,
+  AtAuthor,
+} from "@/lib/components/at-meta-tags";
 import { PrefetchOgImage } from "@/lib/og-client";
 
 function truncateText(text: string, maxLength: number) {
@@ -60,15 +64,21 @@ export default async function CommentPage(
   props: PageProps<"/post/[postAuthor]/[postRkey]/[commentAuthor]/[commentRkey]">,
 ) {
   const params = await props.params;
-  const { comment, post } = await getCommentPageData(params);
+  const { comment, post, postAuthorDid } = await getCommentPageData(params);
 
   return (
     <>
-      <LinkAlternateAtUri
+      <AtCanonical
         authority={comment.authorDid}
         collection={comment.collection}
         rkey={comment.rkey}
       />
+      <AtAlternate
+        authority={postAuthorDid}
+        collection={post.collection}
+        rkey={post.rkey}
+      />
+      <AtAuthor did={comment.authorDid} />
       <PrefetchOgImage path={`${getPagePath(params)}/og-image`} />
       <div className="flex justify-end">
         <Link

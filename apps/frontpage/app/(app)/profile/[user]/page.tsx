@@ -22,7 +22,7 @@ import { EllipsisDropdown } from "../../_components/ellipsis-dropdown";
 import { ReportDialogDropdownButton } from "../../_components/report-dialog";
 import { reportUserAction } from "@/lib/components/user-hover-card";
 import { type Metadata } from "next";
-import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { AtMe } from "@/lib/components/at-meta-tags";
 import { getSession } from "@/lib/auth";
 
 export async function generateMetadata(
@@ -79,7 +79,7 @@ export default async function Profile(props: PageProps<"/profile/[user]">) {
 
   return (
     <>
-      <LinkAlternateAtUri authority={did} />
+      <AtMe did={did} />
       <div className="flex items-center space-x-4 mb-4">
         <UserAvatar did={did} size="medium" />
         <div className="flex flex-wrap items-center gap-2">

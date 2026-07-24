@@ -3,7 +3,7 @@ import { getCommentsForPost } from "@/lib/data/db/comment";
 import { type Metadata } from "next";
 import { getVerifiedHandle } from "@/lib/data/atproto/identity";
 import { type PostPageParams, getPostPageData } from "./_lib/page-data";
-import { LinkAlternateAtUri } from "@/lib/components/link-alternate-at";
+import { AtCanonical, AtAuthor } from "@/lib/components/at-meta-tags";
 import { PrefetchOgImage } from "@/lib/og-client";
 
 function getPagePath(params: PostPageParams) {
@@ -50,11 +50,12 @@ export default async function PostPage(
 
   return (
     <>
-      <LinkAlternateAtUri
+      <AtCanonical
         authority={authorDid}
         collection={post.collection}
         rkey={post.rkey}
       />
+      <AtAuthor did={authorDid} />
       <PrefetchOgImage path={`${getPagePath(params)}/og-image`} />
 
       <div className="flex flex-col gap-6">
