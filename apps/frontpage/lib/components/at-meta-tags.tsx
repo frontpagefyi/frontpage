@@ -24,8 +24,3 @@ export function AtAlternate(props: AtRecordUri) {
 export function AtAuthor({ did }: { did: string }) {
   return <meta name="at:author" content={`at://${did}`} />;
 }
-
-/** The identity associated with this page/section. */
-export function AtMe({ did }: { did: string }) {
-  return <meta name="at:me" content={`at://${did}`} />;
-}
