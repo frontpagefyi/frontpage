@@ -1,6 +1,6 @@
 FROM rust:1.89-alpine AS chef
 RUN apk add libressl-dev musl-dev sqlite-dev
-RUN cargo install cargo-chef
+RUN cargo install cargo-chef@0.1.78 --locked
 
 WORKDIR /app
 FROM chef AS planner
