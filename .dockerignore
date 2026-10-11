@@ -1,3 +1,6 @@
-node_modules
-target
+.git
+.turbo
 out
+**/node_modules
+**/target
+**/.next

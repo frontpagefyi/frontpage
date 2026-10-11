@@ -3,13 +3,15 @@ pub mod error;
 pub mod event;
 
 use std::io::{Cursor, Read};
+use std::time::Duration;
 
 use atrium_api::types::string::Did;
 use chrono::Utc;
 use error::{ConfigValidationError, ConnectionError, JetstreamEventError};
 use event::JetstreamEvent;
-use futures_util::stream::StreamExt;
+use futures_util::{SinkExt, StreamExt};
 use tokio::net::TcpStream;
+use tokio::time::{timeout, Instant, MissedTickBehavior};
 use tokio_tungstenite::{connect_async, tungstenite::Message, MaybeTlsStream, WebSocketStream};
 use url::Url;
 use zstd::dict::DecoderDictionary;
@@ -226,25 +228,86 @@ impl JetstreamConnector {
     }
 }
 
+/// How often we send a WebSocket ping to the Jetstream instance.
+pub const PING_INTERVAL: Duration = Duration::from_secs(10);
+
+/// How long we'll go without receiving *any* frame (event, ping or pong) before we consider the
+/// connection dead and close it.
+///
+/// Without this, a connection that dies silently (e.g. a half-open TCP connection after a NAT or
+/// load balancer drops it) leaves us blocked on a read that never returns.
+pub const READ_TIMEOUT: Duration = Duration::from_secs(30);
+
 /// The main task that handles the WebSocket connection and sends [JetstreamEvent]'s to any
 /// receivers that are listening for them.
+///
+/// The task ends (dropping the sender, which disconnects the [JetstreamReceiver]) when the
+/// connection is closed, errors, or goes quiet for longer than [READ_TIMEOUT].
 async fn websocket_task(
     dictionary: DecoderDictionary<'_>,
     ws: WebSocketStream<MaybeTlsStream<TcpStream>>,
     send_channel: JetstreamSender,
 ) -> Result<(), JetstreamEventError> {
-    // TODO: Use the write half to allow the user to change configuration settings on the fly.
-    let (_, mut read) = ws.split();
-    while let Some(message) = read.next().await {
-        let event = match decode_message(message, &dictionary) {
-            Ok(None) => {
-                // Ping message, nothing to do.
-                log::debug!("Received ping message, ignoring.");
+    let (mut write, mut read) = ws.split();
+
+    let mut ping_interval = tokio::time::interval(PING_INTERVAL);
+    ping_interval.set_missed_tick_behavior(MissedTickBehavior::Delay);
+    let mut last_received = Instant::now();
+
+    loop {
+        let message = tokio::select! {
+            message = read.next() => message,
+
+            _ = ping_interval.tick() => {
+                if last_received.elapsed() > READ_TIMEOUT {
+                    log::error!(
+                        "No messages received from Jetstream in {:?}, closing connection.",
+                        last_received.elapsed()
+                    );
+                    return Err(JetstreamEventError::ReadTimeout(last_received.elapsed()));
+                }
+
+                match timeout(PING_INTERVAL, write.send(Message::Ping(Vec::new()))).await {
+                    Ok(Ok(())) => {}
+                    Ok(Err(e)) => {
+                        log::error!("Failed to send ping to Jetstream, closing connection. {:?}", e);
+                        return Err(JetstreamEventError::WebsocketReceiveFailure(e));
+                    }
+                    Err(_) => {
+                        log::error!("Timed out sending ping to Jetstream, closing connection.");
+                        return Err(JetstreamEventError::ReadTimeout(last_received.elapsed()));
+                    }
+                }
                 continue;
             }
+        };
 
-            Ok(Some(event)) => Ok(event),
-            Err(e) => Err(e),
+        let message = match message {
+            Some(Ok(message)) => message,
+            Some(Err(e)) => {
+                // Transport/protocol errors are fatal to the connection. Bail so the caller can
+                // reconnect rather than spinning on a broken stream.
+                log::error!("WebSocket error, closing connection. {:?}", e);
+                return Err(JetstreamEventError::WebsocketReceiveFailure(e));
+            }
+            None => {
+                log::error!("The WebSocket connection was closed unexpectedly.");
+                return Err(JetstreamEventError::WebSocketCloseFailure);
+            }
+        };
+
+        last_received = Instant::now();
+
+        let event = match message {
+            // Heartbeats. tungstenite replies to pings for us; pongs are replies to our pings.
+            Message::Ping(_) | Message::Pong(_) => continue,
+
+            Message::Close(frame) => {
+                log::error!("Jetstream closed the WebSocket connection: {:?}", frame);
+                return Err(JetstreamEventError::WebSocketCloseFailure);
+            }
+
+            message => decode_message(message, &dictionary),
         };
 
         send_channel.send(event).map_err(|e| {
@@ -252,22 +315,16 @@ async fn websocket_task(
             JetstreamEventError::WebSocketCloseFailure
         })?;
     }
-
-    log::error!("The WebSocket connection was closed unexpectedly.");
-    Err(JetstreamEventError::WebSocketCloseFailure)
 }
 
 fn decode_message(
-    message: Result<Message, tokio_tungstenite::tungstenite::Error>,
+    message: Message,
     dictionary: &DecoderDictionary<'_>,
-) -> Result<Option<JetstreamEvent>, JetstreamEventError> {
+) -> Result<JetstreamEvent, JetstreamEventError> {
     let json = match message {
-        // Ignore ping messages
-        Ok(Message::Ping(_)) => return Ok(None),
+        Message::Text(json) => json,
 
-        Ok(Message::Text(json)) => json,
-
-        Ok(Message::Binary(zstd_json)) => {
+        Message::Binary(zstd_json) => {
             let mut cursor = Cursor::new(zstd_json);
             let mut decoder =
                 zstd::stream::Decoder::with_prepared_dictionary(&mut cursor, &dictionary)
@@ -281,13 +338,9 @@ fn decode_message(
             json
         }
 
-        Ok(msg) => Err(JetstreamEventError::UnexpectedEvent(msg))?,
-
-        Err(e) => Err(JetstreamEventError::WebsocketReceiveFailure(e))?,
+        msg => Err(JetstreamEventError::UnexpectedEvent(msg))?,
     };
 
-    let decoded = serde_json::from_str::<JetstreamEvent>(&json)
-        .map_err(|e| JetstreamEventError::ReceivedMalformedJSON { error: e, json })?;
-
-    Ok(Some(decoded))
+    serde_json::from_str::<JetstreamEvent>(&json)
+        .map_err(|e| JetstreamEventError::ReceivedMalformedJSON { error: e, json })
 }

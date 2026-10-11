@@ -159,7 +159,10 @@ async fn send_frontpage_commit(
     cfg: &Config,
     commit: &jetstream::event::CommitEvent,
 ) -> anyhow::Result<()> {
-    let client = reqwest::Client::new();
+    // Without a timeout a hung request to the consumer would stall the receive loop forever.
+    let client = reqwest::Client::builder()
+        .timeout(Duration::from_secs(30))
+        .build()?;
 
     // Structure of the "ops" json array and the body of the request in general is a little whacky because it's
     // matching the old drainpipe code where we would send the relay event to the consumer verbatim.
