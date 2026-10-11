@@ -45,6 +45,8 @@ pub enum JetstreamEventError {
     WebSocketCloseFailure,
     #[error("Received a websocket error: {0}")]
     WebsocketReceiveFailure(tokio_tungstenite::tungstenite::Error),
+    #[error("no messages received from the Jetstream instance in {0:?}, assuming the connection is dead")]
+    ReadTimeout(std::time::Duration),
     #[error("Received an event that was not a binary or text message: {0}")]
     UnexpectedEvent(tokio_tungstenite::tungstenite::Message),
 }
