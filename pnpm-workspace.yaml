@@ -3,14 +3,14 @@ packages:
   - packages/*
 
 catalog:
-  next: ^16.2.6
-  eslint-config-next: ^16.2.6
-  '@next/eslint-plugin-next': ^16.2.6
-  '@next/env': ^16.2.6
-  react: ^19.2.6
-  react-dom: ^19.2.6
-  '@types/react': ^19.2.13
-  '@types/react-dom': ^19.2.3
+  next: ^16.4.6
+  eslint-config-next: ^16.4.6
+  '@next/eslint-plugin-next': ^16.4.6
+  '@next/env': ^16.4.6
+  react: ^19.3.1
+  react-dom: ^19.3.1
+  '@types/react': ^19.3.0
+  '@types/react-dom': ^19.3.0
   typescript: ^6.0.0
   eslint: ^9.37.0
   '@types/node': ^24.10.4
